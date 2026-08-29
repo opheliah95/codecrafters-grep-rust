@@ -6,7 +6,7 @@ fn match_pattern(input_line: &str, pattern: &str) -> bool {
     match pattern {
         "\\d" => input_line.chars().any(|e| e.is_ascii_digit()),
         "d" => input_line.starts_with(|s: char| s.is_ascii_alphabetic()),
-        "\w" => input_line.chars().any(|e| e.is_ascii_alphanumeric() or e == '_'),
+        "\w" => input_line.chars().any(|e| e.is_ascii_alphanumeric() || e == '_'),
         _ => false,
     }
 }
