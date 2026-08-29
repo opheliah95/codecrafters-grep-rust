@@ -9,6 +9,13 @@ fn match_pattern(input_line: &str, pattern: &str) -> bool {
             input_line.chars().any(|e| e.is_ascii_digit())
             
         },
+        "d"=> {
+           if input_line.len() != 1 {
+                return false
+           } else {
+            input_line.starts_with(|s:char| s.is_ascii_digit())
+           }
+        }
         _=> {
             panic!("Unhandled pattern: {}", pattern);
             false
