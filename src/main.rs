@@ -51,8 +51,8 @@ fn pattern_parser(input_line: &str, pattern: &str) -> bool {
             return false;
         }
 
-        // UPDATE RES VALUE 
-        res =Vec::new();
+        // UPDATE RES VALUE
+        res = Vec::new();
         check_input_pattern(input_1, pattern_1, &mut res, "\\d");
         check_input_pattern(input_2, pattern_2, &mut res, "\\w");
 
@@ -120,7 +120,10 @@ fn check_input_pattern(
     }
 
     let mut pt_count: Vec<_> = pattern.match_indices(input_ptn).map(|(i, _)| i).collect();
-    println!("pt_count {:?} and input {} and pattern {}", pt_count, input, pattern);
+    println!(
+        "pt_count {:?} and input {} and pattern {}",
+        pt_count, input, pattern
+    );
     if pt_count.len() == 1 {
         let matched = match_pattern(input, pattern);
         println!("{input} matched one pattern");
@@ -154,7 +157,9 @@ fn check_input_pattern(
                 res.push(false);
                 return Some(false);
             } else {
-                println!("last pt: {last_ptn_pos}, final_ptn:  {final_ptn}, input_not_matched: {input_not_matched}");
+                println!(
+                    "last pt: {last_ptn_pos}, final_ptn:  {final_ptn}, input_not_matched: {input_not_matched}"
+                );
                 for i in [0..matchable_input.len()] {
                     let matched = match_pattern(&matchable_input[i], input_ptn);
                     res.push(matched);
@@ -223,11 +228,19 @@ fn main() {
 
     io::stdin().read_line(&mut input_line).unwrap();
 
-    //TODO: Uncomment the code below to pass the first stage
-    if pattern_parser(&input_line, &pattern) {
-        println!("matching results achieved!");
-        process::exit(0)
+    //handle single input
+    if input_line.len() == 1 {
+        if match_pattern(&input_line, &pattern) {
+            process::exit(0)
+        } else {
+            process::exit(1)
+        }
     } else {
-        process::exit(1)
+        if pattern_parser(&input_line, &pattern) {
+            println!("matching results achieved!");
+            process::exit(0)
+        } else {
+            process::exit(1)
+        }
     }
 }
