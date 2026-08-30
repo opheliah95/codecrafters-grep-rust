@@ -29,27 +29,7 @@ fn pattern_parser(input_line: &str, pattern: &str) -> bool {
                     if match_pattern(next, pattern_2) {
                         return true;
                     }
-                } else {
-                    check_input_pattern(val, pattern_1, &mut res, "\\d");
-
-                    match res.len() {
-                        0 => {
-                            return false;
-                        }
-                        _ => {
-                            if res.iter().all(|e| *e == true) {
-                                if key == re_spilt.len() - 1 {
-                                    return false;
-                                }
-                                let next = re_spilt[key + 1];
-                                check_input_pattern(next, pattern_2, &mut res, "\\w");
-                                return res.iter().all(|e| *e == true)
-                            } else {
-                                return false;
-                            }
-                        }
-                    }
-                }
+                } 
             }
 
             return false;
