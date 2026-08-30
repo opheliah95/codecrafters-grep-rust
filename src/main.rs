@@ -190,7 +190,7 @@ fn match_pattern(input_line: &str, pattern: &str) -> bool {
                 if content.chars().nth(0) == Some('^') {
                     if content.len() > 1 {
                         let slice = &content_vec[1..];
-                        //println!("the slice is: {:?}", slice);
+                        println!("the slice is: {:?}", slice);
                         return input_line.chars().any(|e| !slice.contains(&e));
                     }
                     return false;
