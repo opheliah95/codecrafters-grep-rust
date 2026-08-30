@@ -229,7 +229,8 @@ fn main() {
     io::stdin().read_line(&mut input_line).unwrap();
 
     //handle single input
-    if input_line.len() == 1 {
+    let split_input = input_line.split(" ").collect::<Vec<&str>>().len();
+    if split_input == 1 {
         if match_pattern(&input_line, &pattern) {
             process::exit(0)
         } else {
