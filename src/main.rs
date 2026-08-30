@@ -19,14 +19,14 @@ fn pattern_parser(input_line: &str, pattern: &str) -> bool {
             println!("now spilt inputs are..{:?}", input_2_split);
             let re_spilt = input_line.split(" ").collect::<Vec<&str>>();
             for (key, val) in re_spilt.iter().enumerate() {
-                if check_input_pattern(val, pattern_1, &mut res, "\\d") == Some(true){
+                if match_pattern(val, pattern_1) {
                     // reach the end then false
                     if key == re_spilt.len() - 1 {
                         return false;
                     }
                     // get next index and if it match then pass
                     let next = re_spilt[key + 1];
-                    if check_input_pattern(next, pattern_2, &mut res, "\\d") == Some(true) {
+                    if match_pattern(next, pattern_2) {
                         return true;
                     }
                 }
