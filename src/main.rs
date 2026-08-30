@@ -8,9 +8,33 @@ use std::process;
 fn pattern_parser(input_line: &str, pattern: &str) -> bool {
     let input_parts: Vec<&str> = input_line.splitn(2, " ").collect();
     let pattern_parts: Vec<&str> = pattern.splitn(2, " ").collect();
+
     if input_parts.len() == pattern_parts.len() && input_parts.len() == 2 {
         let (input_1, input_2) = (input_parts[0], input_parts[1]);
         let (pattern_1, pattern_2) = (pattern_parts[0], pattern_parts[1]);
+       
+        let input_2_split = input_2.split(" ").collect::<Vec<&str>>();
+
+        if input_2_split.len() > 1 {
+            //println!("mew..{:?}", input_2_split);
+            let re_spilt = input_line.split(" ").collect::<Vec<&str>>();
+            for (key, val) in re_spilt.iter().enumerate() {
+                if match_pattern(val, pattern_1) {
+                    // reach the end then false
+                    if key == re_spilt.len() - 1 {
+                        return false;
+                    }
+                    // get next index and if it match then pass
+                    let next = re_spilt[key + 1];
+                    if match_pattern(next, pattern_2) {
+                        return true;
+                    }
+                }
+            }
+            
+            return false;
+        }
+       
         let mut map: HashMap<&str, &str> =
             HashMap::from([(input_1, pattern_1), (input_2, pattern_2)]);
 
@@ -47,19 +71,19 @@ fn check_first_input_pattern(
     if pt_count_1.len() == 1 {
         for (key, val) in map.into_iter() {
             let matched = match_pattern(key, val);
-            println!("{} / {} / matching,{}", key, val, matched);
+            //println!("{} / {} / matching,{}", key, val, matched);
             res.push(matched);
         }
     } else {
-        println!(
-            "more than one pattern {} {:?} {}",
-            pattern_1, pt_count_1, input_1
-        );
+        // println!(
+        //     "more than one pattern {} {:?} {}",
+        //     pattern_1, pt_count_1, input_1
+        // );
         let pt_count_1_len = pt_count_1.len();
         if pt_count_1_len != input_1.len() {
             return Some(false); // pattern length does not match input length
         } else {
-            println!("matching...{}", input_1);
+            //println!("matching...{}", input_1);
             for i in [0..input_1.len()] {
                 let matched = match_pattern(&input_1[i], "\\d");
                 res.push(matched);
@@ -169,7 +193,7 @@ fn main() {
     eprintln!("Logs from your program will appear here!");
 
     if env::args().nth(1).unwrap() != "-E" {
-        //println!("Expected first argument to be '-E'");
+        println!("Expected first argument to be '-E'");
         process::exit(1);
     }
 
