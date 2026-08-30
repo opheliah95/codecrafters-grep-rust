@@ -16,7 +16,7 @@ fn pattern_parser(input_line: &str, pattern: &str) -> bool {
         let input_2_split = input_2.split(" ").collect::<Vec<&str>>();
 
         if input_2_split.len() > 1 {
-            //println!("mew..{:?}", input_2_split);
+            println!("now spilt inputs are..{:?}", input_2_split);
             let re_spilt = input_line.split(" ").collect::<Vec<&str>>();
             for (key, val) in re_spilt.iter().enumerate() {
                 if match_pattern(val, pattern_1) {
@@ -71,19 +71,19 @@ fn check_first_input_pattern(
     if pt_count_1.len() == 1 {
         for (key, val) in map.into_iter() {
             let matched = match_pattern(key, val);
-            //println!("{} / {} / matching,{}", key, val, matched);
+            println!("{} / {} / matching,{}", key, val, matched);
             res.push(matched);
         }
     } else {
-        // println!(
-        //     "more than one pattern {} {:?} {}",
-        //     pattern_1, pt_count_1, input_1
-        // );
+        println!(
+            "more than one pattern {} {:?} {}",
+            pattern_1, pt_count_1, input_1
+        );
         let pt_count_1_len = pt_count_1.len();
         if pt_count_1_len != input_1.len() {
             return Some(false); // pattern length does not match input length
         } else {
-            //println!("matching...{}", input_1);
+            println!("matching...{}", input_1);
             for i in [0..input_1.len()] {
                 let matched = match_pattern(&input_1[i], "\\d");
                 res.push(matched);
@@ -96,7 +96,7 @@ fn check_first_input_pattern(
 //this function works with \d\apple \d\d\d \w\w\ws etc
 fn check_input_pattern(input: &str, pattern: &str, res: &mut Vec<bool>, input_ptn: &str) -> Option<bool> {
     // base case input == pattern
-    if *input == *pattern {
+    if input.contains(pattern) {
         res.push(true);
         return Some(true);
     }
@@ -178,7 +178,7 @@ fn match_pattern(input_line: &str, pattern: &str) -> bool {
         }
         _ => {
             // handle cases e.g. apple==apple
-            if *input_line == *pattern {
+            if input_line.contains(pattern) {
                 return true;
             } else {
                 return false;
