@@ -21,7 +21,7 @@ fn match_pattern(input_line: &str, pattern: &str) -> bool {
                 if content.chars().nth(1) == Some('^') {
                     if content.len() > 1 {
                         let slice = &content_vec[2..];
-                        return input_line.chars().any(|e| !content_vec.contains(&e));
+                        return input_line.chars().any(|e| !slice.contains(&e));
                     }
                     return false;
                 } else {
