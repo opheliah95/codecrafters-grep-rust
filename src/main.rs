@@ -203,6 +203,13 @@ fn match_pattern(input_line: &str, pattern: &str) -> bool {
             }
         }
         _ => {
+            // check has both start and end
+            if pattern.starts_with("^") &&  pattern.ends_with("$"){
+                let to_match = &pattern [1..pattern.len()-1];
+                return input_line.starts_with(to_match);
+
+            }
+
             // check start anchor
             if pattern.starts_with("^") {
                 let to_match = &pattern [1..pattern.len()];
