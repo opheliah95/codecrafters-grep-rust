@@ -113,6 +113,11 @@ fn check_input_pattern(
         res.push(true);
         return Some(true);
     }
+    // handle plural
+    if pattern.ends_with("s") && !input.ends_with("s") {
+        res.push(false);
+        return Some(false);
+    }
 
     let mut pt_count: Vec<_> = pattern.match_indices(input_ptn).map(|(i, _)| i).collect();
     println!("pt_count {:?} and input {} and pattern {}", pt_count, input, pattern);
