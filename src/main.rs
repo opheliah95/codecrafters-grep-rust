@@ -211,7 +211,7 @@ fn match_pattern(input_line: &str, pattern: &str) -> bool {
             }
             // check ending
             if pattern.ends_with("$") {
-                let to_match = &pattern [1..pattern.len()];
+                let to_match = &pattern [0..pattern.len()-1];
                 return input_line.ends_with(to_match);
             }
 
