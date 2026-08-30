@@ -6,7 +6,17 @@ fn match_pattern(input_line: &str, pattern: &str) -> bool {
     match pattern {
         "\\d" => input_line.chars().any(|e| e.is_ascii_digit()),
         "d" => input_line.starts_with(|s: char| s.is_ascii_alphabetic()),
-        "\\w" => input_line.chars().any(|e| e.is_ascii_alphanumeric() || e == '_'),
+        "\\w" => input_line
+            .chars()
+            .any(|e| e.is_ascii_alphanumeric() || e == '_'),
+        ptn if pattern.starts_with("[") && pattern.ends_with("]") => {
+            if let Some(content) = ptn.get(1..ptn.len() - 1) {
+                let content_vec: Vec<char> = content.chars().collect();
+                return input_line.chars().any(|e| content_vec.contains(&e));
+            } else {
+                return false;
+            }
+        }
         _ => false,
     }
 }
