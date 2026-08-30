@@ -14,19 +14,19 @@ fn pattern_parser(input_line: &str, pattern: &str) -> bool {
         let (pattern_1, pattern_2) = (pattern_parts[0], pattern_parts[1]);
        
         let input_2_split = input_2.split(" ").collect::<Vec<&str>>();
-
+        let mut res: Vec<bool> = Vec::new();
         if input_2_split.len() > 1 {
             println!("now spilt inputs are..{:?}", input_2_split);
             let re_spilt = input_line.split(" ").collect::<Vec<&str>>();
             for (key, val) in re_spilt.iter().enumerate() {
-                if match_pattern(val, pattern_1) {
+                if check_input_pattern(val, pattern_1, &mut res, "\\d") == Some(true){
                     // reach the end then false
                     if key == re_spilt.len() - 1 {
                         return false;
                     }
                     // get next index and if it match then pass
                     let next = re_spilt[key + 1];
-                    if match_pattern(next, pattern_2) {
+                    if check_input_pattern(next, pattern_2, &mut res, "\\d") == Some(true) {
                         return true;
                     }
                 }
@@ -38,7 +38,7 @@ fn pattern_parser(input_line: &str, pattern: &str) -> bool {
         let mut map: HashMap<&str, &str> =
             HashMap::from([(input_1, pattern_1), (input_2, pattern_2)]);
 
-        let mut res: Vec<bool> = Vec::new();
+        
 
         if let Some(value) = check_input_pattern(input_1, pattern_1, &mut res, "\\d") {
             return value;
