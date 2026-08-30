@@ -203,6 +203,12 @@ fn match_pattern(input_line: &str, pattern: &str) -> bool {
             }
         }
         _ => {
+            // check anchor
+            if pattern.starts_with("^") {
+                let to_match = &pattern [1..pattern.len()];
+                return input_line.starts_with(to_match);
+
+            }
             // handle cases e.g. apple==apple
             if input_line.contains(pattern) {
                 return true;
