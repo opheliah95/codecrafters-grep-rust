@@ -18,9 +18,10 @@ fn match_pattern(input_line: &str, pattern: &str) -> bool {
                 let content_vec: Vec<char> = content.chars().collect();
 
                 //negative char check
-                if content.chars().nth(1) == Some('^') {
+                if content.chars().nth(0) == Some('^') {
                     if content.len() > 1 {
-                        let slice = &content_vec[2..];
+                        let slice = &content_vec[1..];
+                        //println!("the slice is: {:?}", slice);
                         return input_line.chars().any(|e| !slice.contains(&e));
                     }
                     return false;
