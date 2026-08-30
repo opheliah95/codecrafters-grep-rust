@@ -11,8 +11,23 @@ fn match_pattern(input_line: &str, pattern: &str) -> bool {
             .any(|e| e.is_ascii_alphanumeric() || e == '_'),
         ptn if pattern.starts_with("[") && pattern.ends_with("]") => {
             if let Some(content) = ptn.get(1..ptn.len() - 1) {
+                if content.len() == 0 {
+                    return false;
+                }
+                // create content vec
                 let content_vec: Vec<char> = content.chars().collect();
-                return input_line.chars().any(|e| content_vec.contains(&e));
+
+                //negative char check
+                if content.chars().nth(1) == Some('^') {
+                    if content.len() > 1 {
+                        let slice = &content_vec[2..];
+                        return input_line.chars().any(|e| !content_vec.contains(&e));
+                    }
+                    return false;
+                } else {
+                    //positive char check
+                    return input_line.chars().any(|e| content_vec.contains(&e));
+                }
             } else {
                 return false;
             }
