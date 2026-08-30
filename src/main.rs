@@ -12,7 +12,7 @@ fn pattern_parser(input_line: &str, pattern: &str) -> bool {
     if input_parts.len() == pattern_parts.len() && input_parts.len() == 2 {
         let (input_1, input_2) = (input_parts[0], input_parts[1]);
         let (pattern_1, pattern_2) = (pattern_parts[0], pattern_parts[1]);
-       
+
         let input_2_split = input_2.split(" ").collect::<Vec<&str>>();
         let mut res: Vec<bool> = Vec::new();
         if input_2_split.len() > 1 {
@@ -29,16 +29,34 @@ fn pattern_parser(input_line: &str, pattern: &str) -> bool {
                     if match_pattern(next, pattern_2) {
                         return true;
                     }
+                } else {
+                    check_input_pattern(val, pattern_1, &mut res, "\\d");
+
+                    match res.len() {
+                        0 => {
+                            return false;
+                        }
+                        _ => {
+                            if res.iter().all(|e| *e == true) {
+                                if key == re_spilt.len() - 1 {
+                                    return false;
+                                }
+                                let next = re_spilt[key + 1];
+                                check_input_pattern(next, pattern_2, &mut res, "\\w");
+                                return res.iter().all(|e| *e == true)
+                            } else {
+                                return false;
+                            }
+                        }
+                    }
                 }
             }
-            
+
             return false;
         }
-       
+
         let mut map: HashMap<&str, &str> =
             HashMap::from([(input_1, pattern_1), (input_2, pattern_2)]);
-
-        
 
         if let Some(value) = check_input_pattern(input_1, pattern_1, &mut res, "\\d") {
             return value;
@@ -94,7 +112,12 @@ fn check_first_input_pattern(
 }
 
 //this function works with \d\apple \d\d\d \w\w\ws etc
-fn check_input_pattern(input: &str, pattern: &str, res: &mut Vec<bool>, input_ptn: &str) -> Option<bool> {
+fn check_input_pattern(
+    input: &str,
+    pattern: &str,
+    res: &mut Vec<bool>,
+    input_ptn: &str,
+) -> Option<bool> {
     // base case input == pattern
     if input.contains(pattern) {
         res.push(true);
@@ -124,7 +147,7 @@ fn check_input_pattern(input: &str, pattern: &str, res: &mut Vec<bool>, input_pt
             let last_ptn_start = pt_count.last().unwrap();
             let final_ptn = &pattern[last_ptn_start + input_ptn.len()..pattern.len()];
             let input_not_matched = &input[last_ptn_pos..];
-            let matchable_input = &input[0..last_ptn_pos+1];
+            let matchable_input = &input[0..last_ptn_pos + 1];
 
             // println!(
             //     "DBG last pt: {last_ptn_pos}, final_ptn:  {final_ptn}, input_not_matched: {input_not_matched}"
