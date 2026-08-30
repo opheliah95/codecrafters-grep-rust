@@ -1,6 +1,125 @@
+use std::collections::HashMap;
 use std::env;
+use std::hash::Hash;
 use std::io;
 use std::process;
+
+// currently handles \d \input -> 1 apple
+fn pattern_parser(input_line: &str, pattern: &str) -> bool {
+    let input_parts: Vec<&str> = input_line.splitn(2, " ").collect();
+    let pattern_parts: Vec<&str> = pattern.splitn(2, " ").collect();
+    if input_parts.len() == pattern_parts.len() && input_parts.len() == 2 {
+        let (input_1, input_2) = (input_parts[0], input_parts[1]);
+        let (pattern_1, pattern_2) = (pattern_parts[0], pattern_parts[1]);
+        let mut map: HashMap<&str, &str> =
+            HashMap::from([(input_1, pattern_1), (input_2, pattern_2)]);
+
+        let mut res: Vec<bool> = Vec::new();
+
+        if let Some(value) = check_input_pattern(input_1, pattern_1, &mut res, "\\d") {
+            return value;
+        }
+
+        if let Some(value) = check_input_pattern(input_2, pattern_2, &mut res, "\\w") {
+            return value;
+        }
+
+        match res.len() {
+            0 => {
+                return false;
+            }
+            _ => {
+                return res.iter().all(|e| *e == true);
+            }
+        }
+    }
+
+    return false;
+}
+
+fn check_first_input_pattern(
+    input_1: &str,
+    pattern_1: &str,
+    map: &HashMap<&str, &str>,
+    res: &mut Vec<bool>,
+) -> Option<bool> {
+    let pt_count_1: Vec<_> = pattern_1.match_indices("\\d").map(|(i, _)| i).collect();
+    if pt_count_1.len() == 1 {
+        for (key, val) in map.into_iter() {
+            let matched = match_pattern(key, val);
+            println!("{} / {} / matching,{}", key, val, matched);
+            res.push(matched);
+        }
+    } else {
+        println!(
+            "more than one pattern {} {:?} {}",
+            pattern_1, pt_count_1, input_1
+        );
+        let pt_count_1_len = pt_count_1.len();
+        if pt_count_1_len != input_1.len() {
+            return Some(false); // pattern length does not match input length
+        } else {
+            println!("matching...{}", input_1);
+            for i in [0..input_1.len()] {
+                let matched = match_pattern(&input_1[i], "\\d");
+                res.push(matched);
+            }
+        }
+    }
+    None
+}
+
+//this function works with \d\apple \d\d\d \w\w\ws etc
+fn check_input_pattern(input: &str, pattern: &str, res: &mut Vec<bool>, input_ptn: &str) -> Option<bool> {
+    // base case input == pattern
+    if *input == *pattern {
+        res.push(true);
+        return Some(true);
+    }
+
+    let mut pt_count: Vec<_> = pattern.match_indices(input_ptn).map(|(i, _)| i).collect();
+    if pt_count.len() == 1 {
+        let matched = match_pattern(input, pattern);
+        res.push(matched);
+    } else {
+        //println!("more than one pattern {} {:?} {}", pattern, pt_count, input);
+        let pt_count_len = pt_count.len();
+        if pt_count_len == input.len() {
+            //println!("matching...{}", input);
+            for i in [0..input.len()] {
+                let matched = match_pattern(&input[i], input_ptn);
+                res.push(matched);
+                return Some(true);
+            }
+        } else if pt_count_len == 0 {
+            //println!("current matching: ...{:?}", pt_count);
+            res.push(false); //empty string error
+            return Some(false);
+        } else if pt_count_len != 0 && pt_count_len < input.len() {
+            let last_ptn_pos = pt_count.len();
+            let last_ptn_start = pt_count.last().unwrap();
+            let final_ptn = &pattern[last_ptn_start + input_ptn.len()..pattern.len()];
+            let input_not_matched = &input[last_ptn_pos..];
+            let matchable_input = &input[0..last_ptn_pos+1];
+
+            // println!(
+            //     "DBG last pt: {last_ptn_pos}, final_ptn:  {final_ptn}, input_not_matched: {input_not_matched}"
+            // );
+            if final_ptn != input_not_matched {
+                res.push(false);
+                return Some(false);
+            } else {
+                //println!("last pt: {last_ptn_pos}, final_ptn:  {final_ptn}, input_not_matched: {input_not_matched}")
+                for i in [0..matchable_input.len()] {
+                    let matched = match_pattern(&matchable_input[i], input_ptn);
+                    res.push(matched);
+                    return Some(true);
+                }
+            }
+        }
+    }
+    None
+}
 
 fn match_pattern(input_line: &str, pattern: &str) -> bool {
     match pattern {
@@ -33,7 +152,14 @@ fn match_pattern(input_line: &str, pattern: &str) -> bool {
                 return false;
             }
         }
-        _ => false,
+        _ => {
+            // handle cases e.g. apple==apple
+            if *input_line == *pattern {
+                return true;
+            } else {
+                return false;
+            }
+        }
     }
 }
 
@@ -43,7 +169,7 @@ fn main() {
     eprintln!("Logs from your program will appear here!");
 
     if env::args().nth(1).unwrap() != "-E" {
-        println!("Expected first argument to be '-E'");
+        //println!("Expected first argument to be '-E'");
         process::exit(1);
     }
 
@@ -53,7 +179,8 @@ fn main() {
     io::stdin().read_line(&mut input_line).unwrap();
 
     //TODO: Uncomment the code below to pass the first stage
-    if match_pattern(&input_line, &pattern) {
+    if pattern_parser(&input_line, &pattern) {
+        println!("matching results achieved!");
         process::exit(0)
     } else {
         process::exit(1)
