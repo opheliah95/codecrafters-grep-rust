@@ -173,6 +173,22 @@ fn check_input_pattern(
 
 fn match_pattern(input_line: &str, pattern: &str) -> bool {
     match pattern {
+        // check has both start and end
+        ptn if pattern.starts_with("^") && pattern.ends_with("$") => {
+            let to_match = &pattern[1..pattern.len() - 1];
+            return input_line == to_match;
+        }
+
+        // check start anchor
+        ptn if pattern.starts_with("^") => {
+            let to_match = &pattern[1..pattern.len()];
+            return input_line.starts_with(to_match);
+        }
+        // ch,eck ending
+        ptn if pattern.ends_with("$") => {
+            let to_match = &pattern[0..pattern.len() - 1];
+            return input_line.ends_with(to_match);
+        }
         "\\d" => input_line.chars().any(|e| e.is_ascii_digit()),
         "\\d+" => input_line.len() >= 2 && input_line.chars().all(|e| e.is_ascii_digit()),
         "d" => input_line.starts_with(|s: char| s.is_ascii_alphabetic()),
@@ -288,23 +304,6 @@ fn match_pattern(input_line: &str, pattern: &str) -> bool {
             return false;
         }
         _ => {
-            // check has both start and end
-            if pattern.starts_with("^") && pattern.ends_with("$") {
-                let to_match = &pattern[1..pattern.len() - 1];
-                return input_line == to_match;
-            }
-
-            // check start anchor
-            if pattern.starts_with("^") {
-                let to_match = &pattern[1..pattern.len()];
-                return input_line.starts_with(to_match);
-            }
-            // check ending
-            if pattern.ends_with("$") {
-                let to_match = &pattern[0..pattern.len() - 1];
-                return input_line.ends_with(to_match);
-            }
-
             // handle cases e.g. apple==apple
             if input_line.contains(pattern) {
                 return true;
