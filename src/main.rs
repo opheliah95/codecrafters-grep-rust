@@ -234,9 +234,9 @@ fn match_pattern(input_line: &str, pattern: &str) -> bool {
                                 }
                                 // reached plus sign -> need to have one match
                                 if idx == p {
-                                    if val != c {
-                                        return false;
-                                    }
+                                    // if val != c {
+                                    //     return false;
+                                    // }
                                     continue;
                                 }
                                 
