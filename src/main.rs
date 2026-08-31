@@ -174,6 +174,7 @@ fn check_input_pattern(
 fn match_pattern(input_line: &str, pattern: &str) -> bool {
     match pattern {
         "\\d" => input_line.chars().any(|e| e.is_ascii_digit()),
+        "\\d+" => input_line.len() >= 2 && input_line.chars().all(|e| e.is_ascii_digit()),
         "d" => input_line.starts_with(|s: char| s.is_ascii_alphabetic()),
         "\\w" => input_line
             .chars()
@@ -201,6 +202,67 @@ fn match_pattern(input_line: &str, pattern: &str) -> bool {
             } else {
                 return false;
             }
+        }
+
+        ptn if pattern.contains("+") => {
+            let input_quantifier_pos = pattern.find("+");
+            match input_quantifier_pos {
+                Some(p) => {
+                    let before_p = p - 1;
+                    let after_p = p + 1;
+                    let letter_to_match = pattern.clone().chars().nth(before_p);
+                    let letter_after_p = pattern.clone().chars().nth(after_p).unwrap_or('\0');
+                    match letter_to_match {
+                        Some(c) => {
+                            // handle case like a+=> apple
+                            println!("TETS 1 == step 1: checking SINGLE + match: {c}+ => {input_line}");
+                            if before_p == 0 {
+                                println!("signle step case passed");
+                                return input_line.chars().any(|e| e == c);
+                            }
+
+                            // hanndle cases like ca+ts
+                            let mut pattern_char = pattern.chars();
+                            for (idx, val) in input_line.chars().enumerate() {
+                                
+                                if idx <= before_p {
+                                    let pattern_char_before_p = pattern_char.clone().nth(idx).unwrap();
+                                    println!("TEST 2 == step {idx}: checking SINGLE + match: {val} => {pattern_char_before_p}");
+                                    if val != pattern_char_before_p {
+                                        return false;
+                                    }
+                                }
+                                // reached plus sign
+                                if idx == p {
+                                    continue;
+                                }
+                                
+                                if idx > p {
+                                     println!("step {idx}: checking match after +: {letter_after_p} => {val}");
+                                    if val != c {
+                                        // if nothing after +
+                                        if letter_after_p == '\0' {
+                                            return true;
+                                        }
+                                        let pattern_slice = &pattern[p+1..];
+                                        println!("matching + pattern: {} {}", letter_after_p, pattern_slice);
+                                        return pattern_slice == &input_line[idx..];
+
+                                    }
+                                    continue;
+                                }
+                            }
+                        }
+                        None => {
+                            println!("no char found");
+                            return false;
+                        }
+                    }
+                }
+                None => return false,
+            }
+            println!("the string passed is: {}", input_line);
+            return false;
         }
         _ => {
             // check has both start and end
@@ -249,6 +311,7 @@ fn main() {
     let split_input = input_line.split(" ").collect::<Vec<&str>>().len();
     if split_input == 1 {
         if match_pattern(&input_line, &pattern) {
+            println!("single input pattern {input_line} passed");
             process::exit(0)
         } else {
             process::exit(1)
