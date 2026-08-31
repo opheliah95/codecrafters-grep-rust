@@ -232,13 +232,13 @@ fn match_pattern(input_line: &str, pattern: &str) -> bool {
                                         return false;
                                     }
                                 }
-                                // reached plus sign -> need to have one match
-                                if idx == p {
-                                    // if val != c {
-                                    //     return false;
-                                    // }
-                                    continue;
-                                }
+                                // // reached plus sign -> need to have one match
+                                // if idx == p {
+                                //     // if val != c {
+                                //     //     return false;
+                                //     // }
+                                //     continue;
+                                // }
                                 
                                 if idx > p {
                                      println!("step {idx}: checking match after +: {letter_after_p} => {val}");
@@ -264,7 +264,7 @@ fn match_pattern(input_line: &str, pattern: &str) -> bool {
                 }
                 None => return false,
             }
-            println!("the string passed is: {}", input_line);
+            //println!("the string passed is: {}", input_line);
             return false;
         }
         _ => {
