@@ -224,7 +224,7 @@ fn match_pattern(input_line: &str, pattern: &str) -> bool {
                             // hanndle cases like ca+ts
                             let mut pattern_char = pattern.chars();
                             for (idx, val) in input_line.chars().enumerate() {
-                                
+                                println!("enter loop {idx}");
                                 if idx <= before_p {
                                     let pattern_char_before_p = pattern_char.clone().nth(idx).unwrap();
                                     println!("TEST 2 == step {idx}: checking SINGLE + match: {val} => {pattern_char_before_p}");
@@ -232,16 +232,18 @@ fn match_pattern(input_line: &str, pattern: &str) -> bool {
                                         return false;
                                     }
                                 }
-                                // // reached plus sign -> need to have one match
-                                // if idx == p {
-                                //     // if val != c {
-                                //     //     return false;
-                                //     // }
-                                //     continue;
-                                // }
+                                // reached plus sign -> need to have one match
+                                if idx == p {
+                                    println!("reaching idx == p, value is {val}");
+                                    if idx == input_line.len() - 1{
+                                        return pattern[after_p..].len() == 1 &&  val == letter_after_p;
+                                    }
+                                       
+                                    continue;
+                                }
                                 
                                 if idx > p {
-                                     println!("step {idx}: checking match after +: {letter_after_p} => {val}");
+                                    println!("step {idx}: checking match after +: {letter_after_p} => {val}");
                                     if val != c {
                                         // if nothing after +
                                         if letter_after_p == '\0' {
