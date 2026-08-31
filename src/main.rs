@@ -215,7 +215,10 @@ fn match_pattern(input_line: &str, pattern: &str) -> bool {
                     match letter_to_match {
                         Some(c) => {
                             // handle case like a+=> apple
-                            println!("TETS 1 == step 1: checking SINGLE + match: {c}+ => {input_line}");
+                            println!(
+                                "TETS 1 == step 1: checking SINGLE + match: {c}+ => {input_line}"
+                            );
+                            let last_occurance_of_p = pattern.rfind(c).unwrap();
                             if before_p == 0 {
                                 println!("signle step case passed");
                                 return input_line.chars().any(|e| e == c);
@@ -226,8 +229,11 @@ fn match_pattern(input_line: &str, pattern: &str) -> bool {
                             for (idx, val) in input_line.chars().enumerate() {
                                 println!("enter loop {idx}");
                                 if idx <= before_p {
-                                    let pattern_char_before_p = pattern_char.clone().nth(idx).unwrap();
-                                    println!("TEST 2 == step {idx}: checking SINGLE + match: {val} => {pattern_char_before_p}");
+                                    let pattern_char_before_p =
+                                        pattern_char.clone().nth(idx).unwrap();
+                                    println!(
+                                        "TEST 2 == step {idx}: checking SINGLE + match: {val} => {pattern_char_before_p}"
+                                    );
                                     if val != pattern_char_before_p {
                                         return false;
                                     }
@@ -235,24 +241,35 @@ fn match_pattern(input_line: &str, pattern: &str) -> bool {
                                 // reached plus sign -> need to have one match
                                 if idx == p {
                                     println!("reaching idx == p, value is {val}");
-                                    if idx == input_line.len() - 1{
-                                        return pattern[after_p..].len() == 1 &&  val == letter_after_p;
+                                    if idx == input_line.len() - 1 {
+                                        return pattern[after_p..].len() == 1
+                                            && val == letter_after_p;
                                     }
-                                       
+
                                     continue;
                                 }
-                                
+
                                 if idx > p {
-                                    println!("step {idx}: checking match after +: PATTERN {letter_after_p} => VAL {val}");
+                                    println!(
+                                        "step {idx}: checking match after +: PATTERN {letter_after_p} => VAL {val}"
+                                    );
                                     if val != c {
                                         // if nothing after +
                                         if letter_after_p == '\0' {
                                             return true;
                                         }
-                                        let pattern_slice = &pattern[p+1..];
-                                        println!("matching + pattern: {} {}", letter_after_p, pattern_slice);
-                                        return pattern_slice == &input_line[idx..];
 
+                                        let mut pattern_slice = &pattern[p + 1..];
+
+                                        if last_occurance_of_p != p {
+                                            pattern_slice = &pattern[last_occurance_of_p + 1..];
+                                        }
+
+                                        println!(
+                                            "matching + pattern: {} {}",
+                                            letter_after_p, pattern_slice
+                                        );
+                                        return pattern_slice == &input_line[idx..];
                                     }
                                     continue;
                                 }
