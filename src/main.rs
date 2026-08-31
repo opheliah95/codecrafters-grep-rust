@@ -243,7 +243,7 @@ fn match_pattern(input_line: &str, pattern: &str) -> bool {
                                 }
                                 
                                 if idx > p {
-                                    println!("step {idx}: checking match after +: {letter_after_p} => {val}");
+                                    println!("step {idx}: checking match after +: PATTERN {letter_after_p} => VAL {val}");
                                     if val != c {
                                         // if nothing after +
                                         if letter_after_p == '\0' {
