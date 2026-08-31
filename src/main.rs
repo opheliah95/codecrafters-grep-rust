@@ -266,10 +266,11 @@ fn match_pattern(input_line: &str, pattern: &str) -> bool {
                                         }
 
                                         println!(
-                                            "matching + pattern: {} {}",
+                                            "matching + pattern: PTN {} VAL{}",
                                             letter_after_p, pattern_slice
                                         );
-                                        return pattern_slice == &input_line[idx..];
+
+                                        return input_line[idx..].starts_with(pattern_slice);
                                     }
                                     continue;
                                 }
