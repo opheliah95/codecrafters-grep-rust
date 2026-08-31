@@ -11,8 +11,69 @@ fn check_all_true(vec: &Vec<bool>) -> bool {
     vec.iter().all(|e| *e == true)
 }
 
+fn check_individual_match(input_line: &str, pattern: &str) -> bool {
+    println!("FN CHECK_INDV_MATCHING, matching {input_line} -> pattern {pattern}");
+    let pattern_clone: Vec<char> = pattern.clone().chars().collect();
+    let to_match = ["\\d", "\\w", "\\d+"];
+    let mut match_end_pos = 0;
+    let mut matches_by_index: HashMap<usize, &str> = HashMap::new();
+    for i in to_match.iter() {
+        for (idx, matched) in pattern.match_indices(i) {
+            matches_by_index
+                .entry(idx)
+                .and_modify(|longest| {
+                    if matched.len() > longest.len() {
+                        *longest = matched;
+                    }
+                })
+                .or_insert(matched);
+        }
+    }
+
+    println!("all patterns to check are {:?}", matches_by_index);
+
+    let mut map_keys: Vec<usize> = matches_by_index.clone().into_keys().collect();
+    let mut ptn_to_match = "";
+
+    for (i, c) in input_line.chars().enumerate() {
+        //println!("index is {i}, char is {c}, pattern is {pattern}");
+        if c == pattern_clone[i] {
+            continue;
+        } else {
+            // start the matching
+            if map_keys.contains(&i) {
+                println!(
+                    "{i} starting matching {}",
+                    matches_by_index.get(&i).unwrap()
+                );
+                ptn_to_match = matches_by_index.get(&i).unwrap();
+                match_end_pos = ptn_to_match.len() + i;
+                if !match_pattern(&c.to_string(), ptn_to_match) {
+                    println!("No recursive pattern at {i} for \"{c}\" to match {ptn_to_match}");
+                    return false;
+                } else {
+                    map_keys.retain(|&x| x != i);
+                    println!("at idx {i} {c} contain pattern {ptn_to_match}");
+                    continue;
+                }
+            } else {
+                // start to continue patern matching after passing first patch
+                println!("STAGE 3 passing matching idx:  idx {i} \"{c}\" will match {ptn_to_match}");
+                if !match_pattern(&c.to_string(), ptn_to_match) {
+                    let pattern_final = &pattern[match_end_pos..];
+                    println!("continue to match {} {}", pattern_final, &input_line[i..]);
+                    check_individual_match(&input_line[i..], pattern_final);
+                } 
+            }
+        }
+    }
+
+    return true;
+}
+
 // currently handles \d \input -> 1 apple
 fn pattern_parser(input_line: &str, pattern: &str) -> bool {
+    println!("------------start parsing {input_line}, PATTERN: {pattern}--------");
     let input_parts: Vec<&str> = input_line.splitn(2, " ").collect();
     let pattern_parts: Vec<&str> = pattern.splitn(2, " ").collect();
 
@@ -67,38 +128,6 @@ fn pattern_parser(input_line: &str, pattern: &str) -> bool {
     }
 
     return false;
-}
-
-fn check_first_input_pattern(
-    input_1: &str,
-    pattern_1: &str,
-    map: &HashMap<&str, &str>,
-    res: &mut Vec<bool>,
-) -> Option<bool> {
-    let pt_count_1: Vec<_> = pattern_1.match_indices("\\d").map(|(i, _)| i).collect();
-    if pt_count_1.len() == 1 {
-        for (key, val) in map.into_iter() {
-            let matched = match_pattern(key, val);
-            println!("{} / {} / matching,{}", key, val, matched);
-            res.push(matched);
-        }
-    } else {
-        println!(
-            "more than one pattern {} {:?} {}",
-            pattern_1, pt_count_1, input_1
-        );
-        let pt_count_1_len = pt_count_1.len();
-        if pt_count_1_len != input_1.len() {
-            return Some(false); // pattern length does not match input length
-        } else {
-            println!("matching...{}", input_1);
-            for i in [0..input_1.len()] {
-                let matched = match_pattern(&input_1[i], "\\d");
-                res.push(matched);
-            }
-        }
-    }
-    None
 }
 
 //this function works with \d\apple \d\d\d \w\w\ws etc
@@ -175,7 +204,19 @@ fn match_pattern(input_line: &str, pattern: &str) -> bool {
     match pattern {
         // check has both start and end
         ptn if pattern.starts_with("^") && pattern.ends_with("$") => {
+            println!("input line is {input_line} is within ^$");
+            let pattern_start = pattern.chars().nth(1).unwrap();
+            let last_word_pattern_pos = pattern.len() - 2;
+            let last_word_pattern = pattern.chars().nth(last_word_pattern_pos).unwrap();
+            if ! input_line.starts_with(pattern_start) || ! input_line.ends_with(last_word_pattern) {
+                return false;
+            }
+
             let to_match = &pattern[1..pattern.len() - 1];
+            let pattern_lst = ["\\d", "\\w", "+", "d"];
+            if pattern_lst.iter().any(|c| to_match.contains(c)) {
+                return check_individual_match(input_line, to_match);
+            }
             return input_line == to_match;
         }
 
@@ -190,7 +231,7 @@ fn match_pattern(input_line: &str, pattern: &str) -> bool {
             return input_line.ends_with(to_match);
         }
         "\\d" => input_line.chars().any(|e| e.is_ascii_digit()),
-        "\\d+" => input_line.len() >= 2 && input_line.chars().all(|e| e.is_ascii_digit()),
+        "\\d+" => input_line.chars().all(|e| e.is_ascii_digit()),
         "d" => input_line.starts_with(|s: char| s.is_ascii_alphabetic()),
         "\\w" => input_line
             .chars()
@@ -332,6 +373,7 @@ fn main() {
     //handle single input
     let split_input = input_line.split(" ").collect::<Vec<&str>>().len();
     if split_input == 1 {
+        println!("{input_line} is a single line input");
         if match_pattern(&input_line, &pattern) {
             println!("single input pattern {input_line} passed");
             process::exit(0)
