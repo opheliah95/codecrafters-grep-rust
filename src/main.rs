@@ -299,7 +299,7 @@ fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
 
                             // handle case like a+=> apple
                             println!(
-                                "TETS 1 == step 1: checking SINGLE {ptn} match: \"{c}\" {ptn} => {input_line}"
+                                "TETS START: STEP INIT: checking SINGLE {ptn} match: \"{c}\" {ptn} => {input_line}"
                             );
                             let last_occurance_of_p = pattern.rfind(ptn_quant).unwrap();
                             if before_p == 0 {
@@ -310,12 +310,12 @@ fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                             // hanndle cases like ca+ts
                             let mut pattern_char = pattern.chars();
                             for (idx, val) in input_line.chars().enumerate() {
-                                println!("enter loop {idx} and val {val} == c {c}");
+                                //println!("enter loop {idx} and val {val}");
                                 if idx < before_p {
                                     let pattern_char_before_p =
                                         pattern_char.clone().nth(idx).unwrap();
                                     println!(
-                                        "TEST 2 == step {idx}: checking SINGLE {ptn} match: {val} => {pattern_char_before_p}"
+                                        "TEST {idx} == step {idx}: checking FULL PTN {ptn} match: VAL {val} => {pattern_char_before_p}"
                                     );
                                     if val != pattern_char_before_p {
                                         return false;
@@ -369,10 +369,22 @@ fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
 
                                 // reached plus/? sign -> need to have one match
                                 if idx == p {
-                                    println!("reaching idx == p, value is {val}");
+                                    println!("reaching idx == p, value is {val} and ptn after p {} (idx pattern: {after_p}) LTR after p {letter_after_p}", &pattern[after_p..] );
                                     if idx == input_line.len() - 1 {
-                                        return pattern[after_p..].len() == 1
-                                            && val == letter_after_p;
+                                        // if pattern also just have one length
+                                        if pattern[after_p..].len() == 1 {
+                                            return val == letter_after_p;
+                                        } else if pattern[after_p..].len() == 0 {
+                                            return true; // pattern ends here
+                                        } else {
+                                            // there is more pattern than input but we only have one idx
+                                            if pattern[after_p..].contains("?") {
+                                                return  pattern[after_p..].ends_with(val); // special case to handle ? match zero
+                                            }
+
+                                            return false;
+                                        }
+                                            
                                     }
 
                                     continue;
