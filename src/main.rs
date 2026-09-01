@@ -202,7 +202,7 @@ fn check_input_pattern(
     None
 }
 
-fn match_pattern(input_line: &str, pattern: &str) -> bool {
+fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
     match pattern {
         // check has both start and end
         ptn if pattern.starts_with("^") && pattern.ends_with("$") => {
@@ -278,15 +278,30 @@ fn match_pattern(input_line: &str, pattern: &str) -> bool {
                 Some(p) => {
                     let before_p = p - 1;
                     let after_p = p + 1;
-                    let letter_to_match = pattern.clone().chars().nth(before_p);
+                    //handle +
+                    let mut letter_to_match =  pattern.clone().chars().nth(0);
+                    // if ptn_quant == "?" {
+                    //     letter_to_match = pattern.clone().chars().nth(before_p - 1); // one letter before prev letter i.e. skip one match
+                    // }
                     let letter_after_p = pattern.clone().chars().nth(after_p).unwrap_or('\0');
+                    // match start of pattern
+                    
+
                     match letter_to_match {
                         Some(c) => {
+                            // fix inputline basing on the first instance of before p
+                            let first_letter_to_start = input_line.find(c).unwrap();
+                            let old_input = input_line.clone();
+                            input_line = &input_line[first_letter_to_start..];
+                            println!(
+                                "starting from {input_line} PREV: {old_input}, search res {c}, res pos {first_letter_to_start}"
+                            );
+
                             // handle case like a+=> apple
                             println!(
                                 "TETS 1 == step 1: checking SINGLE {ptn} match: \"{c}\" {ptn} => {input_line}"
                             );
-                            let last_occurance_of_p = pattern.rfind(c).unwrap();
+                            let last_occurance_of_p = pattern.rfind(ptn_quant).unwrap();
                             if before_p == 0 {
                                 println!("signle step case passed");
                                 return input_line.chars().any(|e| e == c);
@@ -295,7 +310,7 @@ fn match_pattern(input_line: &str, pattern: &str) -> bool {
                             // hanndle cases like ca+ts
                             let mut pattern_char = pattern.chars();
                             for (idx, val) in input_line.chars().enumerate() {
-                                println!("enter loop {idx}");
+                                println!("enter loop {idx} and val {val} == c {c}");
                                 if idx < before_p {
                                     let pattern_char_before_p =
                                         pattern_char.clone().nth(idx).unwrap();
@@ -367,8 +382,10 @@ fn match_pattern(input_line: &str, pattern: &str) -> bool {
                                     println!(
                                         "step {idx}: checking match after {ptn}: PATTERN {letter_after_p} => VAL {val}"
                                     );
-                                    if val != c {
+                                     letter_to_match = pattern.clone().chars().nth(before_p);
+                                    if val != letter_to_match.unwrap() {
                                         // if nothing after +
+                                        println!("val is {val} , and to match is {c}");
                                         if letter_after_p == '\0' {
                                             return true;
                                         }
@@ -379,9 +396,11 @@ fn match_pattern(input_line: &str, pattern: &str) -> bool {
                                             pattern_slice = &pattern[last_occurance_of_p + 1..];
                                         }
 
+                                        println!("last occur of p {last_occurance_of_p} vs p {p} -> slice = {}", pattern_slice);
+
                                         println!(
-                                            "matching {ptn} pattern: PTN {} VAL{}",
-                                            letter_after_p, pattern_slice
+                                            "matching {idx} idx::: {ptn} pattern: PTN {} VAL {}",
+                                             pattern_slice, &input_line[idx..]
                                         );
 
                                         return input_line[idx..].starts_with(pattern_slice);
