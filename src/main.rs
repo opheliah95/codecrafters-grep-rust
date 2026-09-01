@@ -58,12 +58,14 @@ fn check_individual_match(input_line: &str, pattern: &str) -> bool {
                 }
             } else {
                 // start to continue patern matching after passing first patch
-                println!("STAGE 3 passing matching idx:  idx {i} \"{c}\" will match {ptn_to_match}");
+                println!(
+                    "STAGE 3 passing matching idx:  idx {i} \"{c}\" will match {ptn_to_match}"
+                );
                 if !match_pattern(&c.to_string(), ptn_to_match) {
                     let pattern_final = &pattern[match_end_pos..];
                     println!("continue to match {} {}", pattern_final, &input_line[i..]);
                     check_individual_match(&input_line[i..], pattern_final);
-                } 
+                }
             }
         }
     }
@@ -208,7 +210,7 @@ fn match_pattern(input_line: &str, pattern: &str) -> bool {
             let pattern_start = pattern.chars().nth(1).unwrap();
             let last_word_pattern_pos = pattern.len() - 2;
             let last_word_pattern = pattern.chars().nth(last_word_pattern_pos).unwrap();
-            if ! input_line.starts_with(pattern_start) || ! input_line.ends_with(last_word_pattern) {
+            if !input_line.starts_with(pattern_start) || !input_line.ends_with(last_word_pattern) {
                 return false;
             }
 
@@ -263,10 +265,14 @@ fn match_pattern(input_line: &str, pattern: &str) -> bool {
         }
 
         ptn if pattern.contains("+") || pattern.contains("?") => {
-            let input_quantifier_pos = if ptn.contains("+") {
-                ptn.find("+")
-            }  else {
-                ptn.find("-")
+            let mut ptn_quant = "";
+            let mut input_quantifier_pos = None;
+            if ptn.contains("+") {
+                input_quantifier_pos = ptn.find("+");
+                ptn_quant = "+";
+            } else {
+                input_quantifier_pos = ptn.find("?");
+                ptn_quant = "?";
             };
             match input_quantifier_pos {
                 Some(p) => {
@@ -278,7 +284,7 @@ fn match_pattern(input_line: &str, pattern: &str) -> bool {
                         Some(c) => {
                             // handle case like a+=> apple
                             println!(
-                                "TETS 1 == step 1: checking SINGLE {ptn} match: {c}{ptn} => {input_line}"
+                                "TETS 1 == step 1: checking SINGLE {ptn} match: \"{c}\" {ptn} => {input_line}"
                             );
                             let last_occurance_of_p = pattern.rfind(c).unwrap();
                             if before_p == 0 {
@@ -302,27 +308,50 @@ fn match_pattern(input_line: &str, pattern: &str) -> bool {
                                 }
                                 // handle minus sign
                                 if idx == p - 1 {
-                                    match ptn {
+                                    match ptn_quant {
                                         "?" => {
                                             // does not need to have the previous character
-                                             if val != pattern_char.clone().nth(idx).unwrap() {
-                                                
-                                                if val != pattern_char.clone().nth(idx + 1).unwrap() {
+                                            let after_zero_quant =
+                                                pattern_char.clone().nth(idx).unwrap();
+                                            println!(
+                                                "? reached matching {val} to PTN {after_zero_quant}"
+                                            );
+
+                                            if val != after_zero_quant {
+                                                // if this reaches the end of line then this passed
+                                                if idx == input_line.len() - 1 {
+                                                    return true;
+                                                }
+                                                if val != pattern_char.clone().nth(idx + 1).unwrap()
+                                                {
+                                                    println!(
+                                                        "{val} does not match ptn {}",
+                                                        after_zero_quant
+                                                    );
                                                     return false;
                                                 }
                                             }
-                                        },
+                                            println!(
+                                                "@@@MATCHED {val} matched ptn {}@@@",
+                                                after_zero_quant
+                                            );
+                                            // already end of input then we matched fully for cases like dogs -> dogs?
+                                            if idx == input_line.len() - 1 {
+                                                return true;
+                                            }
+                                            continue;
+                                        }
                                         "+" => {
                                             if val != pattern_char.clone().nth(idx).unwrap() {
-                                                return false
+                                                return false;
                                             }
-
-                                        },
-                                        _=> {
+                                        }
+                                        _ => {
                                             return false;
                                         }
                                     }
                                 }
+
                                 // reached plus/? sign -> need to have one match
                                 if idx == p {
                                     println!("reaching idx == p, value is {val}");
