@@ -232,6 +232,7 @@ fn match_pattern(input_line: &str, pattern: &str) -> bool {
         }
         "\\d" => input_line.chars().any(|e| e.is_ascii_digit()),
         "\\d+" => input_line.chars().all(|e| e.is_ascii_digit()),
+        "\\d?" => input_line.chars().any(|e| e.is_ascii_digit()) || input_line.len() == 0,
         "d" => input_line.starts_with(|s: char| s.is_ascii_alphabetic()),
         "\\w" => input_line
             .chars()
@@ -261,8 +262,12 @@ fn match_pattern(input_line: &str, pattern: &str) -> bool {
             }
         }
 
-        ptn if pattern.contains("+") => {
-            let input_quantifier_pos = pattern.find("+");
+        ptn if pattern.contains("+") || pattern.contains("?") => {
+            let input_quantifier_pos = if ptn.contains("+") {
+                ptn.find("+")
+            }  else {
+                ptn.find("-")
+            };
             match input_quantifier_pos {
                 Some(p) => {
                     let before_p = p - 1;
@@ -273,7 +278,7 @@ fn match_pattern(input_line: &str, pattern: &str) -> bool {
                         Some(c) => {
                             // handle case like a+=> apple
                             println!(
-                                "TETS 1 == step 1: checking SINGLE + match: {c}+ => {input_line}"
+                                "TETS 1 == step 1: checking SINGLE {ptn} match: {c}{ptn} => {input_line}"
                             );
                             let last_occurance_of_p = pattern.rfind(c).unwrap();
                             if before_p == 0 {
@@ -285,17 +290,40 @@ fn match_pattern(input_line: &str, pattern: &str) -> bool {
                             let mut pattern_char = pattern.chars();
                             for (idx, val) in input_line.chars().enumerate() {
                                 println!("enter loop {idx}");
-                                if idx <= before_p {
+                                if idx < before_p {
                                     let pattern_char_before_p =
                                         pattern_char.clone().nth(idx).unwrap();
                                     println!(
-                                        "TEST 2 == step {idx}: checking SINGLE + match: {val} => {pattern_char_before_p}"
+                                        "TEST 2 == step {idx}: checking SINGLE {ptn} match: {val} => {pattern_char_before_p}"
                                     );
                                     if val != pattern_char_before_p {
                                         return false;
                                     }
                                 }
-                                // reached plus sign -> need to have one match
+                                // handle minus sign
+                                if idx == p - 1 {
+                                    match ptn {
+                                        "?" => {
+                                            // does not need to have the previous character
+                                             if val != pattern_char.clone().nth(idx).unwrap() {
+                                                
+                                                if val != pattern_char.clone().nth(idx + 1).unwrap() {
+                                                    return false;
+                                                }
+                                            }
+                                        },
+                                        "+" => {
+                                            if val != pattern_char.clone().nth(idx).unwrap() {
+                                                return false
+                                            }
+
+                                        },
+                                        _=> {
+                                            return false;
+                                        }
+                                    }
+                                }
+                                // reached plus/? sign -> need to have one match
                                 if idx == p {
                                     println!("reaching idx == p, value is {val}");
                                     if idx == input_line.len() - 1 {
@@ -308,7 +336,7 @@ fn match_pattern(input_line: &str, pattern: &str) -> bool {
 
                                 if idx > p {
                                     println!(
-                                        "step {idx}: checking match after +: PATTERN {letter_after_p} => VAL {val}"
+                                        "step {idx}: checking match after {ptn}: PATTERN {letter_after_p} => VAL {val}"
                                     );
                                     if val != c {
                                         // if nothing after +
@@ -323,7 +351,7 @@ fn match_pattern(input_line: &str, pattern: &str) -> bool {
                                         }
 
                                         println!(
-                                            "matching + pattern: PTN {} VAL{}",
+                                            "matching {ptn} pattern: PTN {} VAL{}",
                                             letter_after_p, pattern_slice
                                         );
 
