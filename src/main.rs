@@ -262,7 +262,9 @@ fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
             } else {
                 return false;
             }
-        }
+        },
+
+        "." => return input_line != ("\\n"),
 
         ptn if pattern.contains("+") || pattern.contains("?") => {
             let mut ptn_quant = "";
@@ -422,15 +424,11 @@ fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                                             pattern_slice = &pattern[last_occurance_of_p + 1..];
                                         }
 
-                                        println!(
-                                            "current val {val} vs p {p} -> slice = {}",
-                                            pattern_slice
-                                        );
-
+                            
                                         println!(
                                             "matching {idx} idx::: {ptn} pattern: PTN {} VAL {}",
                                             pattern_slice,
-                                            &input_line[idx..]
+                                            &input_line[idx-1..]
                                         );
 
                                         return input_line[idx-1..].starts_with(pattern_slice);
