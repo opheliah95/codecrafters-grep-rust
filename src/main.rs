@@ -279,13 +279,12 @@ fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                     let before_p = p - 1;
                     let after_p = p + 1;
                     //handle +
-                    let mut letter_to_match =  pattern.clone().chars().nth(0);
+                    let mut letter_to_match = pattern.clone().chars().nth(0);
                     // if ptn_quant == "?" {
                     //     letter_to_match = pattern.clone().chars().nth(before_p - 1); // one letter before prev letter i.e. skip one match
                     // }
                     let letter_after_p = pattern.clone().chars().nth(after_p).unwrap_or('\0');
                     // match start of pattern
-                    
 
                     match letter_to_match {
                         Some(c) => {
@@ -369,7 +368,26 @@ fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
 
                                 // reached plus/? sign -> need to have one match
                                 if idx == p {
-                                    println!("reaching idx == p, value is {val} and ptn after p {} (idx pattern: {after_p}) LTR after p {letter_after_p}", &pattern[after_p..] );
+                                    println!(
+                                        "reaching idx == p, value is {val} and ptn after p {} (idx pattern: {after_p}) LTR after p {letter_after_p}",
+                                        &pattern[after_p..]
+                                    );
+                                    // handle ? after ? should only match world by word
+                                    if ptn_quant == "?" {
+                                        if idx == input_line.len() - 1 {
+                                            println!("end reached for ? -> VAL {val} IDX {idx}");
+                                            return true; // ? at exact end
+                                        } else {
+                                            // if input line < pattern
+                                            let ptn_to_match = pattern_char.clone().nth(p-1).unwrap();
+                                            println!("AT idx == p NOW, check ? ZERP?ONE quantifier:  val {val} == {} ", ptn_to_match);
+                                            if val == ptn_to_match{
+                                                return false;
+                                            }
+
+                                        }
+                                    }
+
                                     if idx == input_line.len() - 1 {
                                         // if pattern also just have one length
                                         if pattern[after_p..].len() == 1 {
@@ -379,12 +397,11 @@ fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                                         } else {
                                             // there is more pattern than input but we only have one idx
                                             if pattern[after_p..].contains("?") {
-                                                return  pattern[after_p..].ends_with(val); // special case to handle ? match zero
+                                                return pattern[after_p..].ends_with(val); // special case to handle ? match zero
                                             }
 
                                             return false;
                                         }
-                                            
                                     }
 
                                     continue;
@@ -392,9 +409,10 @@ fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
 
                                 if idx > p {
                                     println!(
-                                        "step {idx}: checking match after {ptn}: PATTERN {letter_after_p} => VAL {val}"
+                                        "step {idx}: WHEN {idx} > {p}: checking match after {ptn}: PATTERN {letter_after_p} => VAL {val} INPUT PASSED {input_line}"
                                     );
-                                     letter_to_match = pattern.clone().chars().nth(before_p);
+
+                                    letter_to_match = pattern.clone().chars().nth(before_p);
                                     if val != letter_to_match.unwrap() {
                                         // if nothing after +
                                         println!("val is {val} , and to match is {c}");
@@ -408,11 +426,15 @@ fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                                             pattern_slice = &pattern[last_occurance_of_p + 1..];
                                         }
 
-                                        println!("last occur of p {last_occurance_of_p} vs p {p} -> slice = {}", pattern_slice);
+                                        println!(
+                                            "last occur of p {last_occurance_of_p} vs p {p} -> slice = {}",
+                                            pattern_slice
+                                        );
 
                                         println!(
                                             "matching {idx} idx::: {ptn} pattern: PTN {} VAL {}",
-                                             pattern_slice, &input_line[idx..]
+                                            pattern_slice,
+                                            &input_line[idx..]
                                         );
 
                                         return input_line[idx..].starts_with(pattern_slice);
