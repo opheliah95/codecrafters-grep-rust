@@ -288,10 +288,17 @@ fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                     }
 
                     // case idx > whildcard pos
-                    if char_after_wildcard == '+' {
+                    if vec!['+', '?'].contains(&char_after_wildcard) {
                         // check if end matches -> get parts after +
                         let after_wildcard_slice = &pattern[wildcard_pos + 2..];
                         //reverse search input end to match
+
+                        // terminate if input len actally less than ptn i.e. echo -n 'gol' | ./your_program.sh -E 'g.+gol'
+                        let current_input_slice = &input_line[idx..];
+                        println!("WILDCARD: match zero/more quantifier encountered, idx {idx} val in input {c}");
+                        if after_wildcard_slice.len() >= current_input_slice.len() {
+                            return false;
+                        }
 
                         let after_wildcard_rev: Vec<char> =
                             after_wildcard_slice.chars().into_iter().rev().collect();
@@ -300,11 +307,12 @@ fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                         // shorten pattern and re-search wildcard pos
                         for (rev_idx, rev_c) in after_wildcard_rev.iter().enumerate() {
                             let m = input_back_rev.pop().unwrap();
-                            println!("Now matching {rev_c} -> {m} ");
+                            println!("Now reverse match at ptn idx {rev_idx} :  {rev_c} -> {m} ");
                             if *rev_c != m {
                                 return false;
                             }
                         }
+                        return true;
                     } else {
                         return false;
                     }
