@@ -273,7 +273,7 @@ fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
             } else {
                 for (idx, c) in input_line.chars().enumerate() {
                     let ptn_at_idx = pattern.clone().chars().nth(idx).unwrap();
-                    if !match_pattern(&c.to_string(), &ptn.to_string()) {
+                    if !match_pattern(&c.to_string(), &ptn_at_idx.to_string()) {
                         return false;
                     }
                 }
