@@ -418,9 +418,9 @@ fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
 
                                         let mut pattern_slice = &pattern[p + 1..];
 
-                                        if last_occurance_of_p != p {
-                                            pattern_slice = &pattern[last_occurance_of_p + 1..];
-                                        }
+                                        // if last_occurance_of_p != p {
+                                        //     pattern_slice = &pattern[last_occurance_of_p + 1..];
+                                        // }
 
                                         println!(
                                             "last occur of p {last_occurance_of_p} vs p {p} -> slice = {}",
