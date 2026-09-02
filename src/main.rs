@@ -262,9 +262,24 @@ fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
             } else {
                 return false;
             }
-        },
+        }
 
         "." => return input_line != ("\\n"),
+
+        ptn if ptn.contains(".") => {
+            // if length not matching
+            if ptn.len() != input_line.len() {
+                return false;
+            } else {
+                for (idx, c) in input_line.chars().enumerate() {
+                    let ptn_at_idx = pattern.clone().chars().nth(idx).unwrap();
+                    if !match_pattern(&c.to_string(), ptn.to_string()) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+        }
 
         ptn if pattern.contains("+") || pattern.contains("?") => {
             let mut ptn_quant = "";
@@ -424,14 +439,13 @@ fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                                             pattern_slice = &pattern[last_occurance_of_p + 1..];
                                         }
 
-                            
                                         println!(
                                             "matching {idx} idx::: {ptn} pattern: PTN {} VAL {}",
                                             pattern_slice,
-                                            &input_line[idx-1..]
+                                            &input_line[idx - 1..]
                                         );
 
-                                        return input_line[idx-1..].starts_with(pattern_slice);
+                                        return input_line[idx - 1..].starts_with(pattern_slice);
                                     }
                                     continue;
                                 }
