@@ -374,17 +374,13 @@ fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                                     );
                                     // handle ? after ? should only match world by word
                                     if ptn_quant == "?" {
-                                        if idx == input_line.len() - 1 {
-                                            println!("end reached for ? -> VAL {val} IDX {idx}");
-                                            return true; // ? at exact end
-                                        } else {
-                                            // if input line < pattern
-                                            let ptn_to_match = pattern_char.clone().nth(p-1).unwrap();
-                                            println!("AT idx == p NOW, check ? ZERP?ONE quantifier:  val {val} == {} ", ptn_to_match);
-                                            if val == ptn_to_match{
-                                                return false;
-                                            }
-
+                                        let ptn_to_match = pattern_char.clone().nth(p - 1).unwrap();
+                                        println!(
+                                            "AT idx == p NOW, check ? ZERP?ONE quantifier:  val {val} == {} ",
+                                            ptn_to_match
+                                        );
+                                        if val == ptn_to_match {
+                                            return false;
                                         }
                                     }
 
