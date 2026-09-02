@@ -270,13 +270,27 @@ fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
             for (idx, c) in input_line.chars().enumerate() {
                 let wildcard_pos = pattern.find(".").unwrap_or(0);
                 let ptn_at_idx = pattern.clone().chars().nth(idx).unwrap_or('\0');
-                if !match_pattern(&c.to_string(), &ptn_at_idx.to_string()) {
+                println!("WILDCARD: idx {idx}, c: {c} -> match ptn: {ptn_at_idx}");
+
+                // if length same then line by line matching
+                if input_line.len() == pattern.len() {
+                    if !match_pattern(&c.to_string(), &ptn_at_idx.to_string()) {
+                        return false;
+                    }
+                } else {
                     let char_after_wildcard =
                         pattern.clone().chars().nth(wildcard_pos + 1).unwrap();
 
+                    if idx <= wildcard_pos {
+                        if !match_pattern(&c.to_string(), &ptn_at_idx.to_string()) {
+                            return false;
+                        }
+                    }
+
+                    // case idx > whildcard pos
                     if char_after_wildcard == '+' {
                         // check if end matches -> get parts after +
-                        let after_wildcard_slice = &pattern[wildcard_pos + 1..];
+                        let after_wildcard_slice = &pattern[wildcard_pos + 2..];
                         //reverse search input end to match
 
                         let after_wildcard_rev: Vec<char> =
@@ -285,15 +299,15 @@ fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                             input_line.clone().chars().into_iter().collect();
                         // shorten pattern and re-search wildcard pos
                         for (rev_idx, rev_c) in after_wildcard_rev.iter().enumerate() {
-                            if *rev_c != input_back_rev.pop().unwrap() {
+                            let m = input_back_rev.pop().unwrap();
+                            println!("Now matching {rev_c} -> {m} ");
+                            if *rev_c != m {
                                 return false;
                             }
                         }
-                        return true;
                     } else {
                         return false;
                     }
-                    return false;
                 }
             }
             return true;
