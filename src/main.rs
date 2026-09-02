@@ -418,12 +418,12 @@ fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
 
                                         let mut pattern_slice = &pattern[p + 1..];
 
-                                        // if last_occurance_of_p != p {
-                                        //     pattern_slice = &pattern[last_occurance_of_p + 1..];
-                                        // }
+                                        if last_occurance_of_p != p {
+                                            pattern_slice = &pattern[last_occurance_of_p + 1..];
+                                        }
 
                                         println!(
-                                            "last occur of p {last_occurance_of_p} vs p {p} -> slice = {}",
+                                            "current val {val} vs p {p} -> slice = {}",
                                             pattern_slice
                                         );
 
@@ -433,7 +433,7 @@ fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                                             &input_line[idx..]
                                         );
 
-                                        return input_line[idx..].starts_with(pattern_slice);
+                                        return input_line[idx-1..].starts_with(pattern_slice);
                                     }
                                     continue;
                                 }
