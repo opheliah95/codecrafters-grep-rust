@@ -267,18 +267,36 @@ fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
         "." => return input_line != ("\\n"),
 
         ptn if ptn.contains(".") => {
-            // if length not matching
-            if ptn.len() != input_line.len() {
-                return false;
-            } else {
-                for (idx, c) in input_line.chars().enumerate() {
-                    let ptn_at_idx = pattern.clone().chars().nth(idx).unwrap();
-                    if !match_pattern(&c.to_string(), &ptn_at_idx.to_string()) {
+            for (idx, c) in input_line.chars().enumerate() {
+                let wildcard_pos = pattern.find(".").unwrap_or(0);
+                let ptn_at_idx = pattern.clone().chars().nth(idx).unwrap_or('\0');
+                if !match_pattern(&c.to_string(), &ptn_at_idx.to_string()) {
+                    let char_after_wildcard =
+                        pattern.clone().chars().nth(wildcard_pos + 1).unwrap();
+
+                    if char_after_wildcard == '+' {
+                        // check if end matches -> get parts after +
+                        let after_wildcard_slice = &pattern[wildcard_pos + 1..];
+                        //reverse search input end to match
+
+                        let after_wildcard_rev: Vec<char> =
+                            after_wildcard_slice.chars().into_iter().rev().collect();
+                        let mut input_back_rev: Vec<char> =
+                            input_line.clone().chars().into_iter().collect();
+                        // shorten pattern and re-search wildcard pos
+                        for (rev_idx, rev_c) in after_wildcard_rev.iter().enumerate() {
+                            if *rev_c != input_back_rev.pop().unwrap() {
+                                return false;
+                            }
+                        }
+                        return true;
+                    } else {
                         return false;
                     }
+                    return false;
                 }
-                return true;
             }
+            return true;
         }
 
         ptn if pattern.contains("+") || pattern.contains("?") => {
