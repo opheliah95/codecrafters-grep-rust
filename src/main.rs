@@ -295,6 +295,9 @@ fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
 
                 }   
 
+                let res = contain_alt.iter().any(|v| *v ==true);
+                println!("res is {res}");
+
                 return contain_alt.iter().any(|v| *v ==true);
             }
            
