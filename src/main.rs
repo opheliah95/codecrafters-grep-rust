@@ -289,6 +289,7 @@ fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                 for val in ptn_spilt {
                     println!("eval if {input_line} contain {val}");
                     contain_alt.push(input_line.contains(val));
+                    println!("the vec is {:?}", contain_alt);
 
                 }   
 
