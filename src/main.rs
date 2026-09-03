@@ -151,9 +151,9 @@ fn check_input_pattern(
     }
     // handle alt
     if pattern.starts_with("(") && pattern.ends_with(")") {
-        let res = match_pattern(input, pattern);
-        println!("amtch ptn is {res}");
-        return Some(match_pattern(input, pattern));
+        let match_res = match_pattern(input, pattern);
+        res.push(match_res);
+        return Some(match_res);
     }
 
     let mut pt_count: Vec<_> = pattern.match_indices(input_ptn).map(|(i, _)| i).collect();
@@ -294,10 +294,6 @@ fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                     println!("the vec is {:?} ", contain_alt);
 
                 }   
-
-                let res = contain_alt.iter().any(|v| *v ==true);
-                println!("res is {res}");
-
                 return contain_alt.iter().any(|v| *v ==true);
             }
            
