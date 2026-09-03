@@ -265,7 +265,33 @@ fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
         }
 
         "." => return input_line != ("\\n"),
+        "+" => return true,
 
+        //check alt | operator
+        ptn if pattern.starts_with("(") && pattern.ends_with(")") => {
+            println!("{ptn} eval alternat");
+            let mut ptn_char = ptn.chars();
+            ptn_char.next();
+            ptn_char.as_str();
+            let ptn_formatted = ptn_char.as_str();
+            let ptn_spilt = ptn_formatted.split("|").collect::<Vec<&str>>();
+            if ptn_spilt.len() <= 1 {
+                println!("{:?}", ptn_spilt);
+                return false;
+            } else {
+                let mut contain_alt: Vec<bool> = Vec::new();
+
+                for val in ptn_spilt {
+                    contain_alt.push(input_line.contains(val));
+                    
+                }   
+
+                return contain_alt.iter().any(|v| *v ==true);
+            }
+            return false;
+        }
+
+        // check wildcard
         ptn if ptn.contains(".") => {
             for (idx, c) in input_line.chars().enumerate() {
                 let wildcard_pos = pattern.find(".").unwrap_or(0);
@@ -295,10 +321,18 @@ fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
 
                         // terminate if input len actally less than ptn i.e. echo -n 'gol' | ./your_program.sh -E 'g.+gol'
                         let current_input_slice = &input_line[idx..];
-                        println!("WILDCARD: match zero/more quantifier encountered, idx {idx} val in input {c}");
-                        if after_wildcard_slice.len() >= current_input_slice.len() {
+                        println!(
+                            "WILDCARD: match zero/more quantifier encountered, idx {idx} val in input {c}"
+                        );
+                        if char_after_wildcard == '+'
+                            && after_wildcard_slice.len() >= current_input_slice.len()
+                        {
                             return false;
                         }
+
+                        // if char_after_wildcard == '?'{
+                        //     return false;
+                        // }
 
                         let after_wildcard_rev: Vec<char> =
                             after_wildcard_slice.chars().into_iter().rev().collect();
@@ -346,7 +380,7 @@ fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                     match letter_to_match {
                         Some(c) => {
                             // fix inputline basing on the first instance of before p
-                            let first_letter_to_start = input_line.find(c).unwrap();
+                            let first_letter_to_start = input_line.find(c).unwrap_or(0);
                             let old_input = input_line.clone();
                             input_line = &input_line[first_letter_to_start..];
                             println!(
@@ -412,6 +446,7 @@ fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                                             }
                                             continue;
                                         }
+
                                         "+" => {
                                             if val != pattern_char.clone().nth(idx).unwrap() {
                                                 return false;
