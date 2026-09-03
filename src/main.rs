@@ -286,6 +286,7 @@ fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                 let mut contain_alt: Vec<bool> = Vec::new();
 
                 for val in ptn_spilt {
+                    println!("eval if {input_line} contain {val}");
                     contain_alt.push(input_line.contains(val));
 
                 }   
