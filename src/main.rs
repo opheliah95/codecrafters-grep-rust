@@ -82,7 +82,7 @@ fn pattern_parser(input_line: &str, pattern: &str) -> bool {
     if input_parts.len() == pattern_parts.len() && input_parts.len() == 2 {
         let (input_1, input_2) = (input_parts[0], input_parts[1]);
         let (pattern_1, pattern_2) = (pattern_parts[0], pattern_parts[1]);
-
+        println!("input spilt: {:?} pattern spilt {:?}", input_parts, pattern_parts);
         let input_2_split = input_2.split(" ").collect::<Vec<&str>>();
         let mut res: Vec<bool> = Vec::new();
         if input_2_split.len() > 1 {
@@ -149,10 +149,14 @@ fn check_input_pattern(
         res.push(false);
         return Some(false);
     }
+    // handle alt
+    if pattern.starts_with("(") && pattern.ends_with(")") {
+        return Some(match_pattern(input, pattern));
+    }
 
     let mut pt_count: Vec<_> = pattern.match_indices(input_ptn).map(|(i, _)| i).collect();
     println!(
-        "pt_count {:?} and input {} and pattern {}",
+        "pt_count {:?} -- ptn_start {input_ptn} and input {} and pattern {}",
         pt_count, input, pattern
     );
     if pt_count.len() == 1 {
@@ -283,7 +287,7 @@ fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
 
                 for val in ptn_spilt {
                     contain_alt.push(input_line.contains(val));
-                    
+
                 }   
 
                 return contain_alt.iter().any(|v| *v ==true);
@@ -566,7 +570,7 @@ fn main() {
     //handle single input
     let split_input = input_line.split(" ").collect::<Vec<&str>>().len();
     if split_input == 1 {
-        println!("{input_line} is a single line input");
+        println!("{input_line} is a single word ine input");
         if match_pattern(&input_line, &pattern) {
             println!("single input pattern {input_line} passed");
             process::exit(0)
@@ -574,6 +578,7 @@ fn main() {
             process::exit(1)
         }
     } else {
+        println!("multiword input: {input_line} passed");
         if pattern_parser(&input_line, &pattern) {
             println!("matching results achieved!");
             process::exit(0)
