@@ -151,6 +151,8 @@ fn check_input_pattern(
     }
     // handle alt
     if pattern.starts_with("(") && pattern.ends_with(")") {
+        let res = match_pattern(input, pattern);
+        println!("amtch ptn is {res}");
         return Some(match_pattern(input, pattern));
     }
 
@@ -289,7 +291,7 @@ fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                 for val in ptn_spilt {
                     println!("eval if {input_line} contain {val}");
                     contain_alt.push(input_line.contains(val));
-                    println!("the vec is {:?} and result of sort is {} ", contain_alt, contain_alt.iter().any(|v| *v ==true));
+                    println!("the vec is {:?} and result of sort is {} ", contain_alt);
 
                 }   
 
