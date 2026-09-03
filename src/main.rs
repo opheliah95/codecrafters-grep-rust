@@ -276,6 +276,7 @@ fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
             println!("{ptn} eval alternat");
             let mut ptn_char = ptn.chars();
             ptn_char.next();
+            ptn_char.next_back();
             ptn_char.as_str();
             let ptn_formatted = ptn_char.as_str();
             let ptn_spilt = ptn_formatted.split("|").collect::<Vec<&str>>();
