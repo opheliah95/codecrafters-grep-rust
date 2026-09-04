@@ -115,7 +115,13 @@ fn pattern_parser(mut input_line: &str, mut pattern: &str) -> bool {
                 key, val, current_match
             );
             res.push(current_match);
+        }
 
+        // for some reason res does not update...
+        println!("res {:?} ", res);
+        if res.len() == 0 {
+            println!("res {:?} ", res);
+            return false;
         }
 
         return res.iter().any(|v| *v == true);
