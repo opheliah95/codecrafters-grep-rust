@@ -92,7 +92,6 @@ fn check_individual_match(input_line: &str, pattern: &str) -> bool {
 
 // currently handles \d \input -> 1 apple
 fn pattern_parser(mut input_line: &str, mut pattern: &str) -> bool {
-    
     if start_end_is_pattern(input_line) {
         input_line = remove_start_end(input_line);
     }
@@ -118,15 +117,15 @@ fn pattern_parser(mut input_line: &str, mut pattern: &str) -> bool {
             res.push(current_match);
 
             if check_all_true(&res) {
-                // reach the end then false
-                println!("check passed");
                 if key == input_line.len() - 1 {
+                    // reach the end then false
+                    println!("check passed");
                     return true;
                 }
             }
         }
 
-        return false;
+        return res.iter().any(|v| *v == true);
     }
 
     return false;
@@ -303,17 +302,15 @@ fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
             } else if alt_end <= pipe_find {
                 println!("NOT CLOSURE!!  {input_line} -->  {ptn} ) appear earlier than |");
                 return check_individual_match(input_line, ptn);
-            }
-
-            else {
+            } else {
                 // match ()
-                
+
                 let mut ptn_p1_old = ptn.get(1..alt_end).unwrap();
                 let ptn_p1_string = format!("({ptn_p1_old})");
                 let ptn_p1: &str = &ptn_p1_string;
                 println!("( ) | all present => matching {input_line} -------- {ptn_p1}");
                 let ptn_1_match = match_pattern(input_line, ptn_p1);
-                let ptn_p2 = ptn.get(alt_end+1..).unwrap();
+                let ptn_p2 = ptn.get(alt_end + 1..).unwrap();
                 if ptn_p2.len() == 0 {
                     return true;
                 } else if ptn_1_match {
@@ -323,7 +320,6 @@ fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                     return match_pattern(input_line, new_ptn.as_str());
                 }
                 return false;
-
             }
 
             return false;
@@ -394,7 +390,6 @@ fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
         }
 
         ptn if pattern.contains("+") || pattern.contains("?") => {
-           
             let mut ptn_quant = "";
             let mut input_quantifier_pos = None;
             if ptn.contains("+") {
@@ -451,14 +446,14 @@ fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                                     }
                                     // if here idx actuall reaching end
                                     if idx == input_line.len() - 1 {
-                                        let ptn_before_quant = ptn.get(idx+1..p).unwrap();
-                                        // if only one letter before ? 
+                                        let ptn_before_quant = ptn.get(idx + 1..p).unwrap();
+                                        // if only one letter before ?
                                         println!("ptn before quant: {ptn_before_quant}");
                                         return ptn_quant == "?" && ptn_before_quant.len() == 1;
                                     }
                                 }
                                 // handle minus sign
-                                if idx == before_p{
+                                if idx == before_p {
                                     match ptn_quant {
                                         "?" => {
                                             // does not need to have the previous character
