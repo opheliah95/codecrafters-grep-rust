@@ -124,7 +124,7 @@ fn pattern_parser(mut input_line: &str, mut pattern: &str) -> bool {
             return false;
         }
 
-        return res.iter().any(|v| *v == true);
+        return res.iter().all(|v| *v == true);
     }
 
     return false;
