@@ -116,13 +116,6 @@ fn pattern_parser(mut input_line: &str, mut pattern: &str) -> bool {
             );
             res.push(current_match);
 
-            if check_all_true(&res) {
-                if key == input_line.len() - 1 {
-                    // reach the end then false
-                    println!("check passed");
-                    return true;
-                }
-            }
         }
 
         return res.iter().any(|v| *v == true);
