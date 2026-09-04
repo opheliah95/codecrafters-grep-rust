@@ -4,6 +4,23 @@ use std::hash::Hash;
 use std::io;
 use std::process;
 
+fn start_end_is_pattern(input: &str) -> bool {
+    if input.starts_with("^") && input.ends_with("$") {
+        return true;
+    } else if input.starts_with("(") && input.ends_with(")") {
+        return true;
+    } else {
+        return false;
+    }
+}
+fn remove_start_end(input: &str) -> &str {
+    let mut input_chars = input.chars();
+    input_chars.next();
+    input_chars.next_back();
+    let res = input_chars.as_str();
+
+    return res;
+}
 fn check_all_true(vec: &Vec<bool>) -> bool {
     if vec.len() == 0 {
         return false;
@@ -74,59 +91,42 @@ fn check_individual_match(input_line: &str, pattern: &str) -> bool {
 }
 
 // currently handles \d \input -> 1 apple
-fn pattern_parser(input_line: &str, pattern: &str) -> bool {
+fn pattern_parser(mut input_line: &str, mut pattern: &str) -> bool {
+    
+    if start_end_is_pattern(input_line) {
+        input_line = remove_start_end(input_line);
+    }
+
+    if start_end_is_pattern(pattern) {
+        pattern = remove_start_end(pattern);
+    }
     println!("------------start parsing {input_line}, PATTERN: {pattern}--------");
-    let input_parts: Vec<&str> = input_line.splitn(2, " ").collect();
-    let pattern_parts: Vec<&str> = pattern.splitn(2, " ").collect();
 
-    if input_parts.len() == pattern_parts.len() && input_parts.len() == 2 {
-        let (input_1, input_2) = (input_parts[0], input_parts[1]);
-        let (pattern_1, pattern_2) = (pattern_parts[0], pattern_parts[1]);
-        println!("input spilt: {:?} pattern spilt {:?}", input_parts, pattern_parts);
-        let input_2_split = input_2.split(" ").collect::<Vec<&str>>();
-        let mut res: Vec<bool> = Vec::new();
-        if input_2_split.len() > 1 {
-            println!("now spilt inputs are..{:?}", input_2_split);
-            let re_spilt = input_line.split(" ").collect::<Vec<&str>>();
-            for (key, val) in re_spilt.iter().enumerate() {
-                println!("key {} val {} matching {}", key, val, pattern_1);
-                check_input_pattern(val, pattern_1, &mut res, "\\d");
-                println!("now res is {:?}", res);
-                if res.len() == 0 {
-                    return false;
-                }
-                if check_all_true(&res) {
-                    // reach the end then false
-                    println!("check passed");
-                    if key == re_spilt.len() - 1 {
-                        return false;
-                    }
-                    // get next index and if it match then pass
-                    let next = re_spilt[key + 1];
-                    res = Vec::new();
-                    check_input_pattern(next, pattern_2, &mut res, "\\w");
-                    return check_all_true(&res);
-                }
+    let input_parts: Vec<&str> = input_line.split(" ").collect();
+    let pattern_parts: Vec<&str> = pattern.split(" ").collect();
+    let mut res: Vec<bool> = Vec::new();
 
-                res = Vec::new(); // re init bool vec
+    if input_parts.len() == pattern_parts.len() {
+        for (key, val) in input_parts.iter().enumerate() {
+            let current_ptn = pattern_parts[key];
+
+            let current_match = match_pattern(val, current_ptn);
+            println!(
+                "matching word by word: key {} val {} => result is {} ",
+                key, val, current_match
+            );
+            res.push(current_match);
+
+            if check_all_true(&res) {
+                // reach the end then false
+                println!("check passed");
+                if key == input_line.len() - 1 {
+                    return true;
+                }
             }
-
-            return false;
         }
 
-        // UPDATE RES VALUE
-        res = Vec::new();
-        check_input_pattern(input_1, pattern_1, &mut res, "\\d");
-        check_input_pattern(input_2, pattern_2, &mut res, "\\w");
-
-        match res.len() {
-            0 => {
-                return false;
-            }
-            _ => {
-                return check_all_true(&res);
-            }
-        }
+        return false;
     }
 
     return false;
@@ -276,11 +276,7 @@ fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
         //check alt | operator
         ptn if pattern.starts_with("(") && pattern.ends_with(")") => {
             println!("{ptn} eval alternat");
-            let mut ptn_char = ptn.chars();
-            ptn_char.next();
-            ptn_char.next_back();
-            ptn_char.as_str();
-            let ptn_formatted = ptn_char.as_str();
+            let ptn_formatted = remove_start_end(ptn);
             let ptn_spilt = ptn_formatted.split("|").collect::<Vec<&str>>();
             if ptn_spilt.len() <= 1 {
                 println!("{:?}", ptn_spilt);
@@ -292,11 +288,45 @@ fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                     println!("eval if {input_line} contain {val}");
                     contain_alt.push(input_line.contains(val));
                     println!("the vec is {:?} ", contain_alt);
-
-                }   
-                return contain_alt.iter().any(|v| *v ==true);
+                }
+                return contain_alt.iter().any(|v| *v == true);
             }
-           
+        }
+
+        ptn if ptn.starts_with("(") => {
+            println!("ptn start with (: {input_line} ----  {ptn}");
+            let alt_end = ptn.rfind(")").unwrap_or(0);
+            let pipe_find = ptn.find("|").unwrap_or(0);
+            if alt_end == 0 || pipe_find == 0 {
+                println!("matching  {input_line} -->  {ptn} NO CLOSURE");
+                return check_individual_match(input_line, ptn);
+            } else if alt_end <= pipe_find {
+                println!("NOT CLOSURE!!  {input_line} -->  {ptn} ) appear earlier than |");
+                return check_individual_match(input_line, ptn);
+            }
+
+            else {
+                // match ()
+                
+                let mut ptn_p1_old = ptn.get(1..alt_end).unwrap();
+                let ptn_p1_string = format!("({ptn_p1_old})");
+                let ptn_p1: &str = &ptn_p1_string;
+                println!("( ) | all present => matching {input_line} -------- {ptn_p1}");
+                let ptn_1_match = match_pattern(input_line, ptn_p1);
+                let ptn_p2 = ptn.get(alt_end+1..).unwrap();
+                if ptn_p2.len() == 0 {
+                    return true;
+                } else if ptn_1_match {
+                    let mut new_ptn = input_line.to_string();
+                    new_ptn.push_str(ptn_p2);
+                    println!("partial () match, need to match {input_line} => {new_ptn}");
+                    return match_pattern(input_line, new_ptn.as_str());
+                }
+                return false;
+
+            }
+
+            return false;
         }
 
         // check wildcard
@@ -364,6 +394,7 @@ fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
         }
 
         ptn if pattern.contains("+") || pattern.contains("?") => {
+           
             let mut ptn_quant = "";
             let mut input_quantifier_pos = None;
             if ptn.contains("+") {
@@ -392,7 +423,7 @@ fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                             let old_input = input_line.clone();
                             input_line = &input_line[first_letter_to_start..];
                             println!(
-                                "starting from {input_line} PREV: {old_input}, search res {c}, res pos {first_letter_to_start}"
+                                "===QUANT +? MATCHING===starting from {input_line} PREV: {old_input}, search res {c}, res pos {first_letter_to_start}"
                             );
 
                             // handle case like a+=> apple
@@ -418,9 +449,16 @@ fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                                     if val != pattern_char_before_p {
                                         return false;
                                     }
+                                    // if here idx actuall reaching end
+                                    if idx == input_line.len() - 1 {
+                                        let ptn_before_quant = ptn.get(idx+1..p).unwrap();
+                                        // if only one letter before ? 
+                                        println!("ptn before quant: {ptn_before_quant}");
+                                        return ptn_quant == "?" && ptn_before_quant.len() == 1;
+                                    }
                                 }
                                 // handle minus sign
-                                if idx == p - 1 {
+                                if idx == before_p{
                                     match ptn_quant {
                                         "?" => {
                                             // does not need to have the previous character
