@@ -53,12 +53,15 @@ fn match_digits(input: &str, pattern: &str) -> bool {
         .into_iter()
         .map(|(i, c)| (i, c.to_string()))
         .collect();
-    println!("check {input} and its re-matching ptn: {:?}", ptn_digit_match);
-    
+    println!(
+        "check {input} and its re-matching ptn: {:?}",
+        ptn_digit_match
+    );
+
     if ptn_digit_match.len() == 0 {
         return false;
     }
-    
+
     let start = ptn_digit_match[0].0;
     let digit_match_size = ptn_digit_match.len();
     let mut end = start;
@@ -74,7 +77,6 @@ fn match_digits(input: &str, pattern: &str) -> bool {
                 } else {
                     ptn_digit_match.push((idx, c_str.clone()));
                 }
-                
             }
             if idx >= end {
                 ptn_digit_match.push((idx, c_str.clone()));
@@ -87,10 +89,9 @@ fn match_digits(input: &str, pattern: &str) -> bool {
         for (idx, val) in input.chars().enumerate() {
             let input_match = &val.to_string();
             let ptn_match = &ptn_digit_match[idx].1;
-            if ! match_pattern(input_match, ptn_match){
+            if !match_pattern(input_match, ptn_match) {
                 return false;
             }
-
         }
         return true;
     }
@@ -215,14 +216,7 @@ fn pattern_parser(mut input_line: &str, mut pattern: &str) -> bool {
         for (idx, p) in pattern_parts.clone().into_iter().enumerate() {
             for (input_idx, mut input_p) in input_re_spilt.clone().into_iter().enumerate() {
                 let input_digits = check_digits(input_p);
-                if input_digits > 0 {
-                    println!("input {input_p} is a digit with {input_digits} digits");
-                    if ! match_digits(input_p, p) {
-                        return false;
-                    }
-                    continue;
-                }
-                println!("matching now: .... {p} to input {input_p}");
+                println!("matching NON DIGIT now: .... {p} to input {input_p}");
                 if match_pattern(input_p, p) {
                     let ptn_slice = &pattern_parts[idx + 1..].join("");
                     let input_slice = &input_re_spilt[idx + 1..].join("");
@@ -230,10 +224,18 @@ fn pattern_parser(mut input_line: &str, mut pattern: &str) -> bool {
                     if match_pattern(input_slice, ptn_slice) {
                         return true;
                     }
+                } else if input_digits > 0 {
+                    println!("input {input_p} is a digit with {input_digits} digits");
+                    if match_digits(input_p, p) {
+                        if input_idx == input_re_spilt.len() - 1 {
+                            return true;
+                        }
+                        break;
+                    }
                 }
-                // if input_idx == input_re_spilt.len() - 1 {
-                //     return false;
-                // }
+                if input_idx == input_re_spilt.len() - 1 {
+                    return false;
+                }
             }
         }
 
