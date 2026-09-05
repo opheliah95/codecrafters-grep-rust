@@ -156,7 +156,7 @@ fn pattern_parser(mut input_line: &str, mut pattern: &str) -> bool {
                 if match_pattern( input_p, p) {
                     let ptn_slice = &pattern_parts[idx+1..].join("");
                     let input_slice = &input_re_spilt[idx+1..].join("");
-                    
+                    println!("matching P2 PTN_SLIE: .... {ptn_slice} to input_SLICE {input_slice}");
                     if match_pattern(input_slice, ptn_slice) {
                         return true;
                     }
