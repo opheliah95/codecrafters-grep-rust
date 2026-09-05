@@ -217,7 +217,9 @@ fn pattern_parser(mut input_line: &str, mut pattern: &str) -> bool {
                 let input_digits = check_digits(input_p);
                 if input_digits > 0 {
                     println!("input {input_p} is a digit with {input_digits} digits");
-                    return match_digits(input_p, p);
+                    if ! match_digits(input_p, p) {
+                        return false;
+                    }
                 }
                 println!("matching now: .... {p} to input {input_p}");
                 if match_pattern(input_p, p) {
