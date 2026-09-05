@@ -33,7 +33,7 @@ fn convert_to_digit(input: &str) -> String {
     let mut res = "".to_string();
     for c in input.chars() {
         if c.is_ascii_digit() {
-            res.push_str("//d");
+            res.push_str("\\d");
 
         } else {
             return "".to_string();
