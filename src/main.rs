@@ -142,6 +142,9 @@ fn pattern_parser(mut input_line: &str, mut pattern: &str) -> bool {
                         return true;
                     }
                 }
+                if input_idx == input_re_spilt.len() -1 {
+                    return false;
+                }
             }
         }
 
@@ -284,7 +287,10 @@ fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
             let to_match = &pattern[0..pattern.len() - 1];
             return input_line.ends_with(to_match);
         }
-        "\\d" => input_line.chars().any(|e| e.is_ascii_digit()),
+        "\\d" => {
+            println!("matching digits {input_line}  ----> {pattern}");
+            return input_line.chars().any(|e| e.is_ascii_digit())
+        },
         "\\d+" => input_line.chars().all(|e| e.is_ascii_digit()),
         "\\d?" => input_line.chars().any(|e| e.is_ascii_digit()) || input_line.len() == 0,
         "d" => input_line.starts_with(|s: char| s.is_ascii_alphabetic()),
