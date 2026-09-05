@@ -220,6 +220,7 @@ fn pattern_parser(mut input_line: &str, mut pattern: &str) -> bool {
                     if ! match_digits(input_p, p) {
                         return false;
                     }
+                    continue;
                 }
                 println!("matching now: .... {p} to input {input_p}");
                 if match_pattern(input_p, p) {
