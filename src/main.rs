@@ -495,7 +495,7 @@ fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
 
                                             if val != after_zero_quant {
                                                 
-                                                if val != pattern_char.clone().nth(idx + 1).unwrap()
+                                                if val != pattern_char.clone().nth(after_p).unwrap()
                                                 {
                                                     println!(
                                                         "{val} does not match ptn {}",
