@@ -3,6 +3,7 @@ use std::env;
 use std::hash::Hash;
 use std::io;
 use std::process;
+use std::vec;
 
 fn start_end_is_pattern(input: &str) -> bool {
     if input.starts_with("^") && input.ends_with("$") {
@@ -128,6 +129,34 @@ fn pattern_parser(mut input_line: &str, mut pattern: &str) -> bool {
     }
 
     return false;
+}
+
+// helper function --word by word match
+fn find_match_inbetween(source: &str, pattern: &str) -> String {
+    if source.len() == 0 || pattern.len() == 0 {
+        return "".to_string();
+    }
+
+    println!("matching word by word source {source} and ptn: {pattern}");
+    let mut start_pos: usize = 0;
+    //let mut end_pos:usize = 0;
+    let mut matched_chars: Vec<char> = Vec::new();
+    for (s_idx, s_val) in source.chars().enumerate() {
+        for (p_idx, p_val) in pattern.chars().enumerate() {
+            //println!("s_val {s_val}, start pos : {start_pos}  and p_val {p_val} and s_idx {s_idx}");
+            if s_val == p_val {
+                if start_pos > 0 && start_pos != s_idx - 1 {
+                    matched_chars = Vec::new();
+                }
+
+                start_pos = s_idx;
+                matched_chars.push(s_val);
+            }
+        }
+    }
+
+    let res = matched_chars.iter().collect();
+    return res;
 }
 
 //this function works with \d\apple \d\d\d \w\w\ws etc
@@ -313,10 +342,12 @@ fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                 if ptn_p2.len() == 0 {
                     return true;
                 } else if ptn_1_match {
-                    let mut new_ptn = input_line.to_string();
-                    new_ptn.push_str(ptn_p2);
-                    println!("partial () match, need to match {input_line} => {new_ptn}");
-                    return match_pattern(input_line, new_ptn.as_str());
+                    let mut ptn_1_match_start = find_match_inbetween(input_line, ptn_p1_old);
+                    println!("input start is {ptn_1_match_start} and will append {ptn_p2}");
+                    
+                    ptn_1_match_start.push_str(ptn_p2);
+                    println!("partial () match, need to match {input_line} => {ptn_1_match_start}");
+                    return match_pattern(input_line, ptn_1_match_start.as_str());
                 }
                 return false;
             }
@@ -463,18 +494,19 @@ fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                                             );
 
                                             if val != after_zero_quant {
-                                                // if this reaches the end of line then this passed
-                                                if idx == input_line.len() - 1 {
-                                                    return true;
-                                                }
-                                                if val != pattern_char.clone().nth(idx + 1).unwrap()
-                                                {
-                                                    println!(
-                                                        "{val} does not match ptn {}",
-                                                        after_zero_quant
-                                                    );
-                                                    return false;
-                                                }
+                                                 return false;
+                                                // // if this reaches the end of line then this passed
+                                                // if idx == input_line.len() - 1 {
+                                                //     return true;
+                                                // }
+                                                // if val != pattern_char.clone().nth(idx + 1).unwrap()
+                                                // {
+                                                //     println!(
+                                                //         "{val} does not match ptn {}",
+                                                //         after_zero_quant
+                                                //     );
+                                                   
+                                                // }
                                             }
                                             println!(
                                                 "@@@MATCHED {val} matched ptn {}@@@",
