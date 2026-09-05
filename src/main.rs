@@ -230,9 +230,9 @@ fn pattern_parser(mut input_line: &str, mut pattern: &str) -> bool {
                         return true;
                     }
                 }
-                if input_idx == input_re_spilt.len() - 1 {
-                    return false;
-                }
+                // if input_idx == input_re_spilt.len() - 1 {
+                //     return false;
+                // }
             }
         }
 
