@@ -494,19 +494,18 @@ fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                                             );
 
                                             if val != after_zero_quant {
-                                                 return false;
-                                                // // if this reaches the end of line then this passed
-                                                // if idx == input_line.len() - 1 {
-                                                //     return true;
-                                                // }
-                                                // if val != pattern_char.clone().nth(idx + 1).unwrap()
-                                                // {
-                                                //     println!(
-                                                //         "{val} does not match ptn {}",
-                                                //         after_zero_quant
-                                                //     );
+                                                // if this reaches the end of line then this passed
+                                                if idx == input_line.len() - 1 {
+                                                    return true;
+                                                }
+                                                if val != pattern_char.clone().nth(idx + 1).unwrap()
+                                                {
+                                                    println!(
+                                                        "{val} does not match ptn {}",
+                                                        after_zero_quant
+                                                    );
                                                    
-                                                // }
+                                                }
                                             }
                                             println!(
                                                 "@@@MATCHED {val} matched ptn {}@@@",
