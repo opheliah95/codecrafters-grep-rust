@@ -488,7 +488,7 @@ fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                                         "?" => {
                                             // does not need to have the previous character
                                             let after_zero_quant =
-                                                pattern_char.clone().nth(after_p).unwrap();
+                                                pattern_char.clone().nth(idx).unwrap();
                                             println!(
                                                 "? reached matching {val} to PTN {after_zero_quant}"
                                             );
