@@ -147,11 +147,12 @@ fn pattern_parser(mut input_line: &str, mut pattern: &str) -> bool {
     if pattern.len() < input_line.len() {
         for (idx, p) in pattern_parts.clone().into_iter().enumerate() {
             for (input_idx, mut input_p) in input_re_spilt.clone().into_iter().enumerate() {
-                println!("matching now: .... {p} to input {input_p}");
+                
                 let input_digits = convert_to_digit(input_p);
                 if input_digits.len() != 0 {
                     input_p = &input_digits;
                 }
+                println!("matching now: .... {p} to input {input_p}");
                 if match_pattern( input_p, p) {
                     let ptn_slice = &pattern_parts[idx+1..].join("");
                     let input_slice = &input_re_spilt[idx+1..].join("");
