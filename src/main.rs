@@ -29,19 +29,86 @@ fn check_all_true(vec: &Vec<bool>) -> bool {
     vec.iter().all(|e| *e == true)
 }
 
-fn convert_to_digit(input: &str) -> String {
-    let mut res = "".to_string();
+fn check_digits(input: &str) -> usize {
+    let mut res = 0;
     for c in input.chars() {
         if c.is_ascii_digit() {
-            res.push_str("\\d");
-
+            res += 1;
         } else {
-            return "".to_string();
+            return 0;
         }
     }
-    return res
-
+    return res;
 }
+
+fn match_digits(input: &str, pattern: &str) -> bool {
+    // if just a string of no
+    if input == pattern {
+        return true;
+    }
+
+    let digit_len = input.len();
+    let mut ptn_digit_match: Vec<_> = pattern
+        .match_indices("\\d")
+        .into_iter()
+        .map(|(i, c)| (i, c.to_string()))
+        .collect();
+    println!("check {input} and its re-matching ptn: {:?}", ptn_digit_match);
+    
+    if ptn_digit_match.len() == 0 {
+        return false;
+    }
+    
+    let start = ptn_digit_match[0].0;
+    let digit_match_size = ptn_digit_match.len();
+    let mut end = start;
+    if digit_match_size > 1 {
+        end = ptn_digit_match[digit_match_size - 1].0
+    }
+    for (idx, c) in pattern.chars().enumerate() {
+        if c != '\\' && c != 'd' {
+            let c_str: String = c.to_string();
+            if idx < start || idx < end {
+                if idx <= digit_match_size {
+                    ptn_digit_match.insert(idx, (idx, c_str.clone()));
+                } else {
+                    ptn_digit_match.push((idx, c_str.clone()));
+                }
+                
+            }
+            if idx >= end {
+                ptn_digit_match.push((idx, c_str.clone()));
+            }
+        }
+    }
+    if ptn_digit_match.len() != input.len() {
+        return false;
+    } else {
+        for (idx, val) in input.chars().enumerate() {
+            let input_match = &val.to_string();
+            let ptn_match = &ptn_digit_match[idx].1;
+            if ! match_pattern(input_match, ptn_match){
+                return false;
+            }
+
+        }
+        return true;
+    }
+    println!("the start is {start} and content is {:?}", ptn_digit_match);
+    println!("matched ptns {:?}", ptn_digit_match);
+    return false;
+}
+
+fn contain_digits(input: &str) -> bool {
+    for c in input.chars() {
+        if c.is_ascii_digit() {
+            return true;
+        }
+    }
+    return false;
+}
+
+// fn digit string spilter
 
 fn check_individual_match(input_line: &str, pattern: &str) -> bool {
     println!("FN CHECK_INDV_MATCHING, matching {input_line} -> pattern {pattern}");
@@ -147,21 +214,21 @@ fn pattern_parser(mut input_line: &str, mut pattern: &str) -> bool {
     if pattern.len() < input_line.len() {
         for (idx, p) in pattern_parts.clone().into_iter().enumerate() {
             for (input_idx, mut input_p) in input_re_spilt.clone().into_iter().enumerate() {
-                
-                let input_digits = convert_to_digit(input_p);
-                if input_digits.len() != 0 {
-                    input_p = &input_digits;
+                let input_digits = check_digits(input_p);
+                if input_digits > 0 {
+                    println!("input {input_p} is a digit with {input_digits} digits");
+                    return match_digits(input_p, p);
                 }
                 println!("matching now: .... {p} to input {input_p}");
-                if match_pattern( input_p, p) {
-                    let ptn_slice = &pattern_parts[idx+1..].join("");
-                    let input_slice = &input_re_spilt[idx+1..].join("");
+                if match_pattern(input_p, p) {
+                    let ptn_slice = &pattern_parts[idx + 1..].join("");
+                    let input_slice = &input_re_spilt[idx + 1..].join("");
                     println!("matching P2 PTN_SLIE: .... {ptn_slice} to input_SLICE {input_slice}");
                     if match_pattern(input_slice, ptn_slice) {
                         return true;
                     }
                 }
-                if input_idx == input_re_spilt.len() -1 {
+                if input_idx == input_re_spilt.len() - 1 {
                     return false;
                 }
             }
@@ -308,8 +375,8 @@ fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
         }
         "\\d" => {
             println!("matching digits {input_line}  ----> {pattern}");
-            return input_line.chars().any(|e| e.is_ascii_digit())
-        },
+            return input_line.chars().any(|e| e.is_ascii_digit());
+        }
         "\\d+" => input_line.chars().all(|e| e.is_ascii_digit()),
         "\\d?" => input_line.chars().any(|e| e.is_ascii_digit()) || input_line.len() == 0,
         "d" => input_line.starts_with(|s: char| s.is_ascii_alphabetic()),
@@ -388,7 +455,7 @@ fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                 } else if ptn_1_match {
                     let mut ptn_1_match_start = find_match_inbetween(input_line, ptn_p1_old);
                     println!("input start is {ptn_1_match_start} and will append {ptn_p2}");
-                    
+
                     ptn_1_match_start.push_str(ptn_p2);
                     println!("partial () match, need to match {input_line} => {ptn_1_match_start}");
                     return match_pattern(input_line, ptn_1_match_start.as_str());
@@ -538,15 +605,14 @@ fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                                             );
 
                                             if val != after_zero_quant {
-                                                if val != letter_after_p
-                                                {
+                                                if val != letter_after_p {
                                                     println!(
                                                         "{val} does not match ptn {}",
                                                         after_zero_quant
                                                     );
-                                                   return false
-                                                } 
-                                                return true
+                                                    return false;
+                                                }
+                                                return true;
                                             }
                                             println!(
                                                 "@@@MATCHED {val} matched ptn {}@@@",
