@@ -729,7 +729,7 @@ fn main() {
             }
         }
 
-        if matched.iter().all(|c| *c == true) {
+        if matched.iter().any(|c| *c == true) {
              process::exit(0)
         } else {
              process::exit(1)
