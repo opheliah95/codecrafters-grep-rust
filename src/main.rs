@@ -367,7 +367,7 @@ fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
         }
         "\\d" => {
             //println!("matching digits {input_line}  ----> {pattern}");
-            return input_line.chars().any(|e| e.is_ascii_digit()) && input_line.len() == 1;
+            return input_line.chars().any(|e| e.is_ascii_digit());
         }
         "\\d+" => input_line.chars().all(|e| e.is_ascii_digit()),
         "\\d?" => input_line.chars().any(|e| e.is_ascii_digit()) || input_line.len() == 0,
@@ -735,7 +735,16 @@ fn main() {
         } else {
             for val in input_slice.into_iter() {
                 if match_pattern(val, &pattern) {
-                    println!("{val}");
+                    if val.chars().any(|c| c.is_alphabetic()) && pattern == "\\d" {
+                        let res = val.chars().find(|&c| c.is_ascii_digit());
+                        match res {
+                            Some(val) => println!("{val}"),
+                            None => {exit_process_errored();}
+                        }
+
+                    } else {
+                        println!("{val}");
+                    }
                     process::exit(0)
                 }
             }
