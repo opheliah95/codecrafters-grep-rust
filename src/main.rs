@@ -320,14 +320,35 @@ fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
         // check has both start and end
         ptn if pattern.starts_with("^") && pattern.ends_with("$") => {
             //println!("INNPUT {input_line} start:  ^ and ends: $");
+            let to_match = &pattern[1..pattern.len() - 1];
+            let ptn_spilt = to_match.split(" ").collect::<Vec<&str>>();
+
+            if ptn_spilt.len() > 1 {
+                let input_split = input_line.split(" ").collect::<Vec<&str>>();
+                if input_split.len() == 0 || input_split.len() != ptn_spilt.len() {
+                    return false
+                }
+
+                for (idx, v) in input_split.iter().enumerate() {
+                    let current_ptn = ptn_spilt[idx];
+                    if !match_pattern(v, current_ptn) {
+                       return false;
+                    }
+                }
+                //println!("{input_line}");
+                return true; // if all matched within start/end
+            }
+
             let pattern_start = pattern.chars().nth(1).unwrap();
             let last_word_pattern_pos = pattern.len() - 2;
             let last_word_pattern = pattern.chars().nth(last_word_pattern_pos).unwrap();
+            println!("last wprd {last_word_pattern}");
             if !input_line.starts_with(pattern_start) || !input_line.ends_with(last_word_pattern) {
                 return false;
             }
+            println!("input is now {input_line}");
 
-            let to_match = &pattern[1..pattern.len() - 1];
+            
             let pattern_lst = ["\\d", "\\w", "+", "d"];
             if pattern_lst.iter().any(|c| to_match.contains(c)) {
                 return check_individual_match(input_line, to_match);
