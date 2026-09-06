@@ -319,7 +319,7 @@ fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
     match pattern {
         // check has both start and end
         ptn if pattern.starts_with("^") && pattern.ends_with("$") => {
-            println!("INNPUT {input_line} start:  ^ and ends: $");
+            //println!("INNPUT {input_line} start:  ^ and ends: $");
             let pattern_start = pattern.chars().nth(1).unwrap();
             let last_word_pattern_pos = pattern.len() - 2;
             let last_word_pattern = pattern.chars().nth(last_word_pattern_pos).unwrap();
