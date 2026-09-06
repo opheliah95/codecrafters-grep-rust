@@ -751,12 +751,12 @@ fn main() {
                             pattern = pattern[..pattern.len() - 1].to_string();
                         }
 
-                        //println!("pattern is now: {pattern}");
+                        println!("pattern is now: {pattern}");
 
                         let items: Vec<char> = val
                             .chars()
                             .zip(pattern.chars())
-                            .filter(|(x,y)| x == y)
+                            .filter(|(x,y)| x == y || *y =='?')
                             .map(|(x, _)| x)
                             .collect();
                         if !items.is_empty() {
