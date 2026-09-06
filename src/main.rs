@@ -751,7 +751,7 @@ fn main() {
                             pattern = pattern[..pattern.len() - 1].to_string();
                         }
 
-                        println!("pattern is now: {pattern}");
+                        //println!("pattern is now: {pattern}");
 
                         let items: Vec<char> = val
                             .chars()
