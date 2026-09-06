@@ -739,11 +739,30 @@ fn main() {
                         let res = val.chars().find(|&c| c.is_ascii_digit());
                         match res {
                             Some(val) => println!("{val}"),
-                            None => {exit_process_errored();}
+                            None => {
+                                exit_process_errored();
+                            }
+                        }
+                    } else {
+                        if pattern.starts_with("^") {
+                            pattern = pattern[1..].to_string();
+                        }
+                        if pattern.ends_with("$") {
+                            pattern = pattern[..pattern.len() - 1].to_string();
                         }
 
-                    } else {
-                        println!("{val}");
+                        //println!("pattern is now: {pattern}");
+
+                        let items: Vec<char> = val
+                            .chars()
+                            .zip(pattern.chars())
+                            .filter(|(x,y)| x == y)
+                            .map(|(x, _)| x)
+                            .collect();
+                        if !items.is_empty() {
+                            let result:String = items.into_iter().collect();
+                            println!("{result}");
+                        }
                     }
                     process::exit(0)
                 }
