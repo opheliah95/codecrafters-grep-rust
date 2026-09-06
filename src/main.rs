@@ -1,44 +1,10 @@
 use std::collections::HashMap;
 use std::env;
-use std::io;
+use std::io::{self, Read};
 use std::process;
 use std::vec;
-
-fn start_end_is_pattern(input: &str) -> bool {
-    if input.starts_with("^") && input.ends_with("$") {
-        return true;
-    } else if input.starts_with("(") && input.ends_with(")") {
-        return true;
-    } else {
-        return false;
-    }
-}
-fn remove_start_end(input: &str) -> &str {
-    let mut input_chars = input.chars();
-    input_chars.next();
-    input_chars.next_back();
-    let res = input_chars.as_str();
-
-    return res;
-}
-fn check_all_true(vec: &Vec<bool>) -> bool {
-    if vec.len() == 0 {
-        return false;
-    }
-    vec.iter().all(|e| *e == true)
-}
-
-fn check_digits(input: &str) -> usize {
-    let mut res = 0;
-    for c in input.chars() {
-        if c.is_ascii_digit() {
-            res += 1;
-        } else {
-            return 0;
-        }
-    }
-    return res;
-}
+mod lib;
+use lib::{check_digits, remove_start_end, start_end_is_pattern};
 
 fn match_digits(input: &str, pattern: &str) -> bool {
     // if just a string of no
@@ -96,15 +62,6 @@ fn match_digits(input: &str, pattern: &str) -> bool {
     }
     println!("the start is {start} and content is {:?}", ptn_digit_match);
     println!("matched ptns {:?}", ptn_digit_match);
-    return false;
-}
-
-fn contain_digits(input: &str) -> bool {
-    for c in input.chars() {
-        if c.is_ascii_digit() {
-            return true;
-        }
-    }
     return false;
 }
 
@@ -173,7 +130,7 @@ fn check_individual_match(input_line: &str, pattern: &str) -> bool {
 }
 
 // currently handles \d \input -> 1 apple
-fn pattern_parser(mut input_line: &str, mut pattern: &str) -> bool {
+fn pattern_parser(mut input_line: &str, mut pattern: &str, spilt_regex: char) -> bool {
     if start_end_is_pattern(input_line) {
         input_line = remove_start_end(input_line);
     }
@@ -183,8 +140,8 @@ fn pattern_parser(mut input_line: &str, mut pattern: &str) -> bool {
     }
     println!("------------start parsing {input_line}, PATTERN: {pattern}--------");
 
-    let input_parts: Vec<&str> = input_line.split(" ").collect();
-    let pattern_parts: Vec<&str> = pattern.split(" ").collect();
+    let input_parts: Vec<&str> = input_line.split(spilt_regex).collect();
+    let pattern_parts: Vec<&str> = pattern.split(spilt_regex).collect();
     let mut res: Vec<bool> = Vec::new();
 
     if input_parts.len() == pattern_parts.len() {
@@ -212,18 +169,22 @@ fn pattern_parser(mut input_line: &str, mut pattern: &str) -> bool {
     // if length does not match
     let mut input_re_spilt: Vec<&str> = input_line.split(" ").collect();
     let mut found = 0;
-    let input_end = input_re_spilt.len() -1;
+    let input_end = input_re_spilt.len() - 1;
     if pattern.len() < input_line.len() {
         for (idx, p) in pattern_parts.clone().into_iter().enumerate() {
             input_re_spilt = input_re_spilt[found..].to_vec();
             for (input_idx, mut input_p) in input_re_spilt.clone().into_iter().enumerate() {
                 let input_digits = check_digits(input_p);
-                println!("matching PTN to each input iter: ITER {input_idx}: .... {p} to input {input_p}");
+                println!(
+                    "matching PTN to each input iter: ITER {input_idx}: .... {p} to input {input_p}"
+                );
                 if match_pattern(input_p, p) {
                     let ptn_slice = &pattern_parts[idx + 1..].join("");
                     let input_slice = &input_re_spilt[input_idx + 1..].join("");
                     found = input_idx;
-                    println!("matching P2 PTN_SLICE: .... {ptn_slice} to input_SLICE {input_slice}");
+                    println!(
+                        "matching P2 PTN_SLICE: .... {ptn_slice} to input_SLICE {input_slice}"
+                    );
                     if match_pattern(input_slice, ptn_slice) {
                         return true;
                     }
@@ -240,7 +201,7 @@ fn pattern_parser(mut input_line: &str, mut pattern: &str) -> bool {
                     }
                     // temp solution to handle /w/w/w pattern
                 } else if p.contains("\\w") {
-                     println!("word check for {input_p} -> PTN {p} ");
+                    println!("word check for {input_p} -> PTN {p} ");
                     if check_input_pattern(input_p, p, "\\w") {
                         if input_idx == input_re_spilt.len() - 1 {
                             return true;
@@ -750,25 +711,44 @@ fn main() {
     let pattern = env::args().nth(2).unwrap();
     let mut input_line = String::new();
 
-    io::stdin().read_line(&mut input_line).unwrap();
+    io::stdin().read_to_string(&mut input_line).unwrap();
 
     //handle single input
-    let split_input = input_line.split(" ").collect::<Vec<&str>>().len();
-    if split_input == 1 {
+    let split_input_by_space = input_line.split(' ').collect::<Vec<&str>>();
+    let spilt_input_by_line= input_line.split('\n').collect::<Vec<&str>>();
+    let mut spilt_pattern = ' ';
+    
+    if spilt_input_by_line.len() > 1 {
+        let mut matched: Vec<bool> = Vec::new();
+        for v in spilt_input_by_line {
+            if match_pattern(v, &pattern) {
+                println!("{v}");
+                matched.push(true);
+            } else {
+                matched.push(false)
+            }
+        }
+
+        if matched.iter().all(|c| *c == true) {
+             process::exit(0)
+        } else {
+             process::exit(1)
+        }
+    }
+
+    if split_input_by_space.len() <= 1  {
         //println!("{input_line} is a single word ine input");
         if match_pattern(&input_line, &pattern) {
             println!("{input_line}");
             process::exit(0)
-        } else {
-            process::exit(1)
         }
     } else {
-        println!("multiword input: {input_line} passed");
-        if pattern_parser(&input_line, &pattern) {
-            println!("matching results achieved!");
+        //println!("multiword input: {input_line} passed");
+        if pattern_parser(&input_line, &pattern, spilt_pattern) {
+            println!("{input_line}");
             process::exit(0)
-        } else {
-            process::exit(1)
         }
     }
+
+    process::exit(1)
 }
