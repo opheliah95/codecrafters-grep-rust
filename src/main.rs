@@ -1,6 +1,5 @@
 use std::collections::HashMap;
 use std::env;
-use std::hash::Hash;
 use std::io;
 use std::process;
 use std::vec;
@@ -386,7 +385,7 @@ fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
             return input_line.ends_with(to_match);
         }
         "\\d" => {
-            println!("matching digits {input_line}  ----> {pattern}");
+            //println!("matching digits {input_line}  ----> {pattern}");
             return input_line.chars().any(|e| e.is_ascii_digit());
         }
         "\\d+" => input_line.chars().all(|e| e.is_ascii_digit()),
