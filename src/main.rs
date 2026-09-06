@@ -569,14 +569,14 @@ fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                             let first_letter_to_start = input_line.find(c).unwrap_or(0);
                             let old_input = input_line.clone();
                             input_line = &input_line[first_letter_to_start..];
-                            println!(
-                                "===QUANT +? MATCHING===starting from {input_line} PREV: {old_input}, search res {c}, res pos {first_letter_to_start}"
-                            );
+                            // println!(
+                            //     "===QUANT +? MATCHING===starting from {input_line} PREV: {old_input}, search res {c}, res pos {first_letter_to_start}"
+                            // );
 
-                            // handle case like a+=> apple
-                            println!(
-                                "TETS START: STEP INIT: checking SINGLE {ptn} match: \"{c}\" {ptn} => {input_line}"
-                            );
+                            // // handle case like a+=> apple
+                            // println!(
+                            //     "TETS START: STEP INIT: checking SINGLE {ptn} match: \"{c}\" {ptn} => {input_line}"
+                            // );
                             let last_occurance_of_p = pattern.rfind(ptn_quant).unwrap();
                             if before_p == 0 {
                                 println!("signle step case passed");
@@ -590,9 +590,9 @@ fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                                 if idx < before_p {
                                     let pattern_char_before_p =
                                         pattern_char.clone().nth(idx).unwrap();
-                                    println!(
-                                        "TEST {idx} == step {idx}: checking FULL PTN {ptn} match: VAL {val} => {pattern_char_before_p}"
-                                    );
+                                    // println!(
+                                    //     "TEST {idx} == step {idx}: checking FULL PTN {ptn} match: VAL {val} => {pattern_char_before_p}"
+                                    // );
                                     if val != pattern_char_before_p {
                                         return false;
                                     }
@@ -611,9 +611,9 @@ fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                                             // does not need to have the previous character
                                             let after_zero_quant =
                                                 pattern_char.clone().nth(idx).unwrap();
-                                            println!(
-                                                "? reached matching {val} to PTN {after_zero_quant}"
-                                            );
+                                            // println!(
+                                            //     "? reached matching {val} to PTN {after_zero_quant}"
+                                            // );
 
                                             if val != after_zero_quant {
                                                 if val != letter_after_p {
@@ -625,10 +625,10 @@ fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                                                 }
                                                 return true;
                                             }
-                                            println!(
-                                                "@@@MATCHED {val} matched ptn {}@@@",
-                                                after_zero_quant
-                                            );
+                                            // println!(
+                                            //     "@@@MATCHED {val} matched ptn {}@@@",
+                                            //     after_zero_quant
+                                            // );
                                             // already end of input then we matched fully for cases like dogs -> dogs?
                                             if idx == input_line.len() - 1 {
                                                 return true;
@@ -649,17 +649,17 @@ fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
 
                                 // reached plus/? sign -> need to have one match
                                 if idx == p {
-                                    println!(
-                                        "reaching idx == p, value is {val} and ptn after p {} (idx pattern: {after_p}) LTR after p {letter_after_p}",
-                                        &pattern[after_p..]
-                                    );
+                                    // println!(
+                                    //     "reaching idx == p, value is {val} and ptn after p {} (idx pattern: {after_p}) LTR after p {letter_after_p}",
+                                    //     &pattern[after_p..]
+                                    // );
                                     // handle ? after ? should only match world by word
                                     if ptn_quant == "?" {
                                         let ptn_to_match = pattern_char.clone().nth(p - 1).unwrap();
-                                        println!(
-                                            "AT idx == p NOW, check ? ZERP?ONE quantifier:  val {val} == {} ",
-                                            ptn_to_match
-                                        );
+                                        // println!(
+                                        //     "AT idx == p NOW, check ? ZERP?ONE quantifier:  val {val} == {} ",
+                                        //     ptn_to_match
+                                        // );
                                         if val == ptn_to_match {
                                             return false;
                                         }
