@@ -355,6 +355,9 @@ fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
         "\\w" => input_line
             .chars()
             .any(|e| e.is_ascii_alphanumeric() || e == '_'),
+        "\\w+" => {
+            return input_line.len() >= 1 && match_pattern(input_line, "\\w")
+        },
         ptn if pattern.starts_with("[") && pattern.ends_with("]") => {
             if let Some(content) = ptn.get(1..ptn.len() - 1) {
                 if content.len() == 0 {
