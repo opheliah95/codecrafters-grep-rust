@@ -4,7 +4,7 @@ use std::io::{self, Read};
 use std::process;
 use std::vec;
 mod lib;
-use lib::{check_digits, remove_start_end, start_end_is_pattern};
+use lib::{check_digits, exit_process_errored, remove_start_end, start_end_is_pattern};
 
 fn match_digits(input: &str, pattern: &str) -> bool {
     // if just a string of no
@@ -326,13 +326,13 @@ fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
             if ptn_spilt.len() > 1 {
                 let input_split = input_line.split(" ").collect::<Vec<&str>>();
                 if input_split.len() == 0 || input_split.len() != ptn_spilt.len() {
-                    return false
+                    return false;
                 }
 
                 for (idx, v) in input_split.iter().enumerate() {
                     let current_ptn = ptn_spilt[idx];
                     if !match_pattern(v, current_ptn) {
-                       return false;
+                        return false;
                     }
                 }
                 //println!("{input_line}");
@@ -348,7 +348,6 @@ fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
             }
             println!("input is now {input_line}");
 
-            
             let pattern_lst = ["\\d", "\\w", "+", "d"];
             if pattern_lst.iter().any(|c| to_match.contains(c)) {
                 return check_individual_match(input_line, to_match);
@@ -376,9 +375,7 @@ fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
         "\\w" => input_line
             .chars()
             .any(|e| e.is_ascii_alphanumeric() || e == '_'),
-        "\\w+" => {
-            return input_line.len() >= 1 && match_pattern(input_line, "\\w")
-        },
+        "\\w+" => return input_line.len() >= 1 && match_pattern(input_line, "\\w"),
         ptn if pattern.starts_with("[") && pattern.ends_with("]") => {
             if let Some(content) = ptn.get(1..ptn.len() - 1) {
                 if content.len() == 0 {
@@ -726,22 +723,36 @@ fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
 fn main() {
     // You can use print statements as follows for debugging, they'll be visible when running tests.
     eprintln!("Logs from your program will appear here!");
+    let mut input_line = String::new();
+    io::stdin().read_to_string(&mut input_line).unwrap();
+    let mut pattern = env::args().nth(2).unwrap();
+
+    if env::args().nth(1).unwrap() == "-o" {
+        pattern = env::args().nth(3).unwrap();
+        let input_slice = input_line.split_whitespace().collect::<Vec<&str>>();
+        if input_slice.len() == 0 {
+            exit_process_errored();
+        } else {
+            for val in input_slice.into_iter() {
+                if match_pattern(val, &pattern) {
+                    println!("{val}");
+                    process::exit(0)
+                }
+            }
+        }
+        exit_process_errored();
+    }
 
     if env::args().nth(1).unwrap() != "-E" {
         println!("Expected first argument to be '-E'");
         process::exit(1);
     }
 
-    let pattern = env::args().nth(2).unwrap();
-    let mut input_line = String::new();
-
-    io::stdin().read_to_string(&mut input_line).unwrap();
-
     //handle single input
     let split_input_by_space = input_line.split(' ').collect::<Vec<&str>>();
-    let spilt_input_by_line= input_line.split('\n').collect::<Vec<&str>>();
+    let spilt_input_by_line = input_line.split('\n').collect::<Vec<&str>>();
     let mut spilt_pattern = ' ';
-    
+
     if spilt_input_by_line.len() > 1 {
         let mut matched: Vec<bool> = Vec::new();
         for v in spilt_input_by_line {
@@ -754,13 +765,13 @@ fn main() {
         }
 
         if matched.iter().any(|c| *c == true) {
-             process::exit(0)
+            process::exit(0)
         } else {
-             process::exit(1)
+            process::exit(1)
         }
     }
 
-    if split_input_by_space.len() <= 1  {
+    if split_input_by_space.len() <= 1 {
         //println!("{input_line} is a single word ine input");
         if match_pattern(&input_line, &pattern) {
             println!("{input_line}");

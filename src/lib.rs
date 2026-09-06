@@ -1,3 +1,5 @@
+use std::process;
+
 fn check_all_true(vec: &Vec<bool>) -> bool {
     if vec.len() == 0 {
         return false;
@@ -43,4 +45,8 @@ pub fn check_digits(input: &str) -> usize {
         }
     }
     return res;
+}
+
+pub fn exit_process_errored() {
+    process::exit(1);
 }
