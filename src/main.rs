@@ -388,7 +388,7 @@ fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
 
         //check alt | operator
         ptn if pattern.starts_with("(") && pattern.ends_with(")") => {
-            println!("{ptn} eval alternat");
+            //println!("{ptn} eval alternat");
             let ptn_formatted = remove_start_end(ptn);
             let ptn_spilt = ptn_formatted.split("|").collect::<Vec<&str>>();
             if ptn_spilt.len() <= 1 {
@@ -398,9 +398,9 @@ fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                 let mut contain_alt: Vec<bool> = Vec::new();
 
                 for val in ptn_spilt {
-                    println!("eval if {input_line} contain {val}");
+                    //println!("eval if {input_line} contain {val}");
                     contain_alt.push(input_line.contains(val));
-                    println!("the vec is {:?} ", contain_alt);
+                    //println!("the vec is {:?} ", contain_alt);
                 }
                 return contain_alt.iter().any(|v| *v == true);
             }
