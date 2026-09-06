@@ -758,7 +758,7 @@ fn main() {
     if split_input == 1 {
         println!("{input_line} is a single word ine input");
         if match_pattern(&input_line, &pattern) {
-            println!("single input pattern {input_line} passed");
+            println!("{input_line}");
             process::exit(0)
         } else {
             process::exit(1)
