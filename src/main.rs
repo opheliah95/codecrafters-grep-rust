@@ -387,7 +387,7 @@ fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
         }
         "\\d" => {
             println!("matching digits {input_line}  ----> {pattern}");
-            return input_line.chars().any(|e| e.is_ascii_digit());
+            return input_line.chars().all(|e| e.is_ascii_digit());
         }
         "\\d+" => input_line.chars().all(|e| e.is_ascii_digit()),
         "\\d?" => input_line.chars().any(|e| e.is_ascii_digit()) || input_line.len() == 0,
