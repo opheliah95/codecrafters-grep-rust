@@ -55,3 +55,78 @@ fn pattern_parser(input_line: &str, pattern: &str) -> bool {
 
     return false;
 }
+
+
+//this function works with \d\apple \d\d\d \w\w\ws etc
+fn check_input_pattern(
+    input: &str,
+    pattern: &str,
+    input_ptn: &str,
+) -> bool {
+    // base case input == pattern
+    if input.contains(pattern) {
+        return Some(true);
+    }
+    // handle plural
+    if pattern.ends_with("s") && !input.ends_with("s") {
+        res.push(false);
+        return Some(false);
+    }
+    // handle alt
+    if pattern.starts_with("(") && pattern.ends_with(")") {
+        let match_res = match_pattern(input, pattern);
+        res.push(match_res);
+        return Some(match_res);
+    }
+
+    let mut pt_count: Vec<_> = pattern.match_indices(input_ptn).map(|(i, _)| i).collect();
+    println!(
+        "pt_count {:?} -- ptn_start {input_ptn} and input {} and pattern {}",
+        pt_count, input, pattern
+    );
+    if pt_count.len() == 1 {
+        let matched = match_pattern(input, pattern);
+        println!("{input} matched one pattern");
+        res.push(matched);
+        return Some(true);
+    } else {
+        //println!("more than one pattern {} {:?} {}", pattern, pt_count, input);
+        let pt_count_len = pt_count.len();
+        if pt_count_len == input.len() {
+            println!("matching...{}", input);
+            for i in [0..input.len()] {
+                let matched = match_pattern(&input[i], input_ptn);
+                res.push(matched);
+                return Some(true);
+            }
+        } else if pt_count_len == 0 {
+            println!("current matching: ...{:?}", pt_count);
+            res.push(false); //empty string error
+            return Some(false);
+        } else if pt_count_len != 0 && pt_count_len < input.len() {
+            let last_ptn_pos = pt_count.len();
+            let last_ptn_start = pt_count.last().unwrap();
+            let final_ptn = &pattern[last_ptn_start + input_ptn.len()..pattern.len()];
+            let input_not_matched = &input[last_ptn_pos..];
+            let matchable_input = &input[0..last_ptn_pos + 1];
+
+            println!(
+                "DBG last pt: {last_ptn_pos}, final_ptn:  {final_ptn}, input_not_matched: {input_not_matched}"
+            );
+            if final_ptn != input_not_matched {
+                res.push(false);
+                return Some(false);
+            } else {
+                println!(
+                    "last pt: {last_ptn_pos}, final_ptn:  {final_ptn}, input_not_matched: {input_not_matched}"
+                );
+                for i in [0..matchable_input.len()] {
+                    let matched = match_pattern(&matchable_input[i], input_ptn);
+                    res.push(matched);
+                    return Some(true);
+                }
+            }
+        }
+    }
+    None
+}

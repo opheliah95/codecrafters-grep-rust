@@ -211,25 +211,42 @@ fn pattern_parser(mut input_line: &str, mut pattern: &str) -> bool {
     }
 
     // if length does not match
-    let input_re_spilt: Vec<&str> = input_line.split(" ").collect();
+    let mut input_re_spilt: Vec<&str> = input_line.split(" ").collect();
+    let mut found = 0;
+    let input_end = input_re_spilt.len() -1;
     if pattern.len() < input_line.len() {
         for (idx, p) in pattern_parts.clone().into_iter().enumerate() {
+            input_re_spilt = input_re_spilt[found..].to_vec();
             for (input_idx, mut input_p) in input_re_spilt.clone().into_iter().enumerate() {
                 let input_digits = check_digits(input_p);
-                println!("matching NON DIGIT now: .... {p} to input {input_p}");
+                println!("matching PTN to each input iter: ITER {input_idx}: .... {p} to input {input_p}");
                 if match_pattern(input_p, p) {
                     let ptn_slice = &pattern_parts[idx + 1..].join("");
-                    let input_slice = &input_re_spilt[idx + 1..].join("");
-                    println!("matching P2 PTN_SLIE: .... {ptn_slice} to input_SLICE {input_slice}");
+                    let input_slice = &input_re_spilt[input_idx + 1..].join("");
+                    found = input_idx;
+                    println!("matching P2 PTN_SLICE: .... {ptn_slice} to input_SLICE {input_slice}");
                     if match_pattern(input_slice, ptn_slice) {
                         return true;
                     }
-                } else if input_digits > 0 {
+                    break;
+                } else if input_digits > 0 && p.contains("\\d") {
                     println!("input {input_p} is a digit with {input_digits} digits");
                     if match_digits(input_p, p) {
                         if input_idx == input_re_spilt.len() - 1 {
                             return true;
                         }
+                        found = input_idx;
+                        println!("==breaking out of loop {input_p} and PTN {p} matched==");
+                        break;
+                    }
+                    // temp solution to handle /w/w/w pattern
+                } else if p.contains("\\w") {
+                     println!("word check for {input_p} -> PTN {p} ");
+                    if check_input_pattern(input_p, p, "\\w") {
+                        if input_idx == input_re_spilt.len() - 1 {
+                            return true;
+                        }
+                        found = input_idx;
                         break;
                     }
                 }
@@ -273,27 +290,19 @@ fn find_match_inbetween(source: &str, pattern: &str) -> String {
 }
 
 //this function works with \d\apple \d\d\d \w\w\ws etc
-fn check_input_pattern(
-    input: &str,
-    pattern: &str,
-    res: &mut Vec<bool>,
-    input_ptn: &str,
-) -> Option<bool> {
+fn check_input_pattern(input: &str, pattern: &str, input_ptn: &str) -> bool {
     // base case input == pattern
     if input.contains(pattern) {
-        res.push(true);
-        return Some(true);
+        return true;
     }
     // handle plural
     if pattern.ends_with("s") && !input.ends_with("s") {
-        res.push(false);
-        return Some(false);
+        return false;
     }
     // handle alt
     if pattern.starts_with("(") && pattern.ends_with(")") {
         let match_res = match_pattern(input, pattern);
-        res.push(match_res);
-        return Some(match_res);
+        return match_res;
     }
 
     let mut pt_count: Vec<_> = pattern.match_indices(input_ptn).map(|(i, _)| i).collect();
@@ -301,26 +310,26 @@ fn check_input_pattern(
         "pt_count {:?} -- ptn_start {input_ptn} and input {} and pattern {}",
         pt_count, input, pattern
     );
+
+    if pt_count.len() == 0 {
+        return false;
+    }
+
     if pt_count.len() == 1 {
         let matched = match_pattern(input, pattern);
         println!("{input} matched one pattern");
-        res.push(matched);
-        return Some(true);
+        return true;
     } else {
         //println!("more than one pattern {} {:?} {}", pattern, pt_count, input);
         let pt_count_len = pt_count.len();
+        let mut res: Vec<bool> = Vec::new();
         if pt_count_len == input.len() {
             println!("matching...{}", input);
             for i in [0..input.len()] {
                 let matched = match_pattern(&input[i], input_ptn);
                 res.push(matched);
-                return Some(true);
             }
-        } else if pt_count_len == 0 {
-            println!("current matching: ...{:?}", pt_count);
-            res.push(false); //empty string error
-            return Some(false);
-        } else if pt_count_len != 0 && pt_count_len < input.len() {
+        } else if pt_count_len < input.len() {
             let last_ptn_pos = pt_count.len();
             let last_ptn_start = pt_count.last().unwrap();
             let final_ptn = &pattern[last_ptn_start + input_ptn.len()..pattern.len()];
@@ -332,7 +341,6 @@ fn check_input_pattern(
             );
             if final_ptn != input_not_matched {
                 res.push(false);
-                return Some(false);
             } else {
                 println!(
                     "last pt: {last_ptn_pos}, final_ptn:  {final_ptn}, input_not_matched: {input_not_matched}"
@@ -340,12 +348,11 @@ fn check_input_pattern(
                 for i in [0..matchable_input.len()] {
                     let matched = match_pattern(&matchable_input[i], input_ptn);
                     res.push(matched);
-                    return Some(true);
                 }
             }
         }
+        return res.into_iter().any(|c| c == true);
     }
-    None
 }
 
 fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
