@@ -1,19 +1,47 @@
 use std::process;
 
-fn check_all_true(vec: &Vec<bool>) -> bool {
+pub fn check_all_true(vec: &Vec<bool>) -> bool {
     if vec.len() == 0 {
         return false;
     }
     vec.iter().all(|e| *e == true)
 }
 
-fn contain_digits(input: &str) -> bool {
+pub fn contain_digits(input: &str) -> bool {
     for c in input.chars() {
         if c.is_ascii_digit() {
             return true;
         }
     }
     return false;
+}
+
+// helper function --word by word match
+pub fn find_match_inbetween(source: &str, pattern: &str) -> String {
+    if source.len() == 0 || pattern.len() == 0 {
+        return "".to_string();
+    }
+
+    //println!("matching word by word source {source} and ptn: {pattern}");
+    let mut start_pos: usize = 0;
+    //let mut end_pos:usize = 0;
+    let mut matched_chars: Vec<char> = Vec::new();
+    for (s_idx, s_val) in source.chars().enumerate() {
+        for (p_idx, p_val) in pattern.chars().enumerate() {
+            //println!("s_val {s_val}, start pos : {start_pos}  and p_val {p_val} and s_idx {s_idx}");
+            if s_val == p_val {
+                if start_pos > 0 && start_pos != s_idx - 1 {
+                    matched_chars = Vec::new();
+                }
+
+                start_pos = s_idx;
+                matched_chars.push(s_val);
+            }
+        }
+    }
+
+    let res = matched_chars.iter().collect();
+    return res;
 }
 
 pub fn remove_start_end(input: &str) -> &str {
@@ -50,3 +78,4 @@ pub fn check_digits(input: &str) -> usize {
 pub fn exit_process_errored() {
     process::exit(1);
 }
+
