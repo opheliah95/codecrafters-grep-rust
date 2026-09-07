@@ -1,4 +1,4 @@
-use crate::lib::{find_match_inbetween, remove_start_end};
+use crate::lib::{find_match_inbetween, remove_start_end, exit_process_errored};
 use std::collections::HashMap;
 
 pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
@@ -511,6 +511,6 @@ pub fn print_single_matching_line(input_line: &String, pattern: &mut String) -> 
             return "".to_string();
         }
     }
-    //exit_process_errored();
+    exit_process_errored();
     return "".to_string();
 }
