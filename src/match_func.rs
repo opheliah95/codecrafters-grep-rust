@@ -477,7 +477,7 @@ pub fn print_single_matching_line(input_line: &String, pattern: &mut String) -> 
         //     pattern.clone().chars().nth(0).unwrap()
         // );
         if match_pattern(val, pattern) {
-            println!("==={val} MATCHED {pattern}===");
+            //println!("==={val} MATCHED {pattern}===");
             if pattern == "\\d" {
                 let digit = val.chars().find(|c| c.is_ascii_digit());
                 match (digit) {
@@ -508,6 +508,7 @@ pub fn print_single_matching_line(input_line: &String, pattern: &mut String) -> 
                 }
             }
         } else {
+            exit_process_errored();
             return "".to_string();
         }
     }
