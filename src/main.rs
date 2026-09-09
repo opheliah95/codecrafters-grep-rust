@@ -2,10 +2,7 @@ use std::env;
 use std::io::{self, Read};
 use std::process;
 mod lib;
-use lib::{
-    check_digits, exit_process_errored, remove_start_end,
-    start_end_is_pattern,
-};
+use lib::{check_digits, exit_process_errored, remove_start_end, start_end_is_pattern};
 mod match_func;
 use match_func::{match_pattern, print_single_matching_line};
 
@@ -69,8 +66,6 @@ fn match_digits(input: &str, pattern: &str) -> bool {
 }
 
 // fn digit string spilter
-
-
 
 // currently handles \d \input -> 1 apple
 fn pattern_parser(mut input_line: &str, mut pattern: &str, spilt_regex: char) -> bool {
@@ -258,8 +253,6 @@ fn check_input_pattern(input: &str, pattern: &str, input_ptn: &str) -> bool {
     }
 }
 
-
-
 // Usage: echo <input_text> | your_program.sh -E <pattern>
 fn main() {
     // You can use print statements as follows for debugging, they'll be visible when running tests.
@@ -274,24 +267,26 @@ fn main() {
         let split_ptn_by_space = pattern.split_whitespace().collect::<Vec<&str>>();
 
         //println!("{:?} vs PTN {:?}", split_input_by_space, split_ptn_by_space);
-        if split_ptn_by_space.len() != split_input_by_space.len() {
+
+        let mut res: Vec<String> = Vec::new();
+        if split_ptn_by_space.len() == split_input_by_space.len() {
+            res = handle_single_matching_line(&split_input_by_space, split_ptn_by_space);
+        } else if split_ptn_by_space.len() != split_input_by_space.len() {
+            res = handle_single_ptn_to_spaced_txt(&split_input_by_space, split_ptn_by_space);
+        } else if split_ptn_by_space.len() == 0 || split_ptn_by_space.len() == 0 {
             exit_process_errored();
         }
-        let mut res = Vec::new();
-        for (i, p) in split_input_by_space.iter().zip(split_ptn_by_space) {
-            let mut p_str = p.to_string();
-          
-            let res_str = print_single_matching_line(&i.to_string(), &mut p_str);
-            //println!(" matching {i} -> {p_str} res-str: {res_str} -o arg");
-            res.push(res_str)
+
+        if res.len() > 1 {
+            println!("{}", res.join(" "));
+            process::exit(0);
         }
-        //println!("the res string length : {}", res.len());
-        if res.len() != 0 {
+        if res.len() == 1 {
             println!("{}", res.join(""));
             process::exit(0);
         } else {
             //println!("res empty");
-            exit_process_errored();
+            process::exit(1);
         }
     }
 
@@ -337,4 +332,49 @@ fn main() {
     }
 
     process::exit(1)
+}
+
+fn handle_single_ptn_to_spaced_txt(
+    split_input_by_space: &Vec<&str>,
+    split_ptn_by_space: Vec<&str>,
+) -> Vec<String> {
+    let mut res = Vec::new();
+    if split_ptn_by_space.len() == 1 {
+        let mut ptn: &str = split_ptn_by_space.iter().next().copied().unwrap_or("");
+        for i in split_input_by_space.iter() {
+            let mut i_str = i.to_string();
+            let res_str = print_single_matching_line(&i_str, &mut ptn.to_string());
+            //println!(" matching {i} -> {p_str} res-str: {res_str} -o arg");
+            if res_str.len() > 0 {
+                res.push(res_str)
+            }
+        }
+    }
+
+    // println!(
+    //     "the res string length : {}, and the content is {:?}",
+    //     res.len(),
+    //     res
+    // );
+
+    return res;
+}
+
+fn handle_single_matching_line(
+    split_input_by_space: &Vec<&str>,
+    split_ptn_by_space: Vec<&str>,
+) -> Vec<String> {
+    let mut res = Vec::new();
+    for (i, p) in split_input_by_space.iter().zip(split_ptn_by_space) {
+        let mut p_str = p.to_string();
+
+        let res_str = print_single_matching_line(&i.to_string(), &mut p_str);
+        //println!(" matching {i} -> {p_str} res-str: {res_str} -o arg");
+        if res_str.len() > 0 {
+            res.push(res_str)
+        }
+    }
+    //println!("the res string length : {}", res.len());
+
+    return res;
 }

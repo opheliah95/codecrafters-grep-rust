@@ -508,10 +508,8 @@ pub fn print_single_matching_line(input_line: &String, pattern: &mut String) -> 
                 }
             }
         } else {
-            exit_process_errored();
             return "".to_string();
         }
     }
-    exit_process_errored();
     return "".to_string();
 }
