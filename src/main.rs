@@ -339,8 +339,8 @@ fn handle_single_ptn_to_spaced_txt(
     split_ptn_by_space: Vec<&str>,
 ) -> Vec<String> {
     let mut res = Vec::new();
-    if split_ptn_by_space.len() == 1 {
-        let mut ptn: &str = split_ptn_by_space.iter().next().copied().unwrap_or("");
+
+    for ptn in split_ptn_by_space.iter() {
         for i in split_input_by_space.iter() {
             let mut i_str = i.to_string();
             let res_str = print_single_matching_line(&i_str, &mut ptn.to_string());
