@@ -476,7 +476,7 @@ pub fn check_individual_match(input_line: &str, pattern: &str) -> bool {
 
 pub fn print_single_matching_line(input_line: &String, pattern: &mut String) -> String {
     let input_slice = input_line.split_whitespace().collect::<Vec<&str>>();
-    //println!("{input_line} **{pattern}**");
+    println!("{input_line} **{pattern}**");
     let input_slice_len = input_slice.len();
     for (idx, val) in input_slice.into_iter().enumerate() {
         // println!(
