@@ -521,30 +521,35 @@ pub fn print_single_matching_line(input_line: &String, pattern: &mut String) -> 
                     None => return "".to_string(),
                 }
             } else {
-                return val.to_string();
-                // if pattern.starts_with("^") {
-                //     *pattern = pattern[1..].to_string();
-                // }
-                // if pattern.ends_with("$") {
-                //     *pattern = pattern[..pattern.len() - 1].to_string();
-                // }
+                
+                if pattern.starts_with("^") {
+                    *pattern = pattern[1..].to_string();
+                }
+
+                if pattern.ends_with("$") {
+                    *pattern = pattern[..pattern.len() - 1].to_string();
+                }
+
+                if pattern.contains("(") && pattern.contains(')') {
+                    return val.to_string();
+                }
 
                 
 
-                // let items: Vec<char> = val
-                //     .chars()
-                //     .zip(pattern.chars())
-                //     .filter(|(x, y)| x == y || *y == '?')
-                //     .map(|(x, _)| x)
-                //     .collect();
+                let items: Vec<char> = val
+                    .chars()
+                    .zip(pattern.chars())
+                    .filter(|(x, y)| x == y || *y == '?')
+                    .map(|(x, _)| x)
+                    .collect();
 
-                // println!("items are {:?}", items);
-                // if !items.is_empty() {
-                //     let result: String = items.into_iter().collect();
-                //     return result;
-                // } else {
-                //     return "".to_string();
-                // }
+                //intln!("items are {:?}", items);
+                if !items.is_empty() {
+                    let result: String = items.into_iter().collect();
+                    return result;
+                } else {
+                    return "".to_string();
+                }
             }
         } else {
             return "".to_string();
