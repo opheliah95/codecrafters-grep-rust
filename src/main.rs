@@ -277,11 +277,8 @@ fn main() {
             exit_process_errored();
         }
 
-        if res.len() > 1 {
-            println!("{}", res.join(" "));
-            process::exit(0);
-        }
-        if res.len() == 1 {
+       
+        if res.len() >= 1 {
             println!("{}", res.join(""));
             process::exit(0);
         } else {
@@ -341,21 +338,20 @@ fn handle_single_ptn_to_spaced_txt(
     let mut res = Vec::new();
 
     for ptn in split_ptn_by_space.iter() {
-        for i in split_input_by_space.iter() {
+        for (idx, i) in split_input_by_space.iter().enumerate() {
             let mut i_str = i.to_string();
             let res_str = print_single_matching_line(&i_str, &mut ptn.to_string());
             //println!(" matching {i} -> {i_str} res-str: {res_str} -o arg");
             if res_str.len() > 0 {
-                res.push(res_str)
+                if idx == split_input_by_space.len() -1 {
+                    res.push(res_str)
+                } else {
+                    res.push(format!("{res_str}\n"))
+                }
+                
             }
         }
     }
-
-    // println!(
-    //     "the res string length : {}, and the content is {:?}",
-    //     res.len(),
-    //     res
-    // );
 
     return res;
 }

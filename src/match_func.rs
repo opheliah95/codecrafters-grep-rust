@@ -52,15 +52,13 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
             let to_match = &pattern[0..pattern.len() - 1];
             let regex: Vec<&str> = vec!["\\d", "\\w", "(", ")"];
             if regex.iter().any(|a| to_match.contains(a)) {
-                let mut new_input = &input_line[0..input_line.len()-1];
+                let mut new_input = &input_line[0..input_line.len() - 1];
                 let res = match_pattern(&new_input, to_match);
                 //println!("matching {input_line} to {pattern} and res is {res}");
-                return res
+                return res;
             } else {
                 return input_line.ends_with(to_match);
-                
             }
-            
         }
         "\\d" => {
             //println!("matching digits {input_line}  ----> {pattern}");
@@ -121,7 +119,7 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
             }
         }
 
-        ptn if ptn.starts_with("(")  => {
+        ptn if ptn.starts_with("(") => {
             //println!("ptn start with (: {input_line} ----  {ptn}");
             let alt_end = ptn.rfind(")").unwrap_or(0);
             let pipe_find = ptn.find("|").unwrap_or(0);
@@ -152,7 +150,6 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                 }
                 return false;
             }
-
         }
 
         // check wildcard
@@ -485,13 +482,30 @@ pub fn print_single_matching_line(input_line: &String, pattern: &mut String) -> 
         //     "try matching {val} to ptn**{pattern}**, ptn start: {}",
         //     pattern.clone().chars().nth(0).unwrap()
         // );
+        let mut res: Vec<char> = Vec::new();
         if match_pattern(val, pattern) {
             //println!("==={val} MATCHED {pattern}===");
             if pattern == "\\d" {
                 let digit = val.chars().find(|c| c.is_ascii_digit());
                 match (digit) {
-                    Some(d) => return d.to_string(),
-                    None => return "".to_string(),
+                    Some(d) => {
+                        res.push(d);
+                    }
+                    None => {
+                        if res.len() == 0 {
+                            return "".to_string();
+                        } else {
+                            let output = res.iter().enumerate().map(|(idx, a)| {
+                                if idx < res.len() - 1 {
+                                    format!("{a}\n")
+                                } else {
+                                    format!("{a}")
+                                }
+                            }).collect();
+
+                            return output;
+                        }
+                    }
                 }
             } else if pattern == "\\d+" {
                 let digit = val.chars().find(|c| c.is_ascii_digit());
@@ -521,7 +535,6 @@ pub fn print_single_matching_line(input_line: &String, pattern: &mut String) -> 
                     None => return "".to_string(),
                 }
             } else {
-                
                 if pattern.starts_with("^") {
                     *pattern = pattern[1..].to_string();
                 }
@@ -533,8 +546,6 @@ pub fn print_single_matching_line(input_line: &String, pattern: &mut String) -> 
                 if pattern.contains("(") && pattern.contains(')') {
                     return val.to_string();
                 }
-
-                
 
                 let items: Vec<char> = val
                     .chars()
