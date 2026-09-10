@@ -477,7 +477,8 @@ pub fn check_individual_match(input_line: &str, pattern: &str) -> bool {
 pub fn print_single_matching_line(input_line: &String, pattern: &mut String) -> String {
     let input_slice = input_line.split_whitespace().collect::<Vec<&str>>();
     //println!("{input_line} **{pattern}**");
-    for val in input_slice.into_iter() {
+    let input_slice_len = input_slice.len();
+    for (idx, val) in input_slice.into_iter().enumerate() {
         // println!(
         //     "try matching {val} to ptn**{pattern}**, ptn start: {}",
         //     pattern.clone().chars().nth(0).unwrap()
@@ -486,26 +487,29 @@ pub fn print_single_matching_line(input_line: &String, pattern: &mut String) -> 
         if match_pattern(val, pattern) {
             //println!("==={val} MATCHED {pattern}===");
             if pattern == "\\d" {
-                let digit = val.chars().find(|c| c.is_ascii_digit());
-                match (digit) {
-                    Some(d) => {
-                        res.push(d);
+                for v_char in val.chars().into_iter() {
+                    //println!("{v_char} is a digit...");
+                    if let Some(v) = digit_count_and_return(v_char) {
+                        res.push(v);
                     }
-                    None => {
-                        if res.len() == 0 {
-                            return "".to_string();
-                        } else {
-                            let output = res.iter().enumerate().map(|(idx, a)| {
-                                if idx < res.len() - 1 {
-                                    format!("{a}\n")
-                                } else {
-                                    format!("{a}")
-                                }
-                            }).collect();
+                }
 
-                            return output;
-                        }
-                    }
+                if res.len() == 0 {
+                    return "".to_string();
+                } else if idx == input_slice_len - 1 {
+                    let output = res
+                        .iter()
+                        .enumerate()
+                        .map(|(idx, a)| {
+                            if idx < res.len() - 1 {
+                                format!("{a}\n")
+                            } else {
+                                format!("{a}")
+                            }
+                        })
+                        .collect();
+
+                    return output;
                 }
             } else if pattern == "\\d+" {
                 let digit = val.chars().find(|c| c.is_ascii_digit());
@@ -567,4 +571,18 @@ pub fn print_single_matching_line(input_line: &String, pattern: &mut String) -> 
         }
     }
     return "".to_string();
+}
+
+fn digit_count_and_return(val: char) -> Option<char> {
+    let digit = val.is_ascii_digit();
+    match (digit) {
+        true => {
+            //println!("the digit is {val}");
+            return Some(val);
+        }
+
+        false => {
+            return None;
+        }
+    }
 }
