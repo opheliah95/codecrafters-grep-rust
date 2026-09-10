@@ -1,8 +1,8 @@
-use crate::lib::{find_match_inbetween, remove_start_end, exit_process_errored};
+use crate::lib::{exit_process_errored, find_match_inbetween, remove_start_end};
 use std::collections::HashMap;
 
 pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
-    //println!("PTN ==== {pattern} ==========");
+    //println!("00-PTN ==== {pattern} ==========00-INPUT:  {input_line}");
     match pattern {
         // check has both start and end
         ptn if pattern.starts_with("^") && pattern.ends_with("$") => {
@@ -50,7 +50,17 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
         // ch,eck ending
         ptn if pattern.ends_with("$") => {
             let to_match = &pattern[0..pattern.len() - 1];
-            return input_line.ends_with(to_match);
+            let regex: Vec<&str> = vec!["\\d", "\\w", "(", ")"];
+            if regex.iter().any(|a| to_match.contains(a)) {
+                let mut new_input = &input_line[0..input_line.len()-1];
+                let res = match_pattern(&new_input, to_match);
+                //println!("matching {input_line} to {pattern} and res is {res}");
+                return res
+            } else {
+                return input_line.ends_with(to_match);
+                
+            }
+            
         }
         "\\d" => {
             //println!("matching digits {input_line}  ----> {pattern}");
@@ -111,7 +121,7 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
             }
         }
 
-        ptn if ptn.starts_with("(") => {
+        ptn if ptn.starts_with("(")  => {
             //println!("ptn start with (: {input_line} ----  {ptn}");
             let alt_end = ptn.rfind(")").unwrap_or(0);
             let pipe_find = ptn.find("|").unwrap_or(0);
@@ -137,13 +147,12 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                     //println!("input start is {ptn_1_match_start} and will append {ptn_p2}");
 
                     ptn_1_match_start.push_str(ptn_p2);
-                   // println!("partial () match, need to match {input_line} => {ptn_1_match_start}");
+                    // println!("partial () match, need to match {input_line} => {ptn_1_match_start}");
                     return match_pattern(input_line, ptn_1_match_start.as_str());
                 }
                 return false;
             }
 
-            return false;
         }
 
         // check wildcard
@@ -269,7 +278,7 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                                     if idx == input_line.len() - 1 {
                                         let ptn_before_quant = ptn.get(idx + 1..p).unwrap();
                                         // if only one letter before ?
-                                        println!("ptn before quant: {ptn_before_quant}");
+                                        //println!("ptn before quant: {ptn_before_quant} and quant is {ptn_quant}");
                                         return ptn_quant == "?" && ptn_before_quant.len() == 1;
                                     }
                                 }
@@ -484,28 +493,58 @@ pub fn print_single_matching_line(input_line: &String, pattern: &mut String) -> 
                     Some(d) => return d.to_string(),
                     None => return "".to_string(),
                 }
+            } else if pattern == "\\d+" {
+                let digit = val.chars().find(|c| c.is_ascii_digit());
+                match (digit) {
+                    Some(d) => {
+                        let idx = val.find(d).unwrap();
+                        let mut res: Vec<char> = Vec::new();
+                        res.push(d);
+                        let mut next_idx = idx + 1;
+                        if val.len() == idx + 1 {
+                            return "".to_string();
+                        }
+
+                        while next_idx < val.len() {
+                            let next_char = val.chars().nth(next_idx).unwrap();
+
+                            if next_char.is_ascii_digit() {
+                                res.push(next_char);
+                            } else {
+                                break;
+                            }
+                            next_idx += 1;
+                        }
+
+                        return res.into_iter().collect();
+                    }
+                    None => return "".to_string(),
+                }
             } else {
-                if pattern.starts_with("^") {
-                    *pattern = pattern[1..].to_string();
-                }
-                if pattern.ends_with("$") {
-                    *pattern = pattern[..pattern.len() - 1].to_string();
-                }
+                return val.to_string();
+                // if pattern.starts_with("^") {
+                //     *pattern = pattern[1..].to_string();
+                // }
+                // if pattern.ends_with("$") {
+                //     *pattern = pattern[..pattern.len() - 1].to_string();
+                // }
 
-                //println!("pattern is now: {pattern}");
+                
 
-                let items: Vec<char> = val
-                    .chars()
-                    .zip(pattern.chars())
-                    .filter(|(x, y)| x == y || *y == '?')
-                    .map(|(x, _)| x)
-                    .collect();
-                if !items.is_empty() {
-                    let result: String = items.into_iter().collect();
-                    return result;
-                } else {
-                    return "".to_string();
-                }
+                // let items: Vec<char> = val
+                //     .chars()
+                //     .zip(pattern.chars())
+                //     .filter(|(x, y)| x == y || *y == '?')
+                //     .map(|(x, _)| x)
+                //     .collect();
+
+                // println!("items are {:?}", items);
+                // if !items.is_empty() {
+                //     let result: String = items.into_iter().collect();
+                //     return result;
+                // } else {
+                //     return "".to_string();
+                // }
             }
         } else {
             return "".to_string();

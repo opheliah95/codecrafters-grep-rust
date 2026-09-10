@@ -344,7 +344,7 @@ fn handle_single_ptn_to_spaced_txt(
         for i in split_input_by_space.iter() {
             let mut i_str = i.to_string();
             let res_str = print_single_matching_line(&i_str, &mut ptn.to_string());
-            //println!(" matching {i} -> {p_str} res-str: {res_str} -o arg");
+            //println!(" matching {i} -> {i_str} res-str: {res_str} -o arg");
             if res_str.len() > 0 {
                 res.push(res_str)
             }
