@@ -479,19 +479,21 @@ pub fn remove_underline(input_line: &String) -> String {
     return new_input;
 }
 
-pub fn print_single_matching_line( input_line: &String, pattern: &mut String) -> String {
+pub fn print_single_matching_line(input_line: &String, pattern: &mut String) -> String {
     let new_input = remove_underline(&input_line);
     let mut input_slice = new_input.split_whitespace().collect::<Vec<&str>>();
-    //println!("{input_line} **{pattern}**");
+    //println!("{new_input} **{pattern}**");
     let input_slice_len = input_slice.len();
+    let mut res: Vec<char> = Vec::new();
+    let mut res_str: Vec<String> = vec![];
     for (idx, val) in input_slice.into_iter().enumerate() {
         // println!(
-        //     "try matching {val} to ptn**{pattern}**, ptn start: {}",
+        //     "idx {idx} out of {input_slice_len} try matching {val} to ptn**{pattern}**, ptn start: {}",
         //     pattern.clone().chars().nth(0).unwrap()
         // );
-        let mut res: Vec<char> = Vec::new();
+
         if match_pattern(val, pattern) {
-            println!("==={val} MATCHED {pattern}===");
+            //println!("==={val} MATCHED {pattern}===");
             if pattern == "\\d" {
                 for v_char in val.chars().into_iter() {
                     //println!("{v_char} is a digit...");
@@ -554,7 +556,31 @@ pub fn print_single_matching_line( input_line: &String, pattern: &mut String) ->
                 }
 
                 if pattern.contains("(") && pattern.contains(')') {
-                    return val.to_string();
+                    res_str.push(val.to_string());
+                    //println!("res_st: {:?}  {input_slice_len}", res_str);
+                    if idx == input_slice_len - 1 {
+                        if res_str.len() == 0 {
+                            return "".to_string();
+                        } else {
+                            //println!("done");
+                            let output_len = res_str.len();
+                            let out: String = res_str
+                                .into_iter()
+                                .enumerate()
+                                .map(|(idx, a)| {
+                                    if idx != output_len - 1 {
+                                        format!("{a}\n")
+                                    } else {
+                                        format!("{a}")
+                                    }
+                                })
+                                .collect();
+
+                            return out;
+                        }
+                    }
+
+                    continue;
                 }
 
                 let items: Vec<char> = val
