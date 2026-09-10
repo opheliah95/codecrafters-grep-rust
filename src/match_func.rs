@@ -474,9 +474,15 @@ pub fn check_individual_match(input_line: &str, pattern: &str) -> bool {
     return true;
 }
 
-pub fn print_single_matching_line(input_line: &String, pattern: &mut String) -> String {
-    let input_slice = input_line.split_whitespace().collect::<Vec<&str>>();
-    println!("{input_line} **{pattern}**");
+pub fn remove_underline(input_line: &String) -> String {
+    let new_input = input_line.replace("_", " ");
+    return new_input;
+}
+
+pub fn print_single_matching_line( input_line: &String, pattern: &mut String) -> String {
+    let new_input = remove_underline(&input_line);
+    let mut input_slice = new_input.split_whitespace().collect::<Vec<&str>>();
+    //println!("{input_line} **{pattern}**");
     let input_slice_len = input_slice.len();
     for (idx, val) in input_slice.into_iter().enumerate() {
         // println!(
