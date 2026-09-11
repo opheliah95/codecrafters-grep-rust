@@ -1,8 +1,47 @@
 use crate::lib::{exit_process_errored, find_match_inbetween, remove_start_end};
 use std::collections::HashMap;
 
+pub fn examine_repeat(mut input_line: &str, mut pattern: &str) -> bool {
+    let repeats = ["\\w", "\\d"];
+    let mut input_temp = &input_line.replace(",", "");
+    let mut res_output: Vec<String>= vec![];
+    
+    let mut repeats_result: HashMap<String, usize> = HashMap::new();
+    for repeat in repeats.into_iter() {
+        if pattern.contains(repeat) {
+            let res = repeats_result.entry(repeat.to_string()).or_insert(1);
+            *res += 1;
+        }
+    }
+
+    //println!("examine_repeat");
+    for (repeat, count) in &repeats_result {
+        let repeat_len = repeat.len();
+        //println!("{input_temp} -> {repeat}");
+        if input_temp.len() == repeat_len {
+            //println!("SUCCES: {input_temp} -> {repeat}");
+            let input_filtered: String = input_temp
+                .chars()
+                .into_iter()
+                .filter(|a| match_pattern(&a.to_string(), repeat))
+                .collect();
+
+            println!("{input_filtered}");
+            return true;
+        } else {
+            return false;
+        }
+    }
+    //println!("res is {:?}", res_output);
+
+    return false;
+}
+
 pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
     //println!("00-PTN ==== {pattern} ==========00-INPUT:  {input_line}");
+    if examine_repeat(input_line, pattern) {
+        return true;
+    };
     match pattern {
         // check has both start and end
         ptn if pattern.starts_with("^") && pattern.ends_with("$") => {
@@ -67,9 +106,12 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
         "\\d+" => input_line.chars().all(|e| e.is_ascii_digit()),
         "\\d?" => input_line.chars().any(|e| e.is_ascii_digit()) || input_line.len() == 0,
         "d" => input_line.starts_with(|s: char| s.is_ascii_alphabetic()),
-        "\\w" => input_line
-            .chars()
-            .any(|e| e.is_ascii_alphanumeric() || e == '_'),
+        "\\w" => {
+            input_line
+                .chars()
+                .any(|e| e.is_ascii_alphanumeric() || e == '_')
+                && input_line.len() == 1
+        }
         "\\w+" => return input_line.len() >= 1 && match_pattern(input_line, "\\w"),
         ptn if pattern.starts_with("[") && pattern.ends_with("]") => {
             if let Some(content) = ptn.get(1..ptn.len() - 1) {
