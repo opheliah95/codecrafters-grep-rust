@@ -1,11 +1,11 @@
-use crate::lib::{exit_process_errored, find_match_inbetween, remove_start_end};
+use crate::lib::{find_match_inbetween, remove_start_end};
 use std::collections::HashMap;
 
-pub fn examine_repeat(mut input_line: &str, mut pattern: &str) -> bool {
+pub fn examine_repeat(mut input_line: &str, mut pattern: &str) -> Option<String> {
     let repeats = ["\\w", "\\d"];
     let mut input_temp = &input_line.replace(",", "");
-    let mut res_output: Vec<String>= vec![];
-    
+    let mut res_output: Vec<String> = vec![];
+
     let mut repeats_result: HashMap<String, usize> = HashMap::new();
     for repeat in repeats.into_iter() {
         if pattern.contains(repeat) {
@@ -26,22 +26,18 @@ pub fn examine_repeat(mut input_line: &str, mut pattern: &str) -> bool {
                 .filter(|a| match_pattern(&a.to_string(), repeat))
                 .collect();
 
-            println!("{input_filtered}");
-            return true;
+            //println!("{input_filtered}");
+            return Some(input_filtered);
         } else {
-            return false;
+            return None;
         }
     }
     //println!("res is {:?}", res_output);
 
-    return false;
+    return None;
 }
 
 pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
-    //println!("00-PTN ==== {pattern} ==========00-INPUT:  {input_line}");
-    if examine_repeat(input_line, pattern) {
-        return true;
-    };
     match pattern {
         // check has both start and end
         ptn if pattern.starts_with("^") && pattern.ends_with("$") => {
@@ -529,10 +525,16 @@ pub fn print_single_matching_line(input_line: &String, pattern: &mut String) -> 
     let mut res: Vec<char> = Vec::new();
     let mut res_str: Vec<String> = vec![];
     for (idx, val) in input_slice.into_iter().enumerate() {
-        // println!(
-        //     "idx {idx} out of {input_slice_len} try matching {val} to ptn**{pattern}**, ptn start: {}",
-        //     pattern.clone().chars().nth(0).unwrap()
-        // );
+        if let Some(repeat_matched) = examine_repeat(val, pattern) {
+            res_str.push(repeat_matched);
+
+            if idx == input_slice_len - 1 {
+                let output_len = res_str.len();
+                let out = format_matched_vec(&res_str, output_len);
+                return out
+            }
+            continue;
+        }
 
         if match_pattern(val, pattern) {
             //println!("==={val} MATCHED {pattern}===");
@@ -606,17 +608,7 @@ pub fn print_single_matching_line(input_line: &String, pattern: &mut String) -> 
                         } else {
                             //println!("done");
                             let output_len = res_str.len();
-                            let out: String = res_str
-                                .into_iter()
-                                .enumerate()
-                                .map(|(idx, a)| {
-                                    if idx != output_len - 1 {
-                                        format!("{a}\n")
-                                    } else {
-                                        format!("{a}")
-                                    }
-                                })
-                                .collect();
+                            let out = format_matched_vec(&res_str, output_len);
 
                             return out;
                         }
@@ -645,6 +637,21 @@ pub fn print_single_matching_line(input_line: &String, pattern: &mut String) -> 
         }
     }
     return "".to_string();
+}
+
+fn format_matched_vec(res_str: &Vec<String>, output_len: usize) -> String {
+    let out: String = res_str
+        .into_iter()
+        .enumerate()
+        .map(|(idx, a)| {
+            if idx != output_len - 1 {
+                format!("{a}\n")
+            } else {
+                format!("{a}")
+            }
+        })
+        .collect();
+    out
 }
 
 fn digit_count_and_return(val: char) -> Option<char> {
