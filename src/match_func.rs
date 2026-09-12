@@ -451,7 +451,7 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
 }
 
 pub fn check_individual_match(input_line: &str, pattern: &str) -> bool {
-    println!("FN CHECK_INDV_MATCHING, matching {input_line} -> pattern {pattern}");
+    //println!("FN CHECK_INDV_MATCHING, matching {input_line} -> pattern {pattern}");
     let pattern_clone: Vec<char> = pattern.clone().chars().collect();
     let to_match = ["\\d", "\\w", "\\d+"];
     let mut match_end_pos = 0;
@@ -534,6 +534,7 @@ pub fn print_single_matching_line(input_line: &String, pattern: &mut String) -> 
 
 
     for (idx, val) in input_slice.into_iter().enumerate() {
+        println!("{idx}: {val}");
         if let Some(repeat_matched) = examine_repeat(val, pattern) {
             res_str.push(repeat_matched);
             
