@@ -663,16 +663,32 @@ pub fn print_single_matching_line(input_line: &String, pattern: &mut String) -> 
                     continue;
                 }
 
-                let items: Vec<char> = val
-                    .chars()
-                    .zip(pattern.chars())
-                    .filter(|(x, y)| x == y || *y == '?')
-                    .map(|(x, _)| x)
-                    .collect();
+                
+                let mut items: Vec<_>=  val.match_indices(&*pattern).collect();
+                
+                // if spilt_by_hypgens.len() == 0 {
+                //     // items = val
+                //     // .chars()
+                //     // .zip(pattern.chars())
+                //     // .filter(|(x, y)| x == y || *y == '?')
+                //     // .map(|(x, _)| x)
+                //     // .collect();
 
-                //intln!("items are {:?}", items);
+                // } else {
+                    
+                // }
+                //println!("items are {:?}", items);
                 if !items.is_empty() {
-                    let result: String = items.into_iter().collect();
+                    let mut result: String = String::new();
+                    let item_len = items.len();
+                    for (idx, item ) in items.iter() {
+                        if *idx != item_len - 1  {
+                            result.push_str(format!("{item}\n").as_ref());
+                        } else{
+                            result.push_str(item)
+                        }
+                    }
+          
                     return result;
                 } else {
                     return "".to_string();
