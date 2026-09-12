@@ -352,10 +352,10 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
 
                                             if val != after_zero_quant {
                                                 if val != letter_after_p {
-                                                    println!(
-                                                        "{val} does not match ptn {}",
-                                                        after_zero_quant
-                                                    );
+                                                    // println!(
+                                                    //     "{val} does not match ptn {}",
+                                                    //     after_zero_quant
+                                                    // );
                                                     return false;
                                                 }
                                                 return true;
