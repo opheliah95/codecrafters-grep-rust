@@ -17,7 +17,7 @@ fn main() {
     io::stdin().read_to_string(&mut input_line).unwrap();
     let mut pattern = env::args().nth(2).unwrap();
     let split_input_by_space = input_line.split_whitespace().collect::<Vec<&str>>();
-    //println!("line is: {input_line}");
+    //println!("{input_line} line is: {:?}", split_input_by_space);
     if env::args().nth(1).unwrap() == "-o" {
         pattern = env::args().nth(3).unwrap();
 
