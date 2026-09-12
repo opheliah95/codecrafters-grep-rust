@@ -264,20 +264,44 @@ fn main() {
 
     if env::args().nth(1).unwrap() == "-o" {
         pattern = env::args().nth(3).unwrap();
-        let split_ptn_by_space = pattern.split_whitespace().collect::<Vec<&str>>();
 
-        //println!("{:?} vs PTN {:?}", split_input_by_space, split_ptn_by_space);
+        let mut split_by_full_stop: Vec<&str> = input_line.split(".").collect();
+        let split_by_full_stop_cleaned: Vec<String> = split_by_full_stop
+            .iter()
+            .filter(|a| a.len() > 0)
+            .map(|a| a.to_string())
+            .collect();
+        //println!("res of spilt full stop: {:?}", split_by_full_stop_cleaned);
 
         let mut res: Vec<String> = Vec::new();
-        if split_ptn_by_space.len() == split_input_by_space.len() {
-            res = handle_single_matching_line(&split_input_by_space, split_ptn_by_space);
-        } else if split_ptn_by_space.len() != split_input_by_space.len() {
-            res = handle_single_ptn_to_spaced_txt(&split_input_by_space, split_ptn_by_space);
-        } else if split_ptn_by_space.len() == 0 || split_ptn_by_space.len() == 0 {
-            exit_process_errored();
+
+        if split_by_full_stop_cleaned.len() > 1 {
+            res = handle_sentence_ptn(&split_by_full_stop_cleaned, pattern.clone());
+            if res.len() >= 1 {
+                for r in res {
+                    let s = r.trim_end();
+                    println!("{s}");
+                }
+
+                process::exit(0);
+            } else {
+                //println!("res empty");
+                process::exit(1);
+            }
+        } else {
+            let split_ptn_by_space = pattern.split_whitespace().collect::<Vec<&str>>();
+
+            //println!("{:?} vs PTN {:?}", split_input_by_space, split_ptn_by_space);
+
+            if split_ptn_by_space.len() == split_input_by_space.len() {
+                res = handle_single_matching_line(&split_input_by_space, split_ptn_by_space);
+            } else if split_ptn_by_space.len() != split_input_by_space.len() {
+                res = handle_single_ptn_to_spaced_txt(&split_input_by_space, split_ptn_by_space);
+            } else if split_ptn_by_space.len() == 0 || split_ptn_by_space.len() == 0 {
+                exit_process_errored();
+            }
         }
 
-       
         if res.len() >= 1 {
             println!("{}", res.join(""));
             process::exit(0);
@@ -331,24 +355,49 @@ fn main() {
     process::exit(1)
 }
 
+fn handle_sentence_ptn(sentences: &Vec<String>, pattern: String) -> Vec<String> {
+    let mut final_sentence = String::new();
+    let mut sentence_collection: Vec<String> = Vec::new();
+    for sentence in sentences.iter() {
+        let sentence_spilt: Vec<&str> = sentence.split_whitespace().collect();
+        let ptn_split: Vec<&str> = pattern.split_whitespace().collect();
+        let res = handle_single_ptn_to_spaced_txt(&sentence_spilt, ptn_split);
+        let res_len = res.len();
+        final_sentence = res
+            .into_iter()
+            .enumerate()
+            .map(|(idx, a)| a.replace("\n", " ").replace("\r", "").replace("\r\n", ""))
+            .collect();
+        sentence_collection.push(final_sentence);
+    }
+
+    //println!("all res: {:?}", sentence_collection);
+    return sentence_collection;
+}
+
 fn handle_single_ptn_to_spaced_txt(
     split_input_by_space: &Vec<&str>,
     split_ptn_by_space: Vec<&str>,
 ) -> Vec<String> {
     let mut res = Vec::new();
-
+    let mut start: usize = 0;
+    //println!("spilt input by space {:?}", split_input_by_space);
     for ptn in split_ptn_by_space.iter() {
-        for (idx, i) in split_input_by_space.iter().enumerate() {
+        let mut input_to_start_at = &split_input_by_space[start..];
+        for (idx, i) in input_to_start_at.iter().enumerate() {
+            //println!("index: {start} matching: {i} vs {ptn}");
             let mut i_str = i.to_string();
             let res_str = print_single_matching_line(&i_str, &mut ptn.to_string());
-            //println!(" matching {i} -> {i_str} res-str: {res_str} -o arg");
+            //println!("resuot: ---{res_str}---");
             if res_str.len() > 0 {
-                if idx == split_input_by_space.len() -1 {
-                    res.push(res_str)
+                if idx == split_input_by_space.len() - 1 {
+                    res.push(res_str);
+                    //println!("idx reached ==== {start}=== idx {idx}");
                 } else {
-                    res.push(format!("{res_str}\n"))
+                    res.push(format!("{res_str}\n"));
+                    start = idx + 1;
+                    break;
                 }
-                
             }
         }
     }
