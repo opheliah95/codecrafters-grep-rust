@@ -539,6 +539,7 @@ pub fn print_single_matching_line(input_line: &String, pattern: &mut String) -> 
             res_str.push(repeat_matched);
             
             if idx == input_slice_len - 1 {
+                println!("this is true");
                 let output_len = res_str.len();
                 let out = format_matched_vec(&res_str, output_len);
                 return out
