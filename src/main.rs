@@ -303,7 +303,7 @@ fn main() {
         }
 
         if res.len() >= 1 {
-            println!("{}", res.join(" "));
+            println!("{:?}", res);
             process::exit(0);
         } else {
             //println!("res empty");
