@@ -24,6 +24,9 @@ pub fn examine_repeat(mut input_line: &str, mut pattern: &str) -> Option<String>
     for (repeat, count) in &repeats_result {
         let repeat_len = repeat.len();
         let input_line_end = input_line.len();
+        if input_line_end < *count {
+            return None;
+        }
         let diff = &input_line[*count..input_line_end];
         //println!("{input_temp} -> {repeat} -> {count} -> diff len {diff}");
         if input_temp.len() == *count {
@@ -479,7 +482,7 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
 
 pub fn check_individual_match(input_line: &str, pattern: &str) -> bool {
     //println!("FN CHECK_INDV_MATCHING, matching {input_line} -> pattern {pattern}");
-    let pattern_clone: Vec<char> = pattern.clone().chars().collect();
+    let pattern_clone: Vec<char> = pattern.chars().collect();
     let to_match = ["\\d", "\\w", "\\d+"];
     let mut match_end_pos = 0;
     let mut matches_by_index: HashMap<usize, &str> = HashMap::new();
