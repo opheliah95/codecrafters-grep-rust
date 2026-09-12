@@ -6,6 +6,8 @@ pub fn examine_repeat(mut input_line: &str, mut pattern: &str) -> Option<String>
     let mut input_temp = &input_line.replace(",", "");
     let mut res_output: Vec<String> = vec![];
 
+
+    
     let mut repeats_result: HashMap<String, usize> = HashMap::new();
     
     for repeat in repeats.into_iter() {
@@ -564,6 +566,13 @@ pub fn print_single_matching_line(input_line: &String, pattern: &mut String) -> 
     // simplest case exact match
     if input_line == pattern {
         return input_line.to_string();
+    }
+
+
+    // handle plural cases
+    if pattern.ends_with("s") && !input_line.ends_with("s") {
+        println!("not matching");
+        return "".to_string();
     }
 
     for (idx, val) in input_slice.into_iter().enumerate() {
