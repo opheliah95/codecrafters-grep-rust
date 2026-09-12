@@ -105,10 +105,17 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
         "\\w" => {
             input_line
                 .chars()
-                .any(|e| e.is_ascii_alphanumeric() || e == '_')
+                .any(|e| (e.is_ascii_alphanumeric() || e == '_') && !vec!['+', '!', '@', '$'].contains(&e))
                 && input_line.len() == 1
         }
-        "\\w+" => return input_line.len() >= 1 && match_pattern(input_line, "\\w"),
+        "\\w+" => {
+            for w in input_line.chars() {
+                if  ! match_pattern(&w.to_string(), "\\w") {
+                    return false;
+                }
+            }
+            return true;
+        },
         ptn if pattern.starts_with("[") && pattern.ends_with("]") => {
             if let Some(content) = ptn.get(1..ptn.len() - 1) {
                 if content.len() == 0 {

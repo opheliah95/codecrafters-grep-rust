@@ -1,4 +1,5 @@
 use std::env;
+use std::f32::consts::LN_10;
 use std::io::{self, Read};
 use std::process;
 mod lib;
@@ -261,7 +262,7 @@ fn main() {
     io::stdin().read_to_string(&mut input_line).unwrap();
     let mut pattern = env::args().nth(2).unwrap();
     let split_input_by_space = input_line.split_whitespace().collect::<Vec<&str>>();
-
+    //println!("line is: {input_line}");
     if env::args().nth(1).unwrap() == "-o" {
         pattern = env::args().nth(3).unwrap();
 
@@ -290,8 +291,8 @@ fn main() {
             }
         } else {
             let split_ptn_by_space = pattern.split_whitespace().collect::<Vec<&str>>();
-
-            //println!("{:?} vs PTN {:?}", split_input_by_space, split_ptn_by_space);
+            //echo -ne "mango\n!@#$\nbanana\n+++\ntest123" | ./your_program.sh -E '\w+'
+            println!("{:?} vs PTN {:?}", split_input_by_space, split_ptn_by_space);
 
             if split_ptn_by_space.len() == split_input_by_space.len() {
                 res = handle_single_matching_line(&split_input_by_space, split_ptn_by_space);
@@ -337,6 +338,7 @@ fn main() {
     //handle single input
     let spilt_input_by_line = input_line.split('\n').collect::<Vec<&str>>();
     let mut spilt_pattern = ' ';
+    //println!("{:?} {pattern}", spilt_input_by_line);
 
     if spilt_input_by_line.len() > 1 {
         let mut matched: Vec<bool> = Vec::new();
