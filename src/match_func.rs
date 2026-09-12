@@ -536,7 +536,7 @@ pub fn print_single_matching_line(input_line: &String, pattern: &mut String) -> 
     for (idx, val) in input_slice.into_iter().enumerate() {
         //println!("{idx}: {val}");
         if let Some(repeat_matched) = examine_repeat(val, pattern) {
-            return repeat_matched;
+            return repeat_matched.trim().to_string();
             
         }
 

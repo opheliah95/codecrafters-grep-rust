@@ -302,8 +302,26 @@ fn main() {
             }
         }
 
-        if res.len() >= 1 {
-            println!("{:?}", res);
+        let res_len = res.len();
+        if res_len >= 1 {
+            let res_collected: Vec<String> = res
+                .iter()
+                .enumerate()
+                .map(|(idx, a)| {
+                    if idx == res_len - 1 {
+                        a.trim_end().to_string()
+                    } else {
+                         if a.chars().last().unwrap() == 0xA as char{
+                            a.to_string()
+                         } else {
+                            format!("{} ", a)
+                         }
+                        
+                    }
+                })
+                .collect();
+            //println!("{:?}", res_collected);
+            println!("{}", res_collected.join(""));
             process::exit(0);
         } else {
             //println!("res empty");
