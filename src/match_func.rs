@@ -522,7 +522,7 @@ pub fn remove_underline_and_punc(input_line: &String) -> String {
 pub fn print_single_matching_line(input_line: &String, pattern: &mut String) -> String {
     let new_input = remove_underline_and_punc(&input_line);
     let mut input_slice = new_input.split_whitespace().collect::<Vec<&str>>();
-    //println!("{new_input} **{pattern}**");
+    //println!("{:?} **{pattern}**", input_slice);
     let input_slice_len = input_slice.len();
     let mut res: Vec<char> = Vec::new();
     let mut res_str: Vec<String> = vec![];
@@ -534,16 +534,16 @@ pub fn print_single_matching_line(input_line: &String, pattern: &mut String) -> 
 
 
     for (idx, val) in input_slice.into_iter().enumerate() {
-        println!("{idx}: {val}");
+        //println!("{idx}: {val}");
         if let Some(repeat_matched) = examine_repeat(val, pattern) {
-            res_str.push(repeat_matched);
+            return repeat_matched;
             
-            if idx == input_slice_len - 1 {
-                println!("this is true");
-                let output_len = res_str.len();
-                let out = format_matched_vec(&res_str, output_len);
-                return out
-            }
+            // if idx == input_slice_len - 1 {
+            //     println!("this is true");
+            //     let output_len = res_str.len();
+            //     let out = format_matched_vec(&res_str, output_len);
+            //     return out
+            // }
             continue;
         }
 
