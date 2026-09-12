@@ -292,7 +292,7 @@ fn main() {
         } else {
             let split_ptn_by_space = pattern.split_whitespace().collect::<Vec<&str>>();
             //echo -ne "mango\n!@#$\nbanana\n+++\ntest123" | ./your_program.sh -E '\w+'
-            println!("{:?} vs PTN {:?}", split_input_by_space, split_ptn_by_space);
+            //println!("{:?} vs PTN {:?}", split_input_by_space, split_ptn_by_space);
 
             if split_ptn_by_space.len() == split_input_by_space.len() {
                 res = handle_single_matching_line(&split_input_by_space, split_ptn_by_space);

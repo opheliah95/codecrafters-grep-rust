@@ -548,7 +548,7 @@ pub fn print_single_matching_line(input_line: &String, pattern: &mut String) -> 
         }
 
         if match_pattern(val, pattern) {
-            println!("==={val} MATCHED {pattern}===");
+            //println!("==={val} MATCHED {pattern}===");
             if pattern == "\\d" {
                 for v_char in val.chars().into_iter() {
                     //println!("{v_char} is a digit...");
