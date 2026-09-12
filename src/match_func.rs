@@ -23,12 +23,13 @@ pub fn examine_repeat(mut input_line: &str, mut pattern: &str) -> Option<String>
     //println!("examine_repeat: {pattern} {:?}", repeats_result);
     for (repeat, count) in &repeats_result {
         let repeat_len = repeat.len();
-        let input_line_end = input_line.len();
-        if input_line_end < *count {
-            return None;
+        let input_line_end = input_temp.len();
+        let mut diff = "";
+        if input_line_end > *count {
+            diff = &input_temp[*count..];
         }
-        let diff = &input_line[*count..input_line_end];
-        //println!("{input_temp} -> {repeat} -> {count} -> diff len {diff}");
+        
+        //'println!("{input_temp} -> {repeat} -> {count} -> diff len {diff} -> {}", *count + diff.len());
         if input_temp.len() == *count {
             //println!("SUCCES: {input_temp} -> {repeat}");
             let input_filtered: String = input_temp
@@ -40,12 +41,15 @@ pub fn examine_repeat(mut input_line: &str, mut pattern: &str) -> Option<String>
             //println!("{input_filtered}");
             return Some(input_filtered);
         } else if input_temp.len() == *count + diff.len() {
+            //println!("{input_temp} vs {pattern}");
             if pattern.ends_with(diff) {
                 let mut input_filtered: String = input_temp
                     .chars()
                     .into_iter()
                     .filter(|a| match_pattern(&a.to_string(), repeat))
                     .collect();
+
+                println!("{input_filtered}");
 
                 //input_filtered.push_str(diff);
                 return Some(input_filtered);

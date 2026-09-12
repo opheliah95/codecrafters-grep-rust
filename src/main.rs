@@ -404,26 +404,32 @@ fn handle_single_ptn_to_spaced_txt(
     let mut res = Vec::new();
     let mut start: usize = 0;
     let input_len = split_input_by_space.len();
-   
+    let ptn_len = split_ptn_by_space.len();
+    let mut new_ptn_spilt = split_ptn_by_space.to_vec();
 
-    for ptn in split_ptn_by_space.iter() {
+    if ptn_len == 1 {
+        let ptn = split_ptn_by_space[0];
+        for i in (0..input_len - 1) {
+            new_ptn_spilt.push(ptn);
+        }
+    }
+    //println!("{:?} vs {:?}", new_ptn_spilt, split_input_by_space);
+    for ptn in new_ptn_spilt.iter() {
         let mut input_to_start_at = &split_input_by_space[start..];
         //println!("{:?}", split_input_by_space);
         for (idx, i) in input_to_start_at.iter().enumerate() {
             //println!("index: {start} matching: {i} == {ptn}");
             let mut i_str = i.to_string();
             let res_str = print_single_matching_line(&i_str, &mut ptn.to_string());
-            //println!("resuot: ---{res_str}---");
+            //println!("resuot: ---{res_str}---{idx}");
             if res_str.len() > 0 {
+                start += 1;
                 if idx == split_input_by_space.len() - 1 {
                     res.push(res_str);
                     //println!("idx reached ==== {start}=== idx {idx}");
                 } else {
                     res.push(format!("{res_str}\n"));
-                    if idx < split_input_by_space.len() - 2 {
-                        start = idx + 1;
-                        //break;
-                    }
+                    break;
                 }
             }
         }
