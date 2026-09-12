@@ -9,16 +9,20 @@ pub fn examine_repeat(mut input_line: &str, mut pattern: &str) -> Option<String>
     let mut repeats_result: HashMap<String, usize> = HashMap::new();
     for repeat in repeats.into_iter() {
         if pattern.contains(repeat) {
-            let res = repeats_result.entry(repeat.to_string()).or_insert(1);
-            *res += 1;
+            let count = pattern.matches(repeat).count();
+            if count > 0 {
+                repeats_result.insert(repeat.to_string(), count);
+            }
         }
     }
 
-    //println!("examine_repeat");
+    //println!("examine_repeat: {pattern} {:?}", repeats_result);
     for (repeat, count) in &repeats_result {
         let repeat_len = repeat.len();
-        //println!("{input_temp} -> {repeat}");
-        if input_temp.len() == repeat_len {
+        let input_line_end = input_line.len();
+        let diff = &input_line[*count..input_line_end];
+        //println!("{input_temp} -> {repeat} -> {count} -> diff len {diff}");
+        if input_temp.len() == *count {
             //println!("SUCCES: {input_temp} -> {repeat}");
             let input_filtered: String = input_temp
                 .chars()
@@ -28,6 +32,18 @@ pub fn examine_repeat(mut input_line: &str, mut pattern: &str) -> Option<String>
 
             //println!("{input_filtered}");
             return Some(input_filtered);
+        } else if input_temp.len() == *count + diff.len() {
+            if pattern.ends_with(diff) {
+                let mut input_filtered: String = input_temp
+                    .chars()
+                    .into_iter()
+                    .filter(|a| match_pattern(&a.to_string(), repeat))
+                    .collect();
+
+                //input_filtered.push_str(diff);
+                return Some(input_filtered);
+
+            }
         } else {
             return None;
         }
@@ -103,19 +119,18 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
         "\\d?" => input_line.chars().any(|e| e.is_ascii_digit()) || input_line.len() == 0,
         "d" => input_line.starts_with(|s: char| s.is_ascii_alphabetic()),
         "\\w" => {
-            input_line
-                .chars()
-                .any(|e| (e.is_ascii_alphanumeric() || e == '_') && !vec!['+', '!', '@', '$'].contains(&e))
-                && input_line.len() == 1
+            input_line.chars().any(|e| {
+                (e.is_ascii_alphanumeric() || e == '_') && !vec!['+', '!', '@', '$'].contains(&e)
+            }) && input_line.len() == 1
         }
         "\\w+" => {
             for w in input_line.chars() {
-                if  ! match_pattern(&w.to_string(), "\\w") {
+                if !match_pattern(&w.to_string(), "\\w") {
                     return false;
                 }
             }
             return true;
-        },
+        }
         ptn if pattern.starts_with("[") && pattern.ends_with("]") => {
             if let Some(content) = ptn.get(1..ptn.len() - 1) {
                 if content.len() == 0 {
@@ -458,7 +473,7 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
 }
 
 pub fn check_individual_match(input_line: &str, pattern: &str) -> bool {
-    println!("FN CHECK_INDV_MATCHING, matching {input_line} -> pattern {pattern}");
+    //println!("FN CHECK_INDV_MATCHING, matching {input_line} -> pattern {pattern}");
     let pattern_clone: Vec<char> = pattern.clone().chars().collect();
     let to_match = ["\\d", "\\w", "\\d+"];
     let mut match_end_pos = 0;
@@ -539,12 +554,10 @@ pub fn print_single_matching_line(input_line: &String, pattern: &mut String) -> 
         return input_line.to_string();
     }
 
-
     for (idx, val) in input_slice.into_iter().enumerate() {
         //println!("{idx}: {val}");
         if let Some(repeat_matched) = examine_repeat(val, pattern) {
             return repeat_matched.trim().to_string();
-            
         }
 
         if match_pattern(val, pattern) {

@@ -297,7 +297,7 @@ fn main() {
             if split_ptn_by_space.len() == split_input_by_space.len() {
                 res = handle_single_matching_line(&split_input_by_space, split_ptn_by_space);
             } else if split_ptn_by_space.len() != split_input_by_space.len() {
-                res = handle_single_ptn_to_spaced_txt(&split_input_by_space, split_ptn_by_space);
+                res = handle_single_ptn_to_spaced_txt(&split_input_by_space, &split_ptn_by_space);
             } else if split_ptn_by_space.len() == 0 || split_ptn_by_space.len() == 0 {
                 exit_process_errored();
             }
@@ -312,12 +312,11 @@ fn main() {
                     if idx == res_len - 1 {
                         a.trim_end().to_string()
                     } else {
-                         if a.chars().last().unwrap() == 0xA as char{
+                        if a.chars().last().unwrap() == 0xA as char {
                             a.to_string()
-                         } else {
+                        } else {
                             format!("{} ", a)
-                         }
-                        
+                        }
                     }
                 })
                 .collect();
@@ -366,7 +365,9 @@ fn main() {
         }
     } else {
         //println!("multiword input: {input_line} passed");
-        if pattern_parser(&input_line, &pattern, spilt_pattern) {
+        let split_ptn_by_space = pattern.split_whitespace().collect::<Vec<&str>>();
+        let res = handle_single_ptn_to_spaced_txt(&split_input_by_space, &split_ptn_by_space);
+        if res.len() >= 1 {
             println!("{input_line}");
             process::exit(0)
         }
@@ -381,7 +382,7 @@ fn handle_sentence_ptn(sentences: &Vec<String>, pattern: String) -> Vec<String> 
     for sentence in sentences.iter() {
         let sentence_spilt: Vec<&str> = sentence.split_whitespace().collect();
         let ptn_split: Vec<&str> = pattern.split_whitespace().collect();
-        let res = handle_single_ptn_to_spaced_txt(&sentence_spilt, ptn_split);
+        let res = handle_single_ptn_to_spaced_txt(&sentence_spilt, &ptn_split);
         let res_len = res.len();
         final_sentence = res
             .into_iter()
@@ -397,7 +398,7 @@ fn handle_sentence_ptn(sentences: &Vec<String>, pattern: String) -> Vec<String> 
 
 fn handle_single_ptn_to_spaced_txt(
     split_input_by_space: &Vec<&str>,
-    split_ptn_by_space: Vec<&str>,
+    split_ptn_by_space: &Vec<&str>,
 ) -> Vec<String> {
     let mut res = Vec::new();
     let mut start: usize = 0;
