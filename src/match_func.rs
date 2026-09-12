@@ -135,7 +135,7 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
         "\\w" => {
             input_line.chars().any(|e| {
                 (e.is_ascii_alphanumeric() || e == '_') && !vec!['+', '!', '@', '$'].contains(&e)
-            }) && input_line.len() == 1
+            }) 
         }
         "\\w+" => {
             for w in input_line.chars() {
