@@ -384,7 +384,7 @@ fn handle_single_ptn_to_spaced_txt(
     //println!("spilt input by space {:?}", split_input_by_space);
     for ptn in split_ptn_by_space.iter() {
         let mut input_to_start_at = &split_input_by_space[start..];
-        println!("{:?}", split_input_by_space);
+        //println!("{:?}", split_input_by_space);
         for (idx, i) in input_to_start_at.iter().enumerate() {
             //println!("index: {start} matching: {i} vs {ptn}");
             let mut i_str = i.to_string();
@@ -397,7 +397,6 @@ fn handle_single_ptn_to_spaced_txt(
                 } else {
                     res.push(format!("{res_str}\n"));
                     start = idx + 1;
-                    break;
                 }
             }
         }
