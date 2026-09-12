@@ -7,6 +7,7 @@ pub fn examine_repeat(mut input_line: &str, mut pattern: &str) -> Option<String>
     let mut res_output: Vec<String> = vec![];
 
     let mut repeats_result: HashMap<String, usize> = HashMap::new();
+    
     for repeat in repeats.into_iter() {
         if pattern.contains(repeat) {
             let count = pattern.matches(repeat).count();
@@ -16,6 +17,9 @@ pub fn examine_repeat(mut input_line: &str, mut pattern: &str) -> Option<String>
         }
     }
 
+    if repeats_result.is_empty() {
+        return None;
+    }
     //println!("examine_repeat: {pattern} {:?}", repeats_result);
     for (repeat, count) in &repeats_result {
         let repeat_len = repeat.len();
@@ -42,7 +46,6 @@ pub fn examine_repeat(mut input_line: &str, mut pattern: &str) -> Option<String>
 
                 //input_filtered.push_str(diff);
                 return Some(input_filtered);
-
             }
         } else {
             return None;
@@ -54,6 +57,7 @@ pub fn examine_repeat(mut input_line: &str, mut pattern: &str) -> Option<String>
 }
 
 pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
+   //println!("===matches {input_line} to {pattern}");
     match pattern {
         // check has both start and end
         ptn if pattern.starts_with("^") && pattern.ends_with("$") => {
@@ -100,11 +104,12 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
         }
         // ch,eck ending
         ptn if pattern.ends_with("$") => {
+            //println!("{ptn} contains $");
             let to_match = &pattern[0..pattern.len() - 1];
             let regex: Vec<&str> = vec!["\\d", "\\w", "(", ")"];
             if regex.iter().any(|a| to_match.contains(a)) {
-                let mut new_input = &input_line[0..input_line.len() - 1];
-                let res = match_pattern(&new_input, to_match);
+                //let mut new_input = &input_line[0..input_line.len() - 1];
+                let res = match_pattern(&input_line, to_match);
                 //println!("matching {input_line} to {pattern} and res is {res}");
                 return res;
             } else {
@@ -555,7 +560,7 @@ pub fn print_single_matching_line(input_line: &String, pattern: &mut String) -> 
     }
 
     for (idx, val) in input_slice.into_iter().enumerate() {
-       // println!("{idx}: {val} vs {pattern}");
+        //println!("{idx}: {val} vs {pattern}, == {}", pattern.ends_with("$"));
         if let Some(repeat_matched) = examine_repeat(val, pattern) {
             //println!("repeat: {repeat_matched}");
             return repeat_matched.trim().to_string();
@@ -626,7 +631,7 @@ pub fn print_single_matching_line(input_line: &String, pattern: &mut String) -> 
 
                 if pattern.contains("(") && pattern.contains(')') {
                     res_str.push(val.to_string());
-                    //println!("res_st: {:?}  {input_slice_len}", res_str);
+                    //println!("res_st: {:?}  {input_slice_len} vs ptn: {pattern}", res_str);
                     if idx == input_slice_len - 1 {
                         if res_str.len() == 0 {
                             return "".to_string();

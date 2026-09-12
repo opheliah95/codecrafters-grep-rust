@@ -367,7 +367,7 @@ fn main() {
         //println!("multiword input: {input_line} passed");
         let split_ptn_by_space = pattern.split_whitespace().collect::<Vec<&str>>();
         let res = handle_single_ptn_to_spaced_txt(&split_input_by_space, &split_ptn_by_space);
-        println!("{:?}", res);
+        //println!("{:?}", res);
         if res.len() == split_ptn_by_space.len() {
             println!("{input_line}");
             process::exit(0)
@@ -403,12 +403,14 @@ fn handle_single_ptn_to_spaced_txt(
 ) -> Vec<String> {
     let mut res = Vec::new();
     let mut start: usize = 0;
-    //println!("spilt input by space {:?}", split_input_by_space);
+    let input_len = split_input_by_space.len();
+   
+
     for ptn in split_ptn_by_space.iter() {
         let mut input_to_start_at = &split_input_by_space[start..];
         //println!("{:?}", split_input_by_space);
         for (idx, i) in input_to_start_at.iter().enumerate() {
-            //println!("index: {start} matching: {i} vs {ptn}");
+            //println!("index: {start} matching: {i} == {ptn}");
             let mut i_str = i.to_string();
             let res_str = print_single_matching_line(&i_str, &mut ptn.to_string());
             //println!("resuot: ---{res_str}---");
@@ -418,7 +420,10 @@ fn handle_single_ptn_to_spaced_txt(
                     //println!("idx reached ==== {start}=== idx {idx}");
                 } else {
                     res.push(format!("{res_str}\n"));
-                    start = idx + 1;
+                    if idx < split_input_by_space.len() - 2 {
+                        start = idx + 1;
+                        //break;
+                    }
                 }
             }
         }
