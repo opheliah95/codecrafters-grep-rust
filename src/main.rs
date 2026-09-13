@@ -34,6 +34,7 @@ fn main() {
             if res.len() >= 1 {
                 for r in res {
                     let s = r.trim_end();
+                    println!("r is {r}");
                     println!("{s}");
                 }
 
