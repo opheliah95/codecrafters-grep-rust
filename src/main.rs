@@ -152,7 +152,7 @@ fn handle_sentence_ptn(sentences: &Vec<String>, pattern: String) -> Vec<String> 
                 .map(|(idx, a)| 
 
                 if a == "\n" && idx != res_len -1 {
-                    println!("res is {:?} and a is {a} idx {idx}", res_clone);
+                    //println!("res is {:?} and a is {a} idx {idx}", res_clone);
                     a
                 } else {
                     a.replace("\n", " ").replace("\r", "").replace("\r\n", "")
