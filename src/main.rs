@@ -122,7 +122,7 @@ fn main() {
         //println!("multiword input: {input_line} passed");
         let split_ptn_by_space = pattern.split_whitespace().collect::<Vec<&str>>();
         let res = handle_single_ptn_to_spaced_txt(&split_input_by_space, &split_ptn_by_space);
-        println!("{:?}", res);
+        //println!("{:?}", res);
         if res.len() == split_ptn_by_space.len() {
             println!("{input_line}");
             process::exit(0)
