@@ -34,7 +34,7 @@ fn main() {
             if res.len() >= 1 {
                 for r in res {
                     eprintln!("DEBUG: original='{}'", r); // See raw value
-                    let s = r.trim_end();
+                    let s = r.trim_end().to_string();
                     eprintln!("DEBUG: trimmed='{}'", s); // See after trim
                     println!("{s}");
                 }
