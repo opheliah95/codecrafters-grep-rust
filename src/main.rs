@@ -160,7 +160,10 @@ fn handle_sentence_ptn(sentences: &Vec<String>, pattern: String) -> Vec<String> 
                     }
                 })
                 .collect();
-            sentence_collection.push(final_sentence);
+            let cleaned = final_sentence.trim_end().to_string();
+            if !cleaned.is_empty() {
+                sentence_collection.push(cleaned);
+            }
         }
     }
 
