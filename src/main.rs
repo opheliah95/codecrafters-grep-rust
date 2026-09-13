@@ -7,8 +7,6 @@ use lib::{check_digits, exit_process_errored, remove_start_end, start_end_is_pat
 mod match_func;
 use match_func::{match_pattern, print_single_matching_line};
 
-
-
 // Usage: echo <input_text> | your_program.sh -E <pattern>
 fn main() {
     // You can use print statements as follows for debugging, they'll be visible when running tests.
@@ -133,19 +131,25 @@ fn main() {
 }
 
 fn handle_sentence_ptn(sentences: &Vec<String>, pattern: String) -> Vec<String> {
+    //println!("{:?}", sentences);
     let mut final_sentence = String::new();
     let mut sentence_collection: Vec<String> = Vec::new();
+
     for sentence in sentences.iter() {
         let sentence_spilt: Vec<&str> = sentence.split_whitespace().collect();
+
         let ptn_split: Vec<&str> = pattern.split_whitespace().collect();
+        //println!("{sentence} vs {:?}", ptn_split);
         let res = handle_single_ptn_to_spaced_txt(&sentence_spilt, &ptn_split);
-        let res_len = res.len();
-        final_sentence = res
-            .into_iter()
-            .enumerate()
-            .map(|(idx, a)| a.replace("\n", " ").replace("\r", "").replace("\r\n", ""))
-            .collect();
-        sentence_collection.push(final_sentence);
+
+        if res.len() > 0 {
+            final_sentence = res
+                .into_iter()
+                .enumerate()
+                .map(|(idx, a)| a.replace("\n", " ").replace("\r", "").replace("\r\n", ""))
+                .collect();
+            sentence_collection.push(final_sentence);
+        }
     }
 
     //println!("all res: {:?}", sentence_collection);
@@ -169,23 +173,24 @@ fn handle_single_ptn_to_spaced_txt(
         }
     }
     //println!("{:?} vs {:?}", new_ptn_spilt, split_input_by_space);
-    for ptn in new_ptn_spilt.iter() {
-        let mut input_to_start_at = &split_input_by_space[start..];
-        //println!("{:?}", split_input_by_space);
-        for (idx, i) in input_to_start_at.iter().enumerate() {
-            //println!("index: {start} matching: {i} == {ptn}");
-            let mut i_str = i.to_string();
-            let res_str = print_single_matching_line(&i_str, &mut ptn.to_string());
-            //println!("resuot: ---{res_str}---{idx}");
-            start += 1;
-            if res_str.len() > 0 {
-                
-                if idx == split_input_by_space.len() - 1 {
-                    res.push(res_str);
-                    //println!("idx reached ==== {start}=== idx {idx}");
-                } else {
-                    res.push(format!("{res_str}\n"));
-                    break;
+    while start < split_input_by_space.len() {
+        for ptn in new_ptn_spilt.iter() {
+            let mut input_to_start_at = &split_input_by_space[start..];
+            //println!("{:?}", split_input_by_space);
+            for (idx, i) in input_to_start_at.iter().enumerate() {
+                //println!("index: {start} matching: {i} == {ptn}");
+                let mut i_str = i.to_string();
+                let res_str = print_single_matching_line(&i_str, &mut ptn.to_string());
+                //println!("resuot: ---{res_str}---{idx}");
+                start += 1;
+                if res_str.to_string().trim().len() > 0 {
+                    if idx == split_input_by_space.len() - 1 {
+                        res.push(res_str);
+                        //println!("idx reached ==== {start}=== idx {idx}");
+                    } else {
+                        res.push(format!("{res_str}\n"));
+                        break;
+                    }
                 }
             }
         }
