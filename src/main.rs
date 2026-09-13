@@ -33,7 +33,9 @@ fn main() {
             res = handle_sentence_ptn(&split_by_full_stop_cleaned, pattern.clone());
             if res.len() >= 1 {
                 for r in res {
-                    let s = r.trim();
+                    //println!("DEBUG: original='{}'", r); // See raw value
+                    let s = r.trim_end();
+                    //println!("DEBUG: trimmed='{}'", s); // See after trim
                     println!("{s}");
                 }
 
@@ -141,24 +143,22 @@ fn handle_sentence_ptn(sentences: &Vec<String>, pattern: String) -> Vec<String> 
         let ptn_split: Vec<&str> = pattern.split_whitespace().collect();
         //println!("{sentence} vs {:?}", ptn_split);
         let res = handle_single_ptn_to_spaced_txt(&sentence_spilt, &ptn_split);
-      
+
         let res_len = res.len();
         let res_clone = res.clone();
-        if !res.is_empty() && !(res.len() == 1 && matches!(res[0].as_str(), "\n" | "\r" | "\n\r")){
+        if !res.is_empty() && !(res.len() == 1 && matches!(res[0].as_str(), "\n" | "\r" | "\n\r")) {
             //println!("res is {:?}", res);
             final_sentence = res
                 .into_iter()
                 .enumerate()
-                .map(|(idx, a)| 
-
-                if a == "\n" && idx != res_len -1 {
-                    //println!("res is {:?} and a is {a} idx {idx}", res_clone);
-                    a
-                } else {
-                    a.replace("\n", " ").replace("\r", "").replace("\r\n", "")
-                }
-            
-            )
+                .map(|(idx, a)| {
+                    if a == "\n" && idx != res_len - 1 {
+                        //println!("res is {:?} and a is {a} idx {idx}", res_clone);
+                        a
+                    } else {
+                        a.replace("\n", " ").replace("\r", "").replace("\r\n", "")
+                    }
+                })
                 .collect();
             sentence_collection.push(final_sentence);
         }
@@ -209,10 +209,9 @@ fn handle_single_ptn_to_spaced_txt(
             }
         }
 
-        if start !=  split_input_by_space.len() {
+        if start != split_input_by_space.len() {
             res.push("\n".to_string())
         }
-        
     }
 
     return res;
