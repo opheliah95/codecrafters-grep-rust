@@ -198,7 +198,7 @@ fn handle_single_ptn_to_spaced_txt(
                 if res_str.to_string().trim().len() > 0 {
                     if idx == split_input_by_space.len() - 1 {
                         res.push(res_str);
-                        println!("===break===");
+                        //println!("===break===");
 
                         //println!("idx reached ==== {start}=== idx {idx}");
                     } else {
@@ -209,8 +209,10 @@ fn handle_single_ptn_to_spaced_txt(
             }
         }
 
-        //println!("start is {start}...break");
-        res.push("\n".to_string());
+        if start !=  split_input_by_space.len() {
+            res.push("\n".to_string())
+        }
+        
     }
 
     return res;
