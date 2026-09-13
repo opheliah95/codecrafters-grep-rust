@@ -33,7 +33,7 @@ fn main() {
             res = handle_sentence_ptn(&split_by_full_stop_cleaned, pattern.clone());
             if res.len() >= 1 {
                 for r in res {
-                    let s = r.trim_end();
+                    let s = r.trim();
                     println!("{s}");
                 }
 
