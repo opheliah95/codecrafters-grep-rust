@@ -33,9 +33,9 @@ fn main() {
             res = handle_sentence_ptn(&split_by_full_stop_cleaned, pattern.clone());
             if res.len() >= 1 {
                 for r in res {
-                    //println!("DEBUG: original='{}'", r); // See raw value
+                    eprintln!("DEBUG: original='{}'", r); // See raw value
                     let s = r.trim_end();
-                    //println!("DEBUG: trimmed='{}'", s); // See after trim
+                    eprintln!("DEBUG: trimmed='{}'", s); // See after trim
                     println!("{s}");
                 }
 
