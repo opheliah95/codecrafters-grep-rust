@@ -33,9 +33,9 @@ fn main() {
             res = handle_sentence_ptn(&split_by_full_stop_cleaned, pattern.clone());
             if res.len() >= 1 {
                 for r in res {
-                    eprintln!("DEBUG: original='{}'", r); // See raw value
+                    //eprintln!("DEBUG: original='{}'", r); // See raw value
                     let s = r.trim_end().to_string();
-                    eprintln!("DEBUG: trimmed='{}'", s); // See after trim
+                    //eprintln!("DEBUG: trimmed='{}'", s); // See after trim
                     println!("{s}");
                 }
 
@@ -147,7 +147,7 @@ fn handle_sentence_ptn(sentences: &Vec<String>, pattern: String) -> Vec<String> 
         let res_len = res.len();
         let res_clone = res.clone();
         if !res.is_empty() && !(res.len() == 1 && matches!(res[0].as_str(), "\n" | "\r" | "\n\r")) {
-            //println!("res is {:?}", res);
+            eprintln!("res is {:?}", res);
             final_sentence = res
                 .into_iter()
                 .enumerate()
@@ -193,7 +193,7 @@ fn handle_single_ptn_to_spaced_txt(
             let mut input_to_start_at = &split_input_by_space[start..];
             //println!("{:?}", split_input_by_space);
             for (idx, i) in input_to_start_at.iter().enumerate() {
-                //println!("index: {start} matching: {i} == {ptn}");
+                println!("index: {start} matching: {i} == {ptn}");
                 let mut i_str = i.to_string();
                 let res_str = print_single_matching_line(&i_str, &mut ptn.to_string());
                 //println!("resuot: ---{res_str}---{idx}");

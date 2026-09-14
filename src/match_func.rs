@@ -66,7 +66,7 @@ pub fn examine_repeat(mut input_line: &str, mut pattern: &str) -> Option<String>
 }
 
 pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
-   //println!("===matches {input_line} to {pattern}");
+   eprintln!("===matches {input_line} to {pattern}");
     match pattern {
         // check has both start and end
         ptn if pattern.starts_with("^") && pattern.ends_with("$") => {
@@ -186,7 +186,10 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
 
                 for val in ptn_spilt {
                     //println!("eval if {input_line} contain {val}");
-                    contain_alt.push(input_line.contains(val));
+                    if input_line == val {
+                        return true;
+                    }
+                    contain_alt.push(input_line== val);
                     //println!("the vec is {:?} ", contain_alt);
                 }
                 return contain_alt.iter().any(|v| *v == true);
@@ -198,10 +201,10 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
             let alt_end = ptn.rfind(")").unwrap_or(0);
             let pipe_find = ptn.find("|").unwrap_or(0);
             if alt_end == 0 || pipe_find == 0 {
-                println!("matching  {input_line} -->  {ptn} NO CLOSURE");
+                eprintln!("matching  {input_line} -->  {ptn} NO CLOSURE");
                 return check_individual_match(input_line, ptn);
             } else if alt_end <= pipe_find {
-                println!("NOT CLOSURE!!  {input_line} -->  {ptn} ) appear earlier than |");
+                eprintln!("NOT CLOSURE!!  {input_line} -->  {ptn} ) appear earlier than |");
                 return check_individual_match(input_line, ptn);
             } else {
                 // match ()
@@ -216,7 +219,7 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                     return true;
                 } else if ptn_1_match {
                     let mut ptn_1_match_start = find_match_inbetween(input_line, ptn_p1_old);
-                    //println!("input start is {ptn_1_match_start} and will append {ptn_p2}");
+                    println!("input start is {ptn_1_match_start} and will append {ptn_p2}");
 
                     ptn_1_match_start.push_str(ptn_p2);
                     // println!("partial () match, need to match {input_line} => {ptn_1_match_start}");

@@ -1,6 +1,5 @@
 use std::process;
 
-
 pub fn check_all_true(vec: &Vec<bool>) -> bool {
     if vec.len() == 0 {
         return false;
@@ -26,17 +25,18 @@ pub fn find_match_inbetween(source: &str, pattern: &str) -> String {
     //println!("matching word by word source {source} and ptn: {pattern}");
     let mut start_pos: usize = 0;
     //let mut end_pos:usize = 0;
+    let source_len = source.len();
     let mut matched_chars: Vec<char> = Vec::new();
     for (s_idx, s_val) in source.chars().enumerate() {
         for (p_idx, p_val) in pattern.chars().enumerate() {
             //println!("s_val {s_val}, start pos : {start_pos}  and p_val {p_val} and s_idx {s_idx}");
             if s_val == p_val {
-                if start_pos > 0 && start_pos != s_idx - 1 {
-                    matched_chars = Vec::new();
-                }
-
-                start_pos = s_idx;
+                
                 matched_chars.push(s_val);
+            }
+            if start_pos >= source_len - 1 {
+                println!("{:?}", matched_chars);
+                return matched_chars.iter().collect();
             }
         }
     }
