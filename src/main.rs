@@ -193,7 +193,7 @@ fn handle_single_ptn_to_spaced_txt(
             let mut input_to_start_at = &split_input_by_space[start..];
             //println!("{:?}", split_input_by_space);
             for (idx, i) in input_to_start_at.iter().enumerate() {
-                println!("index: {start} matching: {i} == {ptn}");
+                //println!("index: {start} matching: {i} == {ptn}");
                 let mut i_str = i.to_string();
                 let res_str = print_single_matching_line(&i_str, &mut ptn.to_string());
                 //println!("resuot: ---{res_str}---{idx}");
