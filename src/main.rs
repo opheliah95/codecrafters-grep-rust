@@ -1,6 +1,5 @@
 use std::env;
-use std::f32::consts::LN_10;
-use std::io::{self, Read};
+use std::io::{self, Read, Write};
 use std::process;
 mod lib;
 use lib::{check_digits, exit_process_errored, remove_start_end, start_end_is_pattern};
@@ -145,7 +144,7 @@ fn main() {
         if color_always {
            res = split_input_by_space.iter().map(
             |a| if res_trim.contains(a) {
-                 format!("\033[01;31m{}\033[m", a)
+                 format!("\x1b[01;31m{}\x1b[0m", a)
                 
             } else {
                 a.to_string()
@@ -158,6 +157,7 @@ fn main() {
 
         if res.len() > 0 {
             println!("{}", res.join(" "));
+            io::stdout().flush().unwrap();
             process::exit(0)
         }
     }
