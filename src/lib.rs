@@ -26,21 +26,40 @@ pub fn find_match_inbetween(source: &str, pattern: &str) -> String {
     let mut start_pos: usize = 0;
     //let mut end_pos:usize = 0;
     let source_len = source.len();
+    let pattern_len = pattern.len();
     let mut matched_chars: Vec<char> = Vec::new();
+
+    // remove all brackets
+    let special_symbols = ["|", ")", "(", "$", "^", "?"];
+    let source_contain_symbols = special_symbols.iter().any(|a| source.contains(*a));
+    let mut new_pattern = pattern;
+    if !source_contain_symbols {
+        for s in special_symbols.iter() {
+            pattern.replace(s, "");
+        }
+    }
+
+    println!("pattern is now {pattern}");
+
     for (s_idx, s_val) in source.chars().enumerate() {
         for (p_idx, p_val) in pattern.chars().enumerate() {
             //println!("s_val {s_val}, start pos : {start_pos}  and p_val {p_val} and s_idx {s_idx}");
             if s_val == p_val {
-                
+                if start_pos == 0 {
+                    start_pos = s_idx;
+                } else {
+                    start_pos += 1;
+                }
                 matched_chars.push(s_val);
+                break;
             }
+
             if start_pos >= source_len - 1 {
                 println!("{:?}", matched_chars);
                 return matched_chars.iter().collect();
             }
         }
     }
-
     let res = matched_chars.iter().collect();
     return res;
 }

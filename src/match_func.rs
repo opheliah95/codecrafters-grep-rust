@@ -6,10 +6,8 @@ pub fn examine_repeat(mut input_line: &str, mut pattern: &str) -> Option<String>
     let mut input_temp = &input_line.replace(",", "");
     let mut res_output: Vec<String> = vec![];
 
-
-    
     let mut repeats_result: HashMap<String, usize> = HashMap::new();
-    
+
     for repeat in repeats.into_iter() {
         if pattern.contains(repeat) {
             let count = pattern.matches(repeat).count();
@@ -30,7 +28,7 @@ pub fn examine_repeat(mut input_line: &str, mut pattern: &str) -> Option<String>
         if input_line_end > *count {
             diff = &input_temp[*count..];
         }
-        
+
         //'println!("{input_temp} -> {repeat} -> {count} -> diff len {diff} -> {}", *count + diff.len());
         if input_temp.len() == *count {
             //println!("SUCCES: {input_temp} -> {repeat}");
@@ -66,7 +64,7 @@ pub fn examine_repeat(mut input_line: &str, mut pattern: &str) -> Option<String>
 }
 
 pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
-   eprintln!("===matches {input_line} to {pattern}");
+    eprintln!("===matches {input_line} to {pattern}");
     match pattern {
         // check has both start and end
         ptn if pattern.starts_with("^") && pattern.ends_with("$") => {
@@ -132,11 +130,9 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
         "\\d+" => input_line.chars().all(|e| e.is_ascii_digit()),
         "\\d?" => input_line.chars().any(|e| e.is_ascii_digit()) || input_line.len() == 0,
         "d" => input_line.starts_with(|s: char| s.is_ascii_alphabetic()),
-        "\\w" => {
-            input_line.chars().any(|e| {
-                (e.is_ascii_alphanumeric() || e == '_') && !vec!['+', '!', '@', '$'].contains(&e)
-            }) 
-        }
+        "\\w" => input_line.chars().any(|e| {
+            (e.is_ascii_alphanumeric() || e == '_') && !vec!['+', '!', '@', '$'].contains(&e)
+        }),
         "\\w+" => {
             for w in input_line.chars() {
                 if !match_pattern(&w.to_string(), "\\w") {
@@ -189,7 +185,7 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                     if input_line == val {
                         return true;
                     }
-                    contain_alt.push(input_line== val);
+                    contain_alt.push(input_line == val);
                     //println!("the vec is {:?} ", contain_alt);
                 }
                 return contain_alt.iter().any(|v| *v == true);
@@ -198,8 +194,22 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
 
         ptn if ptn.starts_with("(") => {
             //println!("ptn start with (: {input_line} ----  {ptn}");
-            let alt_end = ptn.rfind(")").unwrap_or(0);
+            let mut alt_end = ptn.rfind(")").unwrap_or(0);
             let pipe_find = ptn.find("|").unwrap_or(0);
+
+            if ptn.ends_with("?") {
+                let char_before_ptn = ptn
+                    .clone()
+                    .chars()
+                    .nth(ptn.len().saturating_sub(2))
+                    .unwrap_or('\0');
+                if char_before_ptn != '\0' && input_line.chars().last() == Some(char_before_ptn) {
+                    if let Some((last_char_byte_idx, _)) = input_line.char_indices().last() {
+                         input_line = &input_line[..last_char_byte_idx];
+                    }
+                }
+            }
+
             if alt_end == 0 || pipe_find == 0 {
                 eprintln!("matching  {input_line} -->  {ptn} NO CLOSURE");
                 return check_individual_match(input_line, ptn);
@@ -207,12 +217,10 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                 eprintln!("NOT CLOSURE!!  {input_line} -->  {ptn} ) appear earlier than |");
                 return check_individual_match(input_line, ptn);
             } else {
-                // match ()
-
                 let mut ptn_p1_old = ptn.get(1..alt_end).unwrap();
                 let ptn_p1_string = format!("({ptn_p1_old})");
                 let ptn_p1: &str = &ptn_p1_string;
-                //println!("( ) | all present => matching {input_line} -------- {ptn_p1}");
+                println!("( ) | all present => matching {input_line} -------- {ptn_p1}");
                 let ptn_1_match = match_pattern(input_line, ptn_p1);
                 let ptn_p2 = ptn.get(alt_end + 1..).unwrap();
                 if ptn_p2.len() == 0 {
@@ -321,9 +329,9 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                             let first_letter_to_start = input_line.find(c).unwrap_or(0);
                             let old_input = input_line.clone();
                             input_line = &input_line[first_letter_to_start..];
-                            // println!(
-                            //     "===QUANT +? MATCHING===starting from {input_line} PREV: {old_input}, search res {c}, res pos {first_letter_to_start}"
-                            // );
+                            eprintln!(
+                                "===QUANT {ptn_quant} MATCHING===starting from {input_line} PREV: {old_input}, search res {c}, res pos {first_letter_to_start}"
+                            );
 
                             // // handle case like a+=> apple
                             // println!(
@@ -571,7 +579,6 @@ pub fn print_single_matching_line(input_line: &String, pattern: &mut String) -> 
         return input_line.to_string();
     }
 
-
     // handle plural cases
     if pattern.ends_with("s") && !input_line.ends_with("s") {
         println!("not matching");
@@ -666,9 +673,8 @@ pub fn print_single_matching_line(input_line: &String, pattern: &mut String) -> 
                     continue;
                 }
 
-                
-                let mut items: Vec<_>=  val.match_indices(&*pattern).collect();
-                
+                let mut items: Vec<_> = val.match_indices(&*pattern).collect();
+
                 // if spilt_by_hypgens.len() == 0 {
                 //     // items = val
                 //     // .chars()
@@ -678,20 +684,20 @@ pub fn print_single_matching_line(input_line: &String, pattern: &mut String) -> 
                 //     // .collect();
 
                 // } else {
-                    
+
                 // }
                 //println!("items are {:?}", items);
                 if !items.is_empty() {
                     let mut result: String = String::new();
                     let item_len = items.len();
-                    for (idx, item ) in items.iter() {
-                        if *idx != item_len - 1  {
+                    for (idx, item) in items.iter() {
+                        if *idx != item_len - 1 {
                             result.push_str(format!("{item}\n").as_ref());
-                        } else{
+                        } else {
                             result.push_str(item)
                         }
                     }
-          
+
                     return result;
                 } else {
                     return "".to_string();
