@@ -133,43 +133,35 @@ fn main() {
 }
 
 fn handle_sentence_ptn(sentences: &Vec<String>, pattern: String) -> Vec<String> {
-    //println!("{:?}", sentences);
-    let mut final_sentence = String::new();
     let mut sentence_collection: Vec<String> = Vec::new();
 
     for sentence in sentences.iter() {
         let sentence_spilt: Vec<&str> = sentence.split_whitespace().collect();
-
         let ptn_split: Vec<&str> = pattern.split_whitespace().collect();
-        //println!("{sentence} vs {:?}", ptn_split);
+        
         let res = handle_single_ptn_to_spaced_txt(&sentence_spilt, &ptn_split);
 
-        let res_len = res.len();
-        let res_clone = res.clone();
         if !res.is_empty() && !(res.len() == 1 && matches!(res[0].as_str(), "\n" | "\r" | "\n\r")) {
-            eprintln!("res is {:?}", res);
-            final_sentence = res
-                .into_iter()
-                .enumerate()
-                .map(|(idx, a)| {
-                    if a == "\n" && idx != res_len - 1 {
-                        //println!("res is {:?} and a is {a} idx {idx}", res_clone);
-                        a.trim_end();
-                        a
-                    } else {
-                        a.replace("\n", " ").replace("\r", "").replace("\r\n", "")
-                    }
-                })
-                .collect();
-            let cleaned = final_sentence.trim().to_string();
-            if !cleaned.is_empty() {
-                sentence_collection.push(cleaned);
+            // 1. Group tokens into separate lines whenever a "\n" token appears
+            let lines = res.split(|token| token == "\n" || token == "\r\n");
+
+            // 2. Format each line cleanly
+            for line_tokens in lines {
+                let cleaned_line = line_tokens
+                    .iter()
+                    .map(|token| token.trim()) // Strip spaces and hidden newlines off each token
+                    .filter(|token| !token.is_empty())
+                    .collect::<Vec<&str>>()
+                    .join(" "); // Join with EXACTLY one space (prevents trailing spaces)
+
+                if !cleaned_line.is_empty() {
+                    sentence_collection.push(cleaned_line);
+                }
             }
         }
     }
 
-    //println!("all res: {:?}", sentence_collection);
-    return sentence_collection;
+    sentence_collection
 }
 
 fn handle_single_ptn_to_spaced_txt(
