@@ -133,33 +133,43 @@ fn main() {
 }
 
 fn handle_sentence_ptn(sentences: &Vec<String>, pattern: String) -> Vec<String> {
+    //println!("{:?}", sentences);
+    let mut final_sentence = String::new();
     let mut sentence_collection: Vec<String> = Vec::new();
 
     for sentence in sentences.iter() {
-        let sentence_split: Vec<&str> = sentence.split_whitespace().collect();
+        let sentence_spilt: Vec<&str> = sentence.split_whitespace().collect();
+
         let ptn_split: Vec<&str> = pattern.split_whitespace().collect();
-        
-        let res = handle_single_ptn_to_spaced_txt(&sentence_split, &ptn_split);
+        //println!("{sentence} vs {:?}", ptn_split);
+        let res = handle_single_ptn_to_spaced_txt(&sentence_spilt, &ptn_split);
 
-        if !res.is_empty() {
-            // Clean newlines/carriages and filter empty tokens
-            let cleaned_tokens: Vec<String> = res
+        let res_len = res.len();
+        let res_clone = res.clone();
+        if !res.is_empty() && !(res.len() == 1 && matches!(res[0].as_str(), "\n" | "\r" | "\n\r")) {
+            eprintln!("res is {:?}", res);
+            final_sentence = res
                 .into_iter()
-                .map(|token| token.replace(['\n', '\r'], ""))
-                .map(|token| token.trim().to_string())
-                .filter(|token| !token.is_empty())
+                .enumerate()
+                .map(|(idx, a)| {
+                    if a == "\n" && idx != res_len - 1 {
+                        //println!("res is {:?} and a is {a} idx {idx}", res_clone);
+                        a.trim_end();
+                        a
+                    } else {
+                        a.replace("\n", " ").replace("\r", "").replace("\r\n", "")
+                    }
+                })
                 .collect();
-
-            // Join tokens with a single space to avoid trailing/leading space issues
-            let final_sentence = cleaned_tokens.join(" ");
-
-            if !final_sentence.is_empty() {
-                sentence_collection.push(final_sentence);
+            let cleaned = final_sentence.trim().to_string();
+            if !cleaned.is_empty() {
+                sentence_collection.push(cleaned);
             }
         }
     }
 
-    sentence_collection
+    //println!("all res: {:?}", sentence_collection);
+    return sentence_collection;
 }
 
 fn handle_single_ptn_to_spaced_txt(
