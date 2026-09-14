@@ -106,7 +106,7 @@ fn main() {
         for v in spilt_input_by_line {
             if match_pattern(v, &pattern) {
                 if color_always {
-                    println!("\033[01;31m{v}\033[m");
+                    println!("\x1b[01;31m{v}\x1b[0m");
                 } else {
                     println!("{v}");
                 }
@@ -128,7 +128,7 @@ fn main() {
         //eprintln!("{input_line} is a single word ine input");
         if match_pattern(&input_line, &pattern) {
             if color_always {
-                println!("\033[01;31m{input_line}\033[m");
+                println!("\x1b[01;31m{input_line}\x1b[0m");
             } else {
                 println!("{input_line}");
             }
