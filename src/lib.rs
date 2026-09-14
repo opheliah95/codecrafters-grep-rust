@@ -39,7 +39,7 @@ pub fn find_match_inbetween(source: &str, pattern: &str) -> String {
         }
     }
 
-    println!("pattern is now {pattern}");
+    //println!("pattern is now {pattern}");
 
     for (s_idx, s_val) in source.chars().enumerate() {
         for (p_idx, p_val) in pattern.chars().enumerate() {
