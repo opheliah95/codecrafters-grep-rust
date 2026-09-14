@@ -227,7 +227,7 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                     return true;
                 } else if ptn_1_match {
                     let mut ptn_1_match_start = find_match_inbetween(input_line, ptn_p1_old);
-                    println!("input start is {ptn_1_match_start} and will append {ptn_p2}");
+                    eprintln!("input start is {ptn_1_match_start} and will append {ptn_p2}");
 
                     ptn_1_match_start.push_str(ptn_p2);
                     // println!("partial () match, need to match {input_line} => {ptn_1_match_start}");
