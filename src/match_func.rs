@@ -220,7 +220,7 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                 let mut ptn_p1_old = ptn.get(1..alt_end).unwrap();
                 let ptn_p1_string = format!("({ptn_p1_old})");
                 let ptn_p1: &str = &ptn_p1_string;
-                println!("( ) | all present => matching {input_line} -------- {ptn_p1}");
+                //println!("( ) | all present => matching {input_line} -------- {ptn_p1}");
                 let ptn_1_match = match_pattern(input_line, ptn_p1);
                 let ptn_p2 = ptn.get(alt_end + 1..).unwrap();
                 if ptn_p2.len() == 0 {
