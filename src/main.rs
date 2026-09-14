@@ -14,7 +14,7 @@ fn main() {
     let mut input_line = String::new();
     io::stdin().read_to_string(&mut input_line).unwrap();
     let mut pattern = env::args().nth(2).unwrap();
-    let split_input_by_space = input_line.split_whitespace().collect::<Vec<&str>>();
+    let mut split_input_by_space = input_line.split_whitespace().collect::<Vec<&str>>();
     //println!("{input_line} line is: {:?}", split_input_by_space);
     if env::args().nth(1).unwrap() == "-o" {
         pattern = env::args().nth(3).unwrap();
@@ -35,7 +35,7 @@ fn main() {
                 for r in res {
                     //eprintln!("DEBUG: original='{}'", r); // See raw value
                     let s = r.trim_end().to_string();
-                   // eprintln!("DEBUG: trimmed='{}'", s); // See after trim
+                    // eprintln!("DEBUG: trimmed='{}'", s); // See after trim
                     println!("{}", s.trim());
                 }
 
@@ -86,9 +86,15 @@ fn main() {
         }
     }
 
-    if env::args().nth(1).unwrap() != "-E" {
+    if env::args().nth(1).unwrap() != "-E" && env::args().nth(1).unwrap() != "--color=always" {
         println!("Expected first argument to be '-E'");
         process::exit(1);
+    }
+
+    let mut color_always = false;
+    if env::args().nth(1).unwrap() == "--color=always" {
+        color_always = true;
+        pattern = env::args().nth(3).unwrap();
     }
 
     //handle single input
@@ -100,7 +106,12 @@ fn main() {
         let mut matched: Vec<bool> = Vec::new();
         for v in spilt_input_by_line {
             if match_pattern(v, &pattern) {
-                println!("{v}");
+                if color_always {
+                    println!("\033[01;31m{v}\033[m");
+                } else {
+                    println!("{v}");
+                }
+
                 matched.push(true);
             } else {
                 matched.push(false)
@@ -117,16 +128,36 @@ fn main() {
     if split_input_by_space.len() <= 1 {
         //eprintln!("{input_line} is a single word ine input");
         if match_pattern(&input_line, &pattern) {
-            println!("{input_line}");
+            if color_always {
+                println!("\033[01;31m{input_line}\033[m");
+            } else {
+                println!("{input_line}");
+            }
             process::exit(0)
         }
     } else {
         //println!("multiword input: {input_line} passed");
-        let split_ptn_by_space = pattern.split_whitespace().collect::<Vec<&str>>();
-        let res = handle_single_ptn_to_spaced_txt(&split_input_by_space, &split_ptn_by_space);
-        //println!("{:?}", res);
-        if res.len() == split_ptn_by_space.len() {
-            println!("{input_line}");
+        let mut split_ptn_by_space = pattern.split_whitespace().collect::<Vec<&str>>();
+        let mut res = handle_single_ptn_to_spaced_txt(&split_input_by_space, &split_ptn_by_space);
+        
+        let res_trim = res.iter().map(|t| t.trim()).filter(|t| !t.is_empty()).collect::<Vec<&str>>();
+
+        if color_always {
+           res = split_input_by_space.iter().map(
+            |a| if res_trim.contains(a) {
+                 format!("\033[01;31m{}\033[m", a)
+                
+            } else {
+                a.to_string()
+            }
+           ).collect::<Vec<String>>();
+        }
+
+        eprintln!("handle single ptn to sentence amtch: {:?}", res);
+
+
+        if res.len() > 0 {
+            println!("{}", res.join(" "));
             process::exit(0)
         }
     }

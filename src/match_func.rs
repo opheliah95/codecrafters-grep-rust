@@ -64,7 +64,7 @@ pub fn examine_repeat(mut input_line: &str, mut pattern: &str) -> Option<String>
 }
 
 pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
-    eprintln!("===matches {input_line} to {pattern}");
+    //eprintln!("===matches {input_line} to {pattern}");
     match pattern {
         // check has both start and end
         ptn if pattern.starts_with("^") && pattern.ends_with("$") => {
@@ -675,8 +675,9 @@ pub fn print_single_matching_line(input_line: &String, pattern: &mut String) -> 
                     continue;
                 }
 
+                 // already checked and passed
                 if pattern.contains("?") {
-                    return val.to_string(); // already checked and passed
+                    return val.to_string();
                     // let quant_indices: Vec<_> = pattern.match_indices("?").collect();
                     // pattern.replace("?", "");
                     // if pattern == val && pattern.len() > val.len() {
