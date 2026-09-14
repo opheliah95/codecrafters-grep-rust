@@ -581,7 +581,7 @@ pub fn print_single_matching_line(input_line: &String, pattern: &mut String) -> 
 
     // handle plural cases
     if pattern.ends_with("s") && !input_line.ends_with("s") {
-        println!("not matching");
+        //println!("not matching");
         return "".to_string();
     }
 

@@ -142,10 +142,10 @@ fn handle_sentence_ptn(sentences: &Vec<String>, pattern: String) -> Vec<String> 
         let res = handle_single_ptn_to_spaced_txt(&sentence_spilt, &ptn_split);
 
         if !res.is_empty() && !(res.len() == 1 && matches!(res[0].as_str(), "\n" | "\r" | "\n\r")) {
-            // 1. Group tokens into separate lines whenever a "\n" token appears
+            // Group tokens into separate lines whenever a "\n" token appears
             let lines = res.split(|token| token == "\n" || token == "\r\n");
 
-            // 2. Format each line cleanly
+            // Format each line cleanly
             for line_tokens in lines {
                 let cleaned_line = line_tokens
                     .iter()
