@@ -36,7 +36,7 @@ fn main() {
                     //eprintln!("DEBUG: original='{}'", r); // See raw value
                     let s = r.trim_end().to_string();
                     //eprintln!("DEBUG: trimmed='{}'", s); // See after trim
-                    println!("{s}");
+                    println!("{}", s.trim());
                 }
 
                 process::exit(0);
