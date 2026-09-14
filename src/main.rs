@@ -35,13 +35,13 @@ fn main() {
                 for r in res {
                     //eprintln!("DEBUG: original='{}'", r); // See raw value
                     let s = r.trim_end().to_string();
-                    //eprintln!("DEBUG: trimmed='{}'", s); // See after trim
+                   // eprintln!("DEBUG: trimmed='{}'", s); // See after trim
                     println!("{}", s.trim());
                 }
 
                 process::exit(0);
             } else {
-                //println!("res empty");
+                //eprintln!("res empty");
                 process::exit(1);
             }
         } else {
@@ -57,6 +57,8 @@ fn main() {
                 exit_process_errored();
             }
         }
+
+        eprintln!("res: {:?}", res);
 
         let res_len = res.len();
         if res_len >= 1 {
@@ -113,7 +115,7 @@ fn main() {
     }
 
     if split_input_by_space.len() <= 1 {
-        //println!("{input_line} is a single word ine input");
+        //eprintln!("{input_line} is a single word ine input");
         if match_pattern(&input_line, &pattern) {
             println!("{input_line}");
             process::exit(0)
@@ -128,6 +130,7 @@ fn main() {
             process::exit(0)
         }
     }
+    //eprint!("failed!: {:?}", split_input_by_space);
 
     process::exit(1)
 }
@@ -138,7 +141,7 @@ fn handle_sentence_ptn(sentences: &Vec<String>, pattern: String) -> Vec<String> 
     for sentence in sentences.iter() {
         let sentence_spilt: Vec<&str> = sentence.split_whitespace().collect();
         let ptn_split: Vec<&str> = pattern.split_whitespace().collect();
-        
+
         let res = handle_single_ptn_to_spaced_txt(&sentence_spilt, &ptn_split);
 
         if !res.is_empty() && !(res.len() == 1 && matches!(res[0].as_str(), "\n" | "\r" | "\n\r")) {
@@ -222,7 +225,7 @@ fn handle_single_matching_line(
         let mut p_str = p.to_string();
 
         let res_str = print_single_matching_line(&i.to_string(), &mut p_str);
-        //println!(" matching {i} -> {p_str} res-str: {res_str} -o arg");
+        //eprintln!(" matching {i} -> {p_str} res-str: {res_str} -o arg");
         if res_str.len() > 0 {
             res.push(res_str)
         }

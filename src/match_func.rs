@@ -346,7 +346,7 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                             // hanndle cases like ca+ts
                             let mut pattern_char = pattern.chars();
                             for (idx, val) in input_line.chars().enumerate() {
-                                //println!("enter loop {idx} and val {val}");
+                                eprintln!("enter loop {idx} and val {val}");
                                 if idx < before_p {
                                     let pattern_char_before_p =
                                         pattern_char.clone().nth(idx).unwrap();
@@ -360,7 +360,7 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                                     if idx == input_line.len() - 1 {
                                         let ptn_before_quant = ptn.get(idx + 1..p).unwrap();
                                         // if only one letter before ?
-                                        //println!("ptn before quant: {ptn_before_quant} and quant is {ptn_quant}");
+                                        //eprintln!("ptn before quant: {ptn_before_quant} and quant is {ptn_quant}");
                                         return ptn_quant == "?" && ptn_before_quant.len() == 1;
                                     }
                                 }
@@ -371,9 +371,9 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                                             // does not need to have the previous character
                                             let after_zero_quant =
                                                 pattern_char.clone().nth(idx).unwrap();
-                                            // println!(
-                                            //     "? reached matching {val} to PTN {after_zero_quant}"
-                                            // );
+                                            eprintln!(
+                                                "? reached matching {val} to PTN {after_zero_quant} and ptn_quant {ptn_quant}"
+                                            );
 
                                             if val != after_zero_quant {
                                                 if val != letter_after_p {
@@ -385,7 +385,7 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                                                 }
                                                 return true;
                                             }
-                                            // println!(
+                                            // eprintln!(
                                             //     "@@@MATCHED {val} matched ptn {}@@@",
                                             //     after_zero_quant
                                             // );
@@ -402,6 +402,7 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                                             }
                                         }
                                         _ => {
+                                            //eprintln!("{val} vs {pattern}");
                                             return false;
                                         }
                                     }
@@ -409,19 +410,20 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
 
                                 // reached plus/? sign -> need to have one match
                                 if idx == p {
-                                    // println!(
-                                    //     "reaching idx == p, value is {val} and ptn after p {} (idx pattern: {after_p}) LTR after p {letter_after_p}",
-                                    //     &pattern[after_p..]
-                                    // );
+                                    eprintln!(
+                                        "reaching idx == p, value is {val} and ptn after p {} (idx pattern: {after_p}) LTR after p {letter_after_p}",
+                                        &pattern[after_p..]
+                                    );
                                     // handle ? after ? should only match world by word
                                     if ptn_quant == "?" {
-                                        let ptn_to_match = pattern_char.clone().nth(p - 1).unwrap();
-                                        // println!(
+                                        let ptn_to_match = pattern_char.clone().nth(p + 1).unwrap();
+                                        // eprintln!(
                                         //     "AT idx == p NOW, check ? ZERP?ONE quantifier:  val {val} == {} ",
                                         //     ptn_to_match
                                         // );
-                                        if val == ptn_to_match {
-                                            return false;
+                                        if val == ptn_to_match && idx == input_line.len() -1 {
+                                           // eprintln!("MATCHED");
+                                            return true;
                                         }
                                     }
 
@@ -593,7 +595,7 @@ pub fn print_single_matching_line(input_line: &String, pattern: &mut String) -> 
         }
 
         if match_pattern(val, pattern) {
-            //println!("==={val} MATCHED {pattern}===");
+            eprintln!("==={val} MATCHING {pattern}===");
             if pattern == "\\d" {
                 for v_char in val.chars().into_iter() {
                     //println!("{v_char} is a digit...");
@@ -673,6 +675,18 @@ pub fn print_single_matching_line(input_line: &String, pattern: &mut String) -> 
                     continue;
                 }
 
+                if pattern.contains("?") {
+                    return val.to_string(); // already checked and passed
+                    // let quant_indices: Vec<_> = pattern.match_indices("?").collect();
+                    // pattern.replace("?", "");
+                    // if pattern == val && pattern.len() > val.len() {
+                    //     return val.to_string();
+                    // } else {
+                    //     for (idx, val ) in val.chars() {
+
+                    //     }
+                    // }
+                }
                 let mut items: Vec<_> = val.match_indices(&*pattern).collect();
 
                 // if spilt_by_hypgens.len() == 0 {
@@ -686,7 +700,7 @@ pub fn print_single_matching_line(input_line: &String, pattern: &mut String) -> 
                 // } else {
 
                 // }
-                //println!("items are {:?}", items);
+                eprintln!("items are {:?} vs {pattern} vs {val}", items);
                 if !items.is_empty() {
                     let mut result: String = String::new();
                     let item_len = items.len();
