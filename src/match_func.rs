@@ -429,7 +429,7 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                                             let after_zero_quant =
                                                 pattern_char.clone().nth(idx).unwrap();
                                             eprintln!(
-                                                "? reached matching {val} to PTN {after_zero_quant} and ptn_quant {ptn_quant}"
+                                                "? reached at input idx {idx} matching {val} to PTN {after_zero_quant} and ptn_quant {ptn_quant}"
                                             );
 
                                             if val != after_zero_quant {
@@ -474,10 +474,17 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                                     // handle ? after ? should only match world by word
                                     if ptn_quant == "?" {
                                         let ptn_to_match = pattern_char.clone().nth(p + 1).unwrap();
-                                        // eprintln!(
-                                        //     "AT idx == p NOW, check ? ZERP?ONE quantifier:  val {val} == {} ",
-                                        //     ptn_to_match
-                                        // );
+                                        eprintln!(
+                                            "AT idx == p NOW, check ? ZERP?ONE quantifier:  val {val} ?== {} ",
+                                            ptn_to_match
+                                        );
+
+                                        // handle case where not matching and pattern is ending after
+                                        if p + 1 == pattern.len() -1  && val != ptn_to_match {
+                                            return false
+                                        }
+
+
                                         if val == ptn_to_match && idx == input_line.len() - 1 {
                                             // eprintln!("MATCHED");
                                             return true;
