@@ -108,10 +108,11 @@ fn main() {
     let mut res: Vec<String> = Vec::new();
 
     if split_input_by_space.len() == 1 && split_ptn_by_space.len() == 1 {
-        let matched = print_single_matching_line(&input_line, &mut pattern);
+        let mut matched = print_single_matching_line(&input_line, &mut pattern);
         if matched.len() == 0 {
             exit_process_errored();
         }
+        let matched = matched.trim().to_string();
         eprintln!("input len and ptn len both 1 ->matched {matched}");
         match input_line.find(&matched) {
             Some(m) => {
