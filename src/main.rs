@@ -100,70 +100,119 @@ fn main() {
     let spilt_input_by_line = input_line.split('\n').collect::<Vec<&str>>();
     let mut spilt_pattern = ' ';
     //println!("{:?} {pattern}", spilt_input_by_line);
+    let mut split_ptn_by_space = pattern.split_whitespace().collect::<Vec<&str>>();
 
-    if spilt_input_by_line.len() > 1 {
-        let mut matched: Vec<bool> = Vec::new();
-        for v in spilt_input_by_line {
-            if match_pattern(v, &pattern) {
-                if color_always {
-                    println!("\x1b[01;31m{v}\x1b[0m");
+    let mut res: Vec<String> = Vec::new();
+
+    if split_input_by_space.len() == 1 && split_ptn_by_space.len() == 1 {
+        let matched = print_single_matching_line(&input_line, &mut pattern);
+        match input_line.find(&matched) {
+            Some(m) => {
+                let m_end = m + matched.len();
+
+                let input_vec = input_line.chars().collect::<Vec<char>>();
+                res = input_vec
+                    .iter()
+                    .enumerate()
+                    .map(|(idx, a)| {
+                        if idx >= m && idx < m_end {
+                            format!("\x1b[01;31m{}\x1b[0m", a)
+                        } else {
+                            a.to_string()
+                        }
+                    })
+                    .collect::<Vec<String>>();
+
+                if res.len() > 0 {
+                    println!("{}", res.join(""));
+                    io::stdout().flush().unwrap();
+                    process::exit(0)
                 } else {
-                    println!("{v}");
+                    eprint!("failed!: {:?}", split_input_by_space);
+
+                    process::exit(1)
                 }
-
-                matched.push(true);
-            } else {
-                matched.push(false)
             }
-        }
-
-        if matched.iter().any(|c| *c == true) {
-            process::exit(0)
-        } else {
-            process::exit(1)
-        }
-    }
-
-    if split_input_by_space.len() <= 1 {
-        //eprintln!("{input_line} is a single word ine input");
-        if match_pattern(&input_line, &pattern) {
-            if color_always {
-                println!("\x1b[01;31m{input_line}\x1b[0m");
-            } else {
-                println!("{input_line}");
+            None => {
+                exit_process_errored();
             }
-            process::exit(0)
         }
     } else {
-        //println!("multiword input: {input_line} passed");
-        let mut split_ptn_by_space = pattern.split_whitespace().collect::<Vec<&str>>();
-        let mut res = handle_single_ptn_to_spaced_txt(&split_input_by_space, &split_ptn_by_space);
-        
-        let res_trim = res.iter().map(|t| t.trim()).filter(|t| !t.is_empty()).collect::<Vec<&str>>();
-
-        if color_always {
-           res = split_input_by_space.iter().map(
-            |a| if res_trim.contains(a) {
-                 format!("\x1b[01;31m{}\x1b[0m", a)
-                
-            } else {
-                a.to_string()
-            }
-           ).collect::<Vec<String>>();
-        }
-
-        eprintln!("handle single ptn to sentence amtch: {:?}", res);
-
-
-        if res.len() > 0 {
-            println!("{}", res.join(" "));
-            io::stdout().flush().unwrap();
-            process::exit(0)
-        }
+        res = handle_single_ptn_to_spaced_txt(&split_input_by_space, &split_ptn_by_space);
     }
-    //eprint!("failed!: {:?}", split_input_by_space);
 
-    process::exit(1)
+    let res_trim = res
+        .iter()
+        .map(|t| t.trim())
+        .filter(|t| !t.is_empty())
+        .collect::<Vec<&str>>();
+
+    if color_always {
+        res = split_input_by_space
+            .iter()
+            .map(|a| {
+                if res_trim.contains(a) {
+                    format!("\x1b[01;31m{}\x1b[0m", a)
+                } else {
+                    a.to_string()
+                }
+            })
+            .collect::<Vec<String>>();
+    }
+
+    eprintln!("handle single ptn to sentence: {:?}", res);
+
+    if res.len() > 0 {
+        println!("{}", res.join(" "));
+        io::stdout().flush().unwrap();
+        process::exit(0)
+    } else {
+        eprint!("failed!: {:?}", split_input_by_space);
+
+        process::exit(1)
+    }
+
+    // if spilt_input_by_line.len() > 1 {
+    //     let mut matched: Vec<bool> = Vec::new();
+    //     for v in spilt_input_by_line {
+    //         if match_pattern(v, &pattern) {
+    //             if color_always {
+    //                 println!("\x1b[01;31m{v}\x1b[0m");
+    //             } else {
+    //                 println!("{v}");
+    //             }
+
+    //             matched.push(true);
+    //         } else {
+    //             matched.push(false)
+    //         }
+    //     }
+
+    //     if matched.iter().any(|c| *c == true) {
+    //         process::exit(0)
+    //     } else {
+    //         process::exit(1)
+    //     }
+    // }
+    //
+
+    // if split_input_by_space.len() <= 1 {
+    //     //eprintln!("{input_line} is a single word ine input");
+    //     if match_pattern(&input_line, &pattern) {
+    //         if color_always {
+    //             println!("\x1b[01;31m{input_line}\x1b[0m");
+    //         } else {
+    //             println!("{input_line}");
+    //         }
+    //         process::exit(0)
+    //     }
+    // } else {
+    //     //println!("multiword input: {input_line} passed");
+
+    // }
+    // //eprint!("failed!: {:?}", split_input_by_space);
+
+    // process::exit(1)
 }
 
 fn handle_sentence_ptn(sentences: &Vec<String>, pattern: String) -> Vec<String> {

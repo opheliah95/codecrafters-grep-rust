@@ -20,7 +20,7 @@ pub fn examine_repeat(mut input_line: &str, mut pattern: &str) -> Option<String>
     if repeats_result.is_empty() {
         return None;
     }
-    //println!("examine_repeat: {pattern} {:?}", repeats_result);
+    //eprintln!("examine_repeat: {pattern} {:?}", repeats_result);
     for (repeat, count) in &repeats_result {
         let repeat_len = repeat.len();
         let input_line_end = input_temp.len();
@@ -29,19 +29,19 @@ pub fn examine_repeat(mut input_line: &str, mut pattern: &str) -> Option<String>
             diff = &input_temp[*count..];
         }
 
-        //'println!("{input_temp} -> {repeat} -> {count} -> diff len {diff} -> {}", *count + diff.len());
-        if input_temp.len() == *count {
-            //println!("SUCCES: {input_temp} -> {repeat}");
+        eprintln!("{input_temp} -> {repeat} -> {count} -> diff len {diff} -> {}", *count + diff.len());
+        if input_temp.len() == *count || repeat_len * count == pattern.len(){
+            eprintln!("SUCCES: {input_temp} -> {repeat}");
             let input_filtered: String = input_temp
                 .chars()
                 .into_iter()
                 .filter(|a| match_pattern(&a.to_string(), repeat))
                 .collect();
 
-            //println!("{input_filtered}");
+            eprintln!("input filtered {input_filtered}");
             return Some(input_filtered);
         } else if input_temp.len() == *count + diff.len() {
-            //println!("{input_temp} vs {pattern}");
+            eprintln!("{input_temp} vs {pattern} and diff is {diff}");
             if pattern.ends_with(diff) {
                 let mut input_filtered: String = input_temp
                     .chars()
@@ -49,7 +49,7 @@ pub fn examine_repeat(mut input_line: &str, mut pattern: &str) -> Option<String>
                     .filter(|a| match_pattern(&a.to_string(), repeat))
                     .collect();
 
-                println!("{input_filtered}");
+                eprintln!("input filtered: {input_filtered}");
 
                 //input_filtered.push_str(diff);
                 return Some(input_filtered);
@@ -579,6 +579,14 @@ pub fn print_single_matching_line(input_line: &String, pattern: &mut String) -> 
     // simplest case exact match
     if input_line == pattern {
         return input_line.to_string();
+    }
+
+    match examine_repeat(input_line, pattern) { 
+        Some(a) => {
+            //eprintln!("the repeat is {a}");
+            return a
+        },
+        None => {}
     }
 
     // handle plural cases
