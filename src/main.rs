@@ -127,8 +127,12 @@ fn main() {
                     .iter()
                     .enumerate()
                     .map(|(idx, a)| {
-                        if idx >= m && idx < m_end {
-                            format!("\x1b[01;31m{}\x1b[0m", a)
+                        if color_always {
+                            if idx >= m && idx < m_end {
+                                format!("\x1b[01;31m{}\x1b[0m", a)
+                            } else {
+                                a.to_string()
+                            }
                         } else {
                             a.to_string()
                         }
