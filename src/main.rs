@@ -172,7 +172,12 @@ fn main() {
     eprintln!("handle single ptn to sentence: {:?}", res);
 
     if res.len() > 0 {
-        println!("{}", res.join(""));
+        if res.iter().all(|x| x.ends_with("\n")) {
+           let out =  res.join("");
+           println!("{}", out.trim())
+        } else {
+            println!("{}", res.join(" "));
+        }
         io::stdout().flush().unwrap();
         process::exit(0)
     } else {
