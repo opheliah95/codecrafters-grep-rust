@@ -3,12 +3,27 @@ use std::collections::HashMap;
 
 pub fn examine_repeat(mut input_line: &str, mut pattern: &str) -> Option<String> {
     let mut repeats = vec!["\\w", "\\d"];
-    if input_line.contains(pattern) {
-        repeats.push(pattern);
-    }
-    let mut input_temp = &input_line.replace(",", "");
-    
     let mut input_filtered = String::new();
+
+    if input_line.contains(pattern) && !repeats.contains(&pattern) {
+        let matches: Vec<_> = input_line.match_indices(pattern).collect();
+        let matches_len = matches.len();
+        if matches_len == 0 {
+            return None;
+        } else {
+            for (idx, m) in matches {
+                if idx == matches_len -1 {
+                    input_filtered.push_str(&m.to_string());
+                } else {
+                    input_filtered.push_str(&format!("{m}\n"));
+                }
+            }
+            return Some(input_filtered);
+        }
+    }
+
+    let mut input_temp = &input_line.replace(",", "");
+
     let mut repeats_result: HashMap<String, usize> = HashMap::new();
 
     for repeat in repeats.into_iter() {
@@ -39,7 +54,7 @@ pub fn examine_repeat(mut input_line: &str, mut pattern: &str) -> Option<String>
 
         if input_line_end == *count || repeat_len * count == pattern.len() {
             eprintln!("SUCCES: {input_temp} -> {repeat}");
-            format_input_of_repeated_pattern(
+            format_input_of_repeated_char_pattern(
                 input_temp,
                 &mut input_filtered,
                 repeat,
@@ -49,7 +64,7 @@ pub fn examine_repeat(mut input_line: &str, mut pattern: &str) -> Option<String>
         } else if input_line_end == *count + diff.len() {
             eprintln!("{input_temp} vs {pattern} and diff is {diff}");
             if pattern.ends_with(diff) {
-                format_input_of_repeated_pattern(
+                format_input_of_repeated_char_pattern(
                     input_temp,
                     &mut input_filtered,
                     repeat,
@@ -70,18 +85,53 @@ pub fn examine_repeat(mut input_line: &str, mut pattern: &str) -> Option<String>
     }
 }
 
-fn format_input_of_repeated_pattern(
+fn format_input_of_repeated_str_pattern(
     input_temp: &String,
     input_filtered: &mut String,
     repeat: &String,
     input_line_end: usize,
     count: usize,
 ) {
-    let input_split:Vec<String> = input_temp.split_whitespace().map (|a| a. to_string()).collect();
-    let input_res = input_split
+    let input_res = input_temp
+        .chars()
         .into_iter()
         .filter(|a| match_pattern(&a.to_string(), repeat))
-        .collect::<Vec<String>>();
+        .collect::<Vec<char>>();
+
+    let input_res_len = input_res.len();
+    if input_res_len == 0 {
+        *input_filtered = "".to_string();
+        return;
+    }
+
+    *input_filtered = input_res
+        .into_iter()
+        .enumerate()
+        .map(|(idx, a)| {
+            if count == input_res_len {
+                a.to_string()
+            } else {
+                //println!("a is {a}");
+                format!("{a}\n")
+            }
+        })
+        .collect();
+
+    eprintln!("input filtered: {input_filtered}");
+}
+
+fn format_input_of_repeated_char_pattern(
+    input_temp: &String,
+    input_filtered: &mut String,
+    repeat: &String,
+    input_line_end: usize,
+    count: usize,
+) {
+    let input_res = input_temp
+        .chars()
+        .into_iter()
+        .filter(|a| match_pattern(&a.to_string(), repeat))
+        .collect::<Vec<char>>();
 
     let input_res_len = input_res.len();
     if input_res_len == 0 {
@@ -616,7 +666,10 @@ pub fn remove_underline_and_punc(input_line: &String) -> String {
 pub fn print_single_matching_line(input_line: &String, pattern: &mut String) -> String {
     let new_input = remove_underline_and_punc(&input_line);
     let mut input_slice = new_input.split_whitespace().collect::<Vec<&str>>();
-    eprintln!("__FN_print_single_matching_line__ INPUT: {:?} **{pattern}**", input_slice);
+    eprintln!(
+        "__FN_print_single_matching_line__ INPUT: {:?} **{pattern}**",
+        input_slice
+    );
     let input_slice_len = input_slice.len();
     let mut res: Vec<char> = Vec::new();
     let mut res_str: Vec<String> = vec![];
