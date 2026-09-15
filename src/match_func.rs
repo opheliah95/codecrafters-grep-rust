@@ -85,41 +85,6 @@ pub fn examine_repeat(mut input_line: &str, mut pattern: &str) -> Option<String>
     }
 }
 
-fn format_input_of_repeated_str_pattern(
-    input_temp: &String,
-    input_filtered: &mut String,
-    repeat: &String,
-    input_line_end: usize,
-    count: usize,
-) {
-    let input_res = input_temp
-        .chars()
-        .into_iter()
-        .filter(|a| match_pattern(&a.to_string(), repeat))
-        .collect::<Vec<char>>();
-
-    let input_res_len = input_res.len();
-    if input_res_len == 0 {
-        *input_filtered = "".to_string();
-        return;
-    }
-
-    *input_filtered = input_res
-        .into_iter()
-        .enumerate()
-        .map(|(idx, a)| {
-            if count == input_res_len {
-                a.to_string()
-            } else {
-                //println!("a is {a}");
-                format!("{a}\n")
-            }
-        })
-        .collect();
-
-    eprintln!("input filtered: {input_filtered}");
-}
-
 fn format_input_of_repeated_char_pattern(
     input_temp: &String,
     input_filtered: &mut String,

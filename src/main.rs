@@ -99,8 +99,11 @@ fn main() {
     //handle single input
     let spilt_input_by_line = input_line.split('\n').collect::<Vec<&str>>();
     let mut spilt_pattern = ' ';
-    //println!("{:?} {pattern}", spilt_input_by_line);
     let mut split_ptn_by_space = pattern.split_whitespace().collect::<Vec<&str>>();
+    eprintln!(
+        "-E input {:?} ptn  {:?}",
+        split_input_by_space, split_ptn_by_space
+    );
 
     let mut res: Vec<String> = Vec::new();
 
@@ -109,6 +112,7 @@ fn main() {
         if matched.len() == 0 {
             exit_process_errored();
         }
+        eprintln!("matched {matched}");
         match input_line.find(&matched) {
             Some(m) => {
                 let m_end = m + matched.len();
@@ -168,7 +172,7 @@ fn main() {
     eprintln!("handle single ptn to sentence: {:?}", res);
 
     if res.len() > 0 {
-        println!("{}", res.join(" "));
+        println!("{}", res.join(""));
         io::stdout().flush().unwrap();
         process::exit(0)
     } else {
@@ -276,7 +280,15 @@ fn handle_single_ptn_to_spaced_txt(
             for (idx, i) in input_to_start_at.iter().enumerate() {
                 //println!("index: {start} matching: {i} == {ptn}");
                 let mut i_str = i.to_string();
-                let res_str = print_single_matching_line(&i_str, &mut ptn.to_string());
+                let mut res_str = String::new();
+
+                if env::args().any(|arg| arg == "-o") {
+                    res_str = print_single_matching_line(&i_str, &mut ptn.to_string());
+                } else {
+                    if match_pattern(i, ptn) {
+                        res_str = i.to_string();
+                    }
+                }
                 //println!("resuot: ---{res_str}---{idx}");
                 start += 1;
                 if res_str.to_string().trim().len() > 0 {
