@@ -4,8 +4,8 @@ use std::collections::HashMap;
 pub fn examine_repeat(mut input_line: &str, mut pattern: &str) -> Option<String> {
     let repeats = ["\\w", "\\d"];
     let mut input_temp = &input_line.replace(",", "");
-    let mut res_output: Vec<String> = vec![];
 
+    let mut input_filtered = String::new();
     let mut repeats_result: HashMap<String, usize> = HashMap::new();
 
     for repeat in repeats.into_iter() {
@@ -33,41 +33,49 @@ pub fn examine_repeat(mut input_line: &str, mut pattern: &str) -> Option<String>
             "{input_temp} -> {repeat} -> {count} -> diff len {diff} -> {}",
             *count + diff.len()
         );
-        if input_temp.len() == *count || repeat_len * count == pattern.len() {
+
+        if input_line_end == *count || repeat_len * count == pattern.len() {
             eprintln!("SUCCES: {input_temp} -> {repeat}");
-            let input_filtered: String = input_temp
+            input_filtered = input_temp
                 .chars()
                 .into_iter()
                 .filter(|a| match_pattern(&a.to_string(), repeat))
                 .collect();
 
             eprintln!("input filtered {input_filtered}");
-            return Some(input_filtered);
-        } else if input_temp.len() == *count + diff.len() {
+        } else if input_line_end == *count + diff.len() {
             eprintln!("{input_temp} vs {pattern} and diff is {diff}");
             if pattern.ends_with(diff) {
-                let mut input_filtered: String = input_temp
+                let mut start = 0;
+                input_filtered = input_temp
                     .chars()
                     .into_iter()
                     .filter(|a| match_pattern(&a.to_string(), repeat))
+                    .enumerate()
+                    .map(|(idx, a)|
+                        if idx == input_line_end -1 {
+                            a.to_string()
+                        } else {
+                            format!("{a}\n")
+                        }
+                
+                
+                )
                     .collect();
 
                 eprintln!("input filtered: {input_filtered}");
-
-                //input_filtered.push_str(diff);
-                if input_filtered.len() > 0 {
-                    return Some(input_filtered);
-                } else {
-                    return None;
-                }
             }
         } else {
             return None;
         }
     }
     //println!("res is {:?}", res_output);
-
-    return None;
+    //input_filtered.push_str(diff);
+    if input_filtered.len() > 0 {
+        return Some(input_filtered);
+    } else {
+        return None;
+    }
 }
 
 pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
@@ -461,7 +469,10 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                                     letter_to_match = pattern.clone().chars().nth(before_p);
                                     if val != letter_to_match.unwrap() {
                                         // if nothing after +
-                                        eprintln!("NOT MATCHED val is {val} , and to match is {}", letter_to_match.unwrap());
+                                        eprintln!(
+                                            "NOT MATCHED val is {val} , and to match is {}",
+                                            letter_to_match.unwrap()
+                                        );
                                         if letter_after_p == '\0' {
                                             return true;
                                         }
@@ -601,7 +612,7 @@ pub fn print_single_matching_line(input_line: &String, pattern: &mut String) -> 
         if match_pattern(input_line, pattern) {
             return input_line.to_string();
         } else {
-            return "".to_string()
+            return "".to_string();
         }
     }
 
