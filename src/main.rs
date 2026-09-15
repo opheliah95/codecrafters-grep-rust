@@ -163,6 +163,17 @@ fn main() {
                 if res_trim.contains(a) {
                     format!("\x1b[01;31m{}\x1b[0m", a)
                 } else {
+                    a.trim().to_string()
+                }
+            })
+            .collect::<Vec<String>>();
+    } else {
+        res = res
+            .iter()
+            .map(|a| {
+                if a != "\n" {
+                    a.trim().to_string()
+                } else {
                     a.to_string()
                 }
             })
@@ -173,10 +184,11 @@ fn main() {
 
     if res.len() > 0 {
         if res.iter().all(|x| x.ends_with("\n")) {
-           let out =  res.join("");
-           println!("{}", out.trim())
+            let out = res.join("");
+            println!("{}", out.trim())
         } else {
-            println!("{}", res.join(" "));
+            let out = res.join(" ");
+            println!("{}", out.trim())
         }
         io::stdout().flush().unwrap();
         process::exit(0)
