@@ -175,11 +175,16 @@ fn main() {
             .collect::<Vec<String>>();
     }
 
-    eprintln!("handle single ptn to sentence: {:?}  and {ptn_len_by_space}", res);
+    eprintln!(
+        "handle single ptn to sentence: {:?}  and {ptn_len_by_space}",
+        res
+    );
 
     if res.len() > 0 {
         for r in res.chunks(ptn_len_by_space) {
-            println!("{}", r.join(" "));
+            if r.len() == ptn_len_by_space {
+                println!("{}", r.join(" "));
+            }
         }
         process::exit(0)
     } else {
