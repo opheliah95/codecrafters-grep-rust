@@ -29,41 +29,30 @@ pub fn examine_repeat(mut input_line: &str, mut pattern: &str) -> Option<String>
             diff = &input_temp[*count..];
         }
 
-        eprintln!(
-            "{input_temp} -> {repeat} -> {count} -> diff len {diff} -> {}",
-            *count + diff.len()
-        );
+        // eprintln!(
+        //     "{input_temp} -> {repeat} -> {count} -> diff len {diff} -> {}",
+        //     *count + diff.len()
+        // );
 
         if input_line_end == *count || repeat_len * count == pattern.len() {
             eprintln!("SUCCES: {input_temp} -> {repeat}");
-            input_filtered = input_temp
-                .chars()
-                .into_iter()
-                .filter(|a| match_pattern(&a.to_string(), repeat))
-                .collect();
-
-            eprintln!("input filtered {input_filtered}");
+            format_input_of_repeated_pattern(
+                input_temp,
+                &mut input_filtered,
+                repeat,
+                input_line_end,
+                *count,
+            );
         } else if input_line_end == *count + diff.len() {
             eprintln!("{input_temp} vs {pattern} and diff is {diff}");
             if pattern.ends_with(diff) {
-                let mut start = 0;
-                input_filtered = input_temp
-                    .chars()
-                    .into_iter()
-                    .filter(|a| match_pattern(&a.to_string(), repeat))
-                    .enumerate()
-                    .map(|(idx, a)|
-                        if idx == input_line_end -1 {
-                            a.to_string()
-                        } else {
-                            format!("{a}\n")
-                        }
-                
-                
-                )
-                    .collect();
-
-                eprintln!("input filtered: {input_filtered}");
+                format_input_of_repeated_pattern(
+                    input_temp,
+                    &mut input_filtered,
+                    repeat,
+                    input_line_end,
+                    *count,
+                );
             }
         } else {
             return None;
@@ -76,6 +65,41 @@ pub fn examine_repeat(mut input_line: &str, mut pattern: &str) -> Option<String>
     } else {
         return None;
     }
+}
+
+fn format_input_of_repeated_pattern(
+    input_temp: &String,
+    input_filtered: &mut String,
+    repeat: &String,
+    input_line_end: usize,
+    count: usize,
+) {
+    let input_res = input_temp
+        .chars()
+        .into_iter()
+        .filter(|a| match_pattern(&a.to_string(), repeat))
+        .collect::<Vec<char>>();
+
+    let input_res_len = input_res.len();
+    if input_res_len == 0 {
+        *input_filtered = "".to_string();
+        return;
+    }
+
+    *input_filtered = input_res
+        .into_iter()
+        .enumerate()
+        .map(|(idx, a)| {
+            if count == input_res_len {
+                a.to_string()
+            } else {
+                //println!("a is {a}");
+                format!("{a}\n")
+            }
+        })
+        .collect();
+
+    eprintln!("input filtered: {input_filtered}");
 }
 
 pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
