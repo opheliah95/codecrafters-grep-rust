@@ -189,7 +189,7 @@ fn main() {
         res
     );
 
-    if res.len() > 0 && res.len() >= ptn_len_by_space {
+    if res.len() > 0 && res.len() == ptn_len_by_space {
         for r in res.chunks(ptn_len_by_space) {
             if r.len() == ptn_len_by_space {
                 println!("{}", r.join(" "));
