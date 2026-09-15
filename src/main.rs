@@ -106,6 +106,9 @@ fn main() {
 
     if split_input_by_space.len() == 1 && split_ptn_by_space.len() == 1 {
         let matched = print_single_matching_line(&input_line, &mut pattern);
+        if matched.len() == 0 {
+            exit_process_errored();
+        }
         match input_line.find(&matched) {
             Some(m) => {
                 let m_end = m + matched.len();
@@ -134,6 +137,8 @@ fn main() {
                 }
             }
             None => {
+                eprint!("failed!: {:?}", split_input_by_space);
+
                 exit_process_errored();
             }
         }

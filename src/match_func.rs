@@ -11,7 +11,7 @@ pub fn examine_repeat(mut input_line: &str, mut pattern: &str) -> Option<String>
     for repeat in repeats.into_iter() {
         if pattern.contains(repeat) {
             let count = pattern.matches(repeat).count();
-            if count > 0 {
+            if count > 1 {
                 repeats_result.insert(repeat.to_string(), count);
             }
         }
@@ -29,8 +29,11 @@ pub fn examine_repeat(mut input_line: &str, mut pattern: &str) -> Option<String>
             diff = &input_temp[*count..];
         }
 
-        eprintln!("{input_temp} -> {repeat} -> {count} -> diff len {diff} -> {}", *count + diff.len());
-        if input_temp.len() == *count || repeat_len * count == pattern.len(){
+        eprintln!(
+            "{input_temp} -> {repeat} -> {count} -> diff len {diff} -> {}",
+            *count + diff.len()
+        );
+        if input_temp.len() == *count || repeat_len * count == pattern.len() {
             eprintln!("SUCCES: {input_temp} -> {repeat}");
             let input_filtered: String = input_temp
                 .chars()
@@ -52,7 +55,11 @@ pub fn examine_repeat(mut input_line: &str, mut pattern: &str) -> Option<String>
                 eprintln!("input filtered: {input_filtered}");
 
                 //input_filtered.push_str(diff);
-                return Some(input_filtered);
+                if input_filtered.len() > 0 {
+                    return Some(input_filtered);
+                } else {
+                    return None;
+                }
             }
         } else {
             return None;
@@ -124,7 +131,7 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
             }
         }
         "\\d" => {
-            //println!("matching digits {input_line}  ----> {pattern}");
+            //println!("matching digits {input_line}  ----> {pattern} ---> {}", input_line.chars().any(|e| e.is_ascii_digit()));
             return input_line.chars().any(|e| e.is_ascii_digit());
         }
         "\\d+" => input_line.chars().all(|e| e.is_ascii_digit()),
@@ -205,7 +212,7 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                     .unwrap_or('\0');
                 if char_before_ptn != '\0' && input_line.chars().last() == Some(char_before_ptn) {
                     if let Some((last_char_byte_idx, _)) = input_line.char_indices().last() {
-                         input_line = &input_line[..last_char_byte_idx];
+                        input_line = &input_line[..last_char_byte_idx];
                     }
                 }
             }
@@ -421,8 +428,8 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                                         //     "AT idx == p NOW, check ? ZERP?ONE quantifier:  val {val} == {} ",
                                         //     ptn_to_match
                                         // );
-                                        if val == ptn_to_match && idx == input_line.len() -1 {
-                                           // eprintln!("MATCHED");
+                                        if val == ptn_to_match && idx == input_line.len() - 1 {
+                                            // eprintln!("MATCHED");
                                             return true;
                                         }
                                     }
@@ -581,11 +588,19 @@ pub fn print_single_matching_line(input_line: &String, pattern: &mut String) -> 
         return input_line.to_string();
     }
 
-    match examine_repeat(input_line, pattern) { 
+    if input_slice.len() == 1 {
+        if match_pattern(input_line, pattern) {
+            return input_line.to_string();
+        } else {
+            return "".to_string()
+        }
+    }
+
+    match examine_repeat(input_line, pattern) {
         Some(a) => {
             //eprintln!("the repeat is {a}");
-            return a
-        },
+            return a;
+        }
         None => {}
     }
 
@@ -683,7 +698,7 @@ pub fn print_single_matching_line(input_line: &String, pattern: &mut String) -> 
                     continue;
                 }
 
-                 // already checked and passed
+                // already checked and passed
                 if pattern.contains("?") {
                     return val.to_string();
                     // let quant_indices: Vec<_> = pattern.match_indices("?").collect();
