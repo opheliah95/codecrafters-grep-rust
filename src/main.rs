@@ -112,12 +112,16 @@ fn main() {
         if matched.len() == 0 {
             exit_process_errored();
         }
-        let matched = matched.trim().to_string();
-        eprintln!("input len and ptn len both 1 ->matched {matched}");
+        let matched = matched
+            .trim()
+            .replace("\n\r", "")
+            .replace("\n", "")
+            .replace("\r", "")
+            .to_string();
+        eprintln!("input len and ptn len both 1 ->matched [  {matched}  ]");
         match input_line.find(&matched) {
             Some(m) => {
                 let m_end = m + matched.len();
-
                 let input_vec = input_line.chars().collect::<Vec<char>>();
                 res = input_vec
                     .iter()
