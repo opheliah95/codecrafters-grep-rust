@@ -112,7 +112,7 @@ fn main() {
         if matched.len() == 0 {
             exit_process_errored();
         }
-        eprintln!("matched {matched}");
+        eprintln!("input len and ptn len both 1 ->matched {matched}");
         match input_line.find(&matched) {
             Some(m) => {
                 let m_end = m + matched.len();
