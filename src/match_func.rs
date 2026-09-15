@@ -11,7 +11,7 @@ pub fn examine_repeat(mut input_line: &str, mut pattern: &str) -> Option<String>
     for repeat in repeats.into_iter() {
         if pattern.contains(repeat) {
             let count = pattern.matches(repeat).count();
-            if count > 1 {
+            if count > 0 {
                 repeats_result.insert(repeat.to_string(), count);
             }
         }
@@ -588,20 +588,21 @@ pub fn print_single_matching_line(input_line: &String, pattern: &mut String) -> 
         return input_line.to_string();
     }
 
-    if input_slice.len() == 1 {
-        if match_pattern(input_line, pattern) {
-            return input_line.to_string();
-        } else {
-            return "".to_string()
-        }
-    }
-
+    // handle cases with input
     match examine_repeat(input_line, pattern) {
         Some(a) => {
             //eprintln!("the repeat is {a}");
             return a;
         }
         None => {}
+    }
+
+    if input_slice.len() == 1 {
+        if match_pattern(input_line, pattern) {
+            return input_line.to_string();
+        } else {
+            return "".to_string()
+        }
     }
 
     // handle plural cases
