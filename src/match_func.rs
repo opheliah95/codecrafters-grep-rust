@@ -2,9 +2,12 @@ use crate::lib::{find_match_inbetween, remove_start_end};
 use std::collections::HashMap;
 
 pub fn examine_repeat(mut input_line: &str, mut pattern: &str) -> Option<String> {
-    let repeats = ["\\w", "\\d"];
+    let mut repeats = vec!["\\w", "\\d"];
+    if input_line.contains(pattern) {
+        repeats.push(pattern);
+    }
     let mut input_temp = &input_line.replace(",", "");
-
+    
     let mut input_filtered = String::new();
     let mut repeats_result: HashMap<String, usize> = HashMap::new();
 
@@ -74,11 +77,11 @@ fn format_input_of_repeated_pattern(
     input_line_end: usize,
     count: usize,
 ) {
-    let input_res = input_temp
-        .chars()
+    let input_split:Vec<String> = input_temp.split_whitespace().map (|a| a. to_string()).collect();
+    let input_res = input_split
         .into_iter()
         .filter(|a| match_pattern(&a.to_string(), repeat))
-        .collect::<Vec<char>>();
+        .collect::<Vec<String>>();
 
     let input_res_len = input_res.len();
     if input_res_len == 0 {
@@ -613,7 +616,7 @@ pub fn remove_underline_and_punc(input_line: &String) -> String {
 pub fn print_single_matching_line(input_line: &String, pattern: &mut String) -> String {
     let new_input = remove_underline_and_punc(&input_line);
     let mut input_slice = new_input.split_whitespace().collect::<Vec<&str>>();
-    //println!("{:?} **{pattern}**", input_slice);
+    eprintln!("__FN_print_single_matching_line__ INPUT: {:?} **{pattern}**", input_slice);
     let input_slice_len = input_slice.len();
     let mut res: Vec<char> = Vec::new();
     let mut res_str: Vec<String> = vec![];
