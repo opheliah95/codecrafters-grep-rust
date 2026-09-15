@@ -98,8 +98,8 @@ fn main() {
 
     //handle single input
     let spilt_input_by_line = input_line.split('\n').collect::<Vec<&str>>();
-    let mut spilt_pattern = ' ';
     let mut split_ptn_by_space = pattern.split_whitespace().collect::<Vec<&str>>();
+    let ptn_len_by_space = split_ptn_by_space.len();
     eprintln!(
         "-E input {:?} ptn  {:?}",
         split_input_by_space, split_ptn_by_space
@@ -170,27 +170,17 @@ fn main() {
     } else {
         res = res
             .iter()
-            .map(|a| {
-                if a != "\n" {
-                    a.trim().to_string()
-                } else {
-                    a.to_string()
-                }
-            })
+            .map(|a| a.trim().to_string())
+            .filter(|a| !a.is_empty())
             .collect::<Vec<String>>();
     }
 
-    eprintln!("handle single ptn to sentence: {:?}", res);
+    eprintln!("handle single ptn to sentence: {:?}  and {ptn_len_by_space}", res);
 
     if res.len() > 0 {
-        if res.iter().all(|x| x.ends_with("\n")) {
-            let out = res.join("");
-            println!("{}", out.trim())
-        } else {
-            let out = res.join(" ");
-            println!("{}", out.trim())
+        for r in res.chunks(ptn_len_by_space) {
+            println!("{}", r.join(" "));
         }
-        io::stdout().flush().unwrap();
         process::exit(0)
     } else {
         eprint!("failed!: {:?}", split_input_by_space);
