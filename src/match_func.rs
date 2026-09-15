@@ -454,14 +454,14 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                                 }
 
                                 if idx > p {
-                                    println!(
+                                    eprintln!(
                                         "step {idx}: WHEN {idx} > {p}: checking match after {ptn}: PATTERN {letter_after_p} => VAL {val} INPUT PASSED {input_line}"
                                     );
 
                                     letter_to_match = pattern.clone().chars().nth(before_p);
                                     if val != letter_to_match.unwrap() {
                                         // if nothing after +
-                                        println!("val is {val} , and to match is {c}");
+                                        eprintln!("NOT MATCHED val is {val} , and to match is {}", letter_to_match.unwrap());
                                         if letter_after_p == '\0' {
                                             return true;
                                         }
@@ -472,13 +472,13 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                                             pattern_slice = &pattern[last_occurance_of_p + 1..];
                                         }
 
-                                        println!(
+                                        eprintln!(
                                             "matching {idx} idx::: {ptn} pattern: PTN {} VAL {}",
                                             pattern_slice,
-                                            &input_line[idx - 1..]
+                                            &input_line[idx..]
                                         );
 
-                                        return input_line[idx - 1..].starts_with(pattern_slice);
+                                        return input_line[idx..].starts_with(pattern_slice);
                                     }
                                     continue;
                                 }
