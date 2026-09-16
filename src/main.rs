@@ -41,7 +41,7 @@ fn main() {
 
         if pattern.ends_with("$") {
             let ptn_last = pattern.len();
-            let ptn_range = &pattern[0..ptn_last-1];
+            let ptn_range = &pattern[0..ptn_last - 1];
             if !input_line.ends_with(ptn_range) {
                 exit_process_errored();
             }
@@ -216,12 +216,20 @@ fn main() {
     eprintln!("old input has space {input_has_space}");
 
     if res.len() > 0 && input_has_space == 1 {
-        println!("{}", input_line);
+        if !color_always {
+            println!("{}", input_line);
+        } else {
+            let mut highlighted = input_line;
+            for r in res {
+                highlighted = highlighted.replace(&r, &format!("\x1b[31m{}\x1b[0m", r));
+            }
+            println!("{}", highlighted);
+        }
     } else if res.len() > 0 && res.len() >= ptn_len_by_space {
         for r in res.chunks(ptn_len_by_space) {
-            if r.len() == ptn_len_by_space  {
+            if r.len() == ptn_len_by_space {
                 println!("{}", r.join(" "));
-            } 
+            }
         }
         process::exit(0)
     } else {
