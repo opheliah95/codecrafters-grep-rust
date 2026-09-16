@@ -104,7 +104,7 @@ fn main() {
 
     let ptn_len_by_space = split_ptn_by_space.len();
     eprintln!(
-        "-E input {:?} ptn  {:?}",
+        "args contain -E input {:?} ptn  {:?}",
         split_input_by_space, split_ptn_by_space
     );
 
@@ -121,7 +121,7 @@ fn main() {
             .replace("\n", "")
             .replace("\r", "")
             .to_string();
-        eprintln!("input len and ptn len both 1 ->matched [  {matched}  ]");
+        eprintln!("args contain -e input len and ptn len both 1 ->matched [  {matched}  ]");
         match input_line.find(&matched) {
             Some(m) => {
                 let m_end = m + matched.len();

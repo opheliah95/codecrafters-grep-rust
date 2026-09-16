@@ -684,7 +684,7 @@ pub fn print_single_matching_line(input_line: &String, pattern: &mut String) -> 
     let new_ptn = remove_underline_and_punc(&pattern);
     let mut input_slice = new_input.split_whitespace().collect::<Vec<&str>>();
     let mut ptn_slice = new_ptn.split_whitespace().collect::<Vec<&str>>();
-
+    
     eprintln!(
         "__FN_print_single_matching_line__ INPUT: {:?} **{:?}**",
         input_slice, ptn_slice
@@ -696,7 +696,7 @@ pub fn print_single_matching_line(input_line: &String, pattern: &mut String) -> 
 
     // handle cases with input
 
-    if input_slice_len == 1 {
+    if input_slice_len == 1 || ptn_slice.len() == 1 {
         match examine_repeat(input_line, pattern) {
             Some(a) => {
                 //eprintln!("the repeat is {a}");
