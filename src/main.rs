@@ -184,8 +184,6 @@ fn main() {
             }
             None => {
                 let mut matched_char = matched.chars().into_iter().collect::<Vec<char>>();
-                let mut input_start = 0;
-                let mut result_str = String::new();
                 let result_str: String = input_line
                     .chars()
                     .map(|c| {
@@ -218,6 +216,7 @@ fn main() {
         .filter(|t| !t.is_empty())
         .collect::<Vec<&str>>();
 
+    eprintln!("res trimed is {:?}  and res is {:?} ", res_trim, res);
     if color_always {
         res = split_input_by_space
             .iter()
@@ -238,7 +237,7 @@ fn main() {
     }
 
     eprintln!(
-        "handle single ptn to sentence: {:?}  and {ptn_len_by_space}",
+        "handle single ptn to sentence: {:?}  vd ptn_len {ptn_len_by_space}",
         res
     );
 
@@ -264,9 +263,9 @@ fn main() {
         //eprintln!("input spilt len is {:?}", split_ptn_by_space);
         process::exit(1)
     } else if res.len() > 0 && res.len() >= ptn_len_by_space {
-        if ptn_len_by_space == 1 {
+        if ptn_len_by_space == 1 || color_always{
             println!("{}", res.join(" "));
-        } else {
+        } else if ! color_always {
             for r in res.chunks(ptn_len_by_space) {
                 if r.len() == ptn_len_by_space {
                     println!("{}", r.join(" "));
@@ -331,26 +330,31 @@ fn handle_single_ptn_to_spaced_txt(
         }
     }
 
-    //println!("{:?} vs {:?}", new_ptn_spilt, split_input_by_space);
+    eprintln!(
+        "====FN handle_single_ptn_to_spaced_txt=== {:?} vs {:?}",
+        new_ptn_spilt, split_input_by_space
+    );
     while start < split_input_by_space.len() {
         for ptn in split_ptn_by_space.iter() {
             let mut input_to_start_at = &split_input_by_space[start..];
             //println!("{:?}", split_input_by_space);
             for (idx, i) in input_to_start_at.iter().enumerate() {
                 //println!("index: {start} matching: {i} == {ptn}");
-                let mut i_str = i.to_string();
+
+                let mut i_str = i.replace(".", "").replace(",", ""); // handle plural cases
+
                 let mut res_str = String::new();
 
                 if env::args().any(|arg| arg == "-o") {
                     res_str = print_single_matching_line(&i_str, &mut ptn.to_string());
                 } else {
-                    if match_pattern(i, ptn) {
+                    if match_pattern(&i_str, ptn) {
                         res_str = i.to_string();
-                    } else if let Some(a) = examine_repeat(&i, &ptn) {
+                    } else if let Some(a) = examine_repeat(&i_str, &ptn) {
                         res_str = a.to_string();
                     }
                 }
-                //eprintln!("resuot: ---{res_str}---{idx}--len is {}", res_str.len());
+                eprintln!("resuot: ---{res_str}---idx: {idx}--len is {}", res_str.len());
                 start += 1;
                 if !res_str.trim().is_empty() || res_str.len() > 0 {
                     if idx == split_input_by_space.len() - 1 {

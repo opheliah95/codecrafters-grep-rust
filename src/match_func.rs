@@ -122,13 +122,10 @@ fn format_input_of_repeated_char_pattern(
         })
         .filter(|a| !a.is_empty() && a != "\n")
         .collect();
-
 }
 
 pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
-    //eprintln!("===FN match_pattern -> Matching: {input_line} to {pattern}");
-
-    // handle plural cases
+    eprintln!("===FN match_pattern -> Matching: {input_line} to {pattern}");
     if pattern.ends_with("s") && !input_line.ends_with("s") {
         eprintln!("plural not matching");
         return false;
@@ -670,7 +667,7 @@ pub fn remove_underline_and_punc(input_line: &String) -> String {
 
 pub fn spilt_all_white_space_punc(input_line: &str) -> Vec<String> {
     let mut new_input = input_line.replace('_', " _ ");
-    new_input = new_input.replace(',', " , ");
+    //new_input = new_input.replace(',', " , ");
     //new_input = new_input.replace('.', " . ");
 
     //println!("new input is {new_input}");
