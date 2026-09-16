@@ -231,19 +231,21 @@ fn main() {
         if !color_always {
             println!("{}", input_line);
         } else {
-             println!("{}", res.join(""));
+            println!("{}", res.join(""));
         }
-    }  else if res.len() > 0 && env::args().nth(1).unwrap() == "-E" && !color_always && !input_line.contains("\n") {
+    } else if res.len() > 0
+        && env::args().nth(1).unwrap() == "-E"
+        && !color_always
+        && !input_line.contains("\n")
+    {
         if res.len() >= split_ptn_by_space.len() {
-            println!("...{input_line}");
+            println!("{input_line}");
+            process::exit(0)
         }
 
-        println!("input spilt len is {:?}", split_ptn_by_space);
-         process::exit(1)
-        
-    }
-    
-    else if res.len () > 0 && res.len() >= ptn_len_by_space {
+        //eprintln!("input spilt len is {:?}", split_ptn_by_space);
+        process::exit(1)
+    } else if res.len() > 0 && res.len() >= ptn_len_by_space {
         for r in res.chunks(ptn_len_by_space) {
             if r.len() == ptn_len_by_space {
                 println!("{}", r.join(" "));
