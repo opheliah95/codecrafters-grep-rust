@@ -308,9 +308,10 @@ fn handle_single_ptn_to_spaced_txt(
             new_ptn_spilt.push(ptn.to_string());
         }
     }
+
     //println!("{:?} vs {:?}", new_ptn_spilt, split_input_by_space);
     while start < split_input_by_space.len() {
-        for ptn in new_ptn_spilt.iter() {
+        for ptn in split_ptn_by_space.iter() {
             let mut input_to_start_at = &split_input_by_space[start..];
             //println!("{:?}", split_input_by_space);
             for (idx, i) in input_to_start_at.iter().enumerate() {

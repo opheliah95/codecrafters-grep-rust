@@ -3,6 +3,14 @@ use std::collections::HashMap;
 
 
 pub fn examine_repeat(mut input_line: &str, mut pattern: &str) -> Option<String> {
+    
+     // handle plural cases
+    if pattern.ends_with("s") && !input_line.ends_with("s") {
+        eprintln!("plural not matching");
+        return None;
+    }
+    
+    
     let mut repeats = vec!["\\w", "\\d", "\\d+", "\\w+"];
     let mut input_filtered = String::new();
 
@@ -122,6 +130,12 @@ fn format_input_of_repeated_char_pattern(
 
 pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
     eprintln!("===FN match_pattern -> Matching: {input_line} to {pattern}");
+
+     // handle plural cases
+    if pattern.ends_with("s") && !input_line.ends_with("s") {
+        eprintln!("plural not matching");
+        return false;
+    }
     
     match pattern {
         // check has both start and end
