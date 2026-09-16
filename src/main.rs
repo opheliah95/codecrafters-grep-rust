@@ -344,7 +344,7 @@ fn handle_single_ptn_to_spaced_txt(
             }
         }
 
-        if start != split_input_by_space.len() {
+        if start != split_input_by_space.len()  && split_ptn_by_space.len() > 1{
             res.push("\n".to_string())
         }
     }
