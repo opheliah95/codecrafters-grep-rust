@@ -237,6 +237,8 @@ fn main() {
         if res.len() >= split_ptn_by_space.len() {
             println!("{input_line}");
         }
+
+        println!("input spilt len is {:?}", split_ptn_by_space);
          process::exit(1)
         
     }
