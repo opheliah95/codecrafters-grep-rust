@@ -615,7 +615,7 @@ pub fn check_individual_match(input_line: &str, pattern: &str) -> bool {
         }
     }
 
-    println!("all patterns to check are {:?}", matches_by_index);
+    eprintln!("all patterns to check are {:?}", matches_by_index);
 
     let mut map_keys: Vec<usize> = matches_by_index.clone().into_keys().collect();
     let mut ptn_to_match = "";

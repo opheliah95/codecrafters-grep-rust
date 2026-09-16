@@ -223,9 +223,16 @@ fn main() {
             .map(|a| {
                 if res_trim.contains(&a.as_str()) {
                     let a_len = a.len();
+                    let a_idx = input_line.find(a).unwrap();
+                    let a_end_idx = a_idx + a_len;
+                    eprintln!("the idx for {a} is {a_idx} + {a_len} = {a_end_idx} <<{input_line}>> next (=={}==)", &input_line[a_end_idx..a_end_idx+1] == "\n");
                     if a.ends_with(",") || a.ends_with(".") {
                         format!("\x1b[01;31m{}\x1b[0m{}", &a[0..a_len-1], &a[a_len-1..])
-                    } else {
+                    } 
+                    else if  &input_line[a_end_idx..a_end_idx+1] == "\n" {
+                        format!("\x1b[01;31m{}\x1b[0m\n", a)
+                    }
+                    else {
                         format!("\x1b[01;31m{}\x1b[0m", a)
                     }
                 } else {
@@ -268,18 +275,10 @@ fn main() {
         //eprintln!("input spilt len is {:?}", split_ptn_by_space);
         process::exit(1)
     } else if res.len() > 0 && res.len() >= ptn_len_by_space {
-
-        if ptn_len_by_space == 1   || color_always {
-            if !input_line.contains("\n") {
-                println!("{}", res.join(" "));
-            } else {
-                for r in res.iter() {
-                    println!("{r}");
-                }
-            }
-         
+        if ptn_len_by_space == 1 || color_always {
+            print_with_newline(&res);
+           
         } 
-        
         
         else if !color_always {
             for r in res.chunks(ptn_len_by_space) {
@@ -294,6 +293,19 @@ fn main() {
 
         process::exit(1)
     }
+}
+
+fn print_with_newline(res: &Vec<String>) {
+    for r in res {
+        if r.ends_with("\n") {
+            print!("{r}");
+        } else {
+            print!("{r} ");
+        }
+    
+    }
+    println!("");
+    io::stdout().flush();
 }
 
 fn handle_sentence_ptn(sentences: &Vec<String>, pattern: String) -> Vec<String> {
