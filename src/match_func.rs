@@ -129,7 +129,7 @@ fn format_input_of_repeated_char_pattern(
 }
 
 pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
-    eprintln!("===FN match_pattern -> Matching: {input_line} to {pattern}");
+    //eprintln!("===FN match_pattern -> Matching: {input_line} to {pattern}");
 
      // handle plural cases
     if pattern.ends_with("s") && !input_line.ends_with("s") {
