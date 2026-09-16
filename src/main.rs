@@ -222,7 +222,12 @@ fn main() {
             .iter()
             .map(|a| {
                 if res_trim.contains(&a.as_str()) {
-                    format!("\x1b[01;31m{}\x1b[0m", a)
+                    let a_len = a.len();
+                    if a.ends_with(",") || a.ends_with(".") {
+                        format!("\x1b[01;31m{}\x1b[0m{}", &a[0..a_len-1], &a[a_len-1..])
+                    } else {
+                        format!("\x1b[01;31m{}\x1b[0m", a)
+                    }
                 } else {
                     a.trim().to_string()
                 }
@@ -263,9 +268,9 @@ fn main() {
         //eprintln!("input spilt len is {:?}", split_ptn_by_space);
         process::exit(1)
     } else if res.len() > 0 && res.len() >= ptn_len_by_space {
-        if ptn_len_by_space == 1 || color_always{
+        if ptn_len_by_space == 1 || color_always {
             println!("{}", res.join(" "));
-        } else if ! color_always {
+        } else if !color_always {
             for r in res.chunks(ptn_len_by_space) {
                 if r.len() == ptn_len_by_space {
                     println!("{}", r.join(" "));
@@ -354,7 +359,10 @@ fn handle_single_ptn_to_spaced_txt(
                         res_str = a.to_string();
                     }
                 }
-                eprintln!("resuot: ---{res_str}---idx: {idx}--len is {}", res_str.len());
+                eprintln!(
+                    "resuot: ---{res_str}---idx: {idx}--len is {}",
+                    res_str.len()
+                );
                 start += 1;
                 if !res_str.trim().is_empty() || res_str.len() > 0 {
                     if idx == split_input_by_space.len() - 1 {
