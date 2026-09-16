@@ -34,15 +34,15 @@ fn main() {
             let ptn_last = pattern.len();
             let ptn_range = &pattern[1..ptn_last];
             if *input_line == ptn_range.to_string() {
-                exit_process_errored();
-            } else if color_always == true {
-                println!( "{}", format!("\x1b[01;31m{}\x1b[0m", input_line));
+                if color_always == true {
+                    println!("{}", format!("\x1b[01;31m{}\x1b[0m", input_line));
+                } else {
+                    println!("{input_line}");
+                }
                 process::exit(0);
             } else {
-                println!("{input_line}");
-                process::exit(0);
+                exit_process_errored();
             }
-
         } else if pattern.starts_with("^") {
             let ptn_range = &pattern[1..];
             //println!("here...{}", pattern.clone().chars().nth(1).unwrap());
