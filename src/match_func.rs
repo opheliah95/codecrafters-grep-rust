@@ -12,7 +12,7 @@ pub fn examine_repeat(mut input_line: &str, mut pattern: &str) -> Option<String>
             return None;
         } else {
             for (idx, m) in matches {
-                if idx == matches_len -1 {
+                if idx == matches_len - 1 {
                     input_filtered.push_str(&m.to_string());
                 } else {
                     input_filtered.push_str(&format!("{m}\n"));
@@ -468,7 +468,7 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                                 // reached plus/? sign -> need to have one match
                                 if idx == p {
                                     eprintln!(
-                                        "reaching idx == p, value is {val} and ptn after p {} (idx pattern: {after_p}) LTR after p {letter_after_p}",
+                                        "reaching idx == p at {idx}, value is {val} and ptn after p {} (idx pattern: {after_p}) LTR after p {letter_after_p}",
                                         &pattern[after_p..]
                                     );
                                     // handle ? after ? should only match world by word
@@ -480,10 +480,9 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                                         );
 
                                         // handle case where not matching and pattern is ending after
-                                        if p + 1 == pattern.len() -1  && val != ptn_to_match {
-                                            return false
+                                        if p + 1 == pattern.len() - 1 && val != ptn_to_match {
+                                            return false;
                                         }
-
 
                                         if val == ptn_to_match && idx == input_line.len() - 1 {
                                             // eprintln!("MATCHED");
@@ -512,16 +511,16 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
 
                                 if idx > p {
                                     eprintln!(
-                                        "step {idx}: WHEN {idx} > {p}: checking match after {ptn}: PATTERN {letter_after_p} => VAL {val} INPUT PASSED {input_line}"
+                                        "step {idx}: WHEN {idx} > {p}: checking match after {ptn}: PATTERN {letter_after_p} => VAL {val} INPUT: {input_line}"
                                     );
 
                                     letter_to_match = pattern.clone().chars().nth(before_p);
                                     if val != letter_to_match.unwrap() {
                                         // if nothing after +
-                                        eprintln!(
-                                            "NOT MATCHED val is {val} , and to match is {}",
-                                            letter_to_match.unwrap()
-                                        );
+                                        // eprintln!(
+                                        //     "NOT MATCHED val is {val} , and to match is {}",
+                                        //     letter_to_match.unwrap()
+                                        // );
                                         if letter_after_p == '\0' {
                                             return true;
                                         }
@@ -532,13 +531,29 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                                             pattern_slice = &pattern[last_occurance_of_p + 1..];
                                         }
 
-                                        eprintln!(
-                                            "matching {idx} idx::: {ptn} pattern: PTN {} VAL {}",
-                                            pattern_slice,
-                                            &input_line[idx..]
-                                        );
+                                        match (ptn_quant) {
+                                            "?" => {
+                                                eprintln!(
+                                                    "QUANT =? Match {idx} idx::: {ptn} pattern: PTN: {} VAL: {}",
+                                                    pattern_slice,
+                                                    &input_line[idx..]
+                                                );
 
-                                        return input_line[idx..].starts_with(pattern_slice);
+                                                return input_line[idx..]
+                                                    .starts_with(pattern_slice);
+                                            }
+
+                                            _ => {
+                                                eprintln!(
+                                                    "QUANT = +  idx > p matching {idx} idx::: {ptn} pattern: PTN: {} VAL: {}",
+                                                    pattern_slice,
+                                                    &input_line[idx-1..]
+                                                );
+
+                                                return input_line[idx-1..]
+                                                    .starts_with(pattern_slice);
+                                            }
+                                        }
                                     }
                                     continue;
                                 }
