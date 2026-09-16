@@ -233,7 +233,7 @@ fn main() {
         } else {
              println!("{}", res.join(""));
         }
-    }  else if res.len() > 0 && env::args().nth(1).unwrap() == "-E" && !color_always && input_line.contains("\n") {
+    }  else if res.len() > 0 && env::args().nth(1).unwrap() == "-E" && !color_always && !input_line.contains("\n") {
         println!("{input_line}");
     }
     
