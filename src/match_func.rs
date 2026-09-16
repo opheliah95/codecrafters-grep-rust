@@ -166,6 +166,7 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
         // check start anchor
         ptn if pattern.starts_with("^") => {
             let to_match = &pattern[1..pattern.len()];
+            println!("matching ^ {}", input_line.starts_with(to_match));
             return input_line.starts_with(to_match);
         }
         // ch,eck ending
