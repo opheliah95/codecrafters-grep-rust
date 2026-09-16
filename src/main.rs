@@ -235,7 +235,7 @@ fn main() {
         }
     }  else if res.len() > 0 && env::args().nth(1).unwrap() == "-E" && !color_always && !input_line.contains("\n") {
         if res.len() >= split_ptn_by_space.len() {
-            println!("{input_line}");
+            println!("...{input_line}");
         }
 
         println!("input spilt len is {:?}", split_ptn_by_space);
