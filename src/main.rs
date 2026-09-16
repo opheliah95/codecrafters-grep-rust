@@ -36,7 +36,7 @@ fn main() {
             if *input_line == ptn_range.to_string() {
                 exit_process_errored();
             } else if color_always == true {
-                println!( "{}", format!("\x1b[01;31m{}\x1b[0m", input_line))
+                println!( "{}", format!("\x1b[01;31m{}\x1b[0m", input_line));
                 process::exit(0);
             } else {
                 println!("{input_line}");
