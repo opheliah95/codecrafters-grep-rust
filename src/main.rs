@@ -268,9 +268,20 @@ fn main() {
         //eprintln!("input spilt len is {:?}", split_ptn_by_space);
         process::exit(1)
     } else if res.len() > 0 && res.len() >= ptn_len_by_space {
-        if ptn_len_by_space == 1 || color_always {
-            println!("{}", res.join(" "));
-        } else if !color_always {
+
+        if ptn_len_by_space == 1   || color_always {
+            if !input_line.contains("\n") {
+                println!("{}", res.join(" "));
+            } else {
+                for r in res.iter() {
+                    println!("{r}");
+                }
+            }
+         
+        } 
+        
+        
+        else if !color_always {
             for r in res.chunks(ptn_len_by_space) {
                 if r.len() == ptn_len_by_space {
                     println!("{}", r.join(" "));
