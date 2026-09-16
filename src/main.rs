@@ -30,16 +30,27 @@ fn main() {
     let mut split_input_by_space = spilt_all_white_space_punc(&input_line);
 
     if split_ptn_by_space.len() == 1 {
-        if pattern.starts_with("^") {
+        if pattern.starts_with("^") && pattern.ends_with("$") {
+            let ptn_last = pattern.len();
+            let ptn_range = &pattern[1..ptn_last];
+            if *input_line == ptn_range.to_string() {
+                exit_process_errored();
+            } else if color_always == true {
+                println!( "{}", format!("\x1b[01;31m{}\x1b[0m", input_line))
+                process::exit(0);
+            } else {
+                println!("{input_line}");
+                process::exit(0);
+            }
+
+        } else if pattern.starts_with("^") {
             let ptn_range = &pattern[1..];
             //println!("here...{}", pattern.clone().chars().nth(1).unwrap());
 
             if !input_line.starts_with(ptn_range) {
                 exit_process_errored();
             }
-        }
-
-        if pattern.ends_with("$") {
+        } else if pattern.ends_with("$") {
             let ptn_last = pattern.len();
             let ptn_range = &pattern[0..ptn_last - 1];
             if !input_line.ends_with(ptn_range) {
@@ -349,7 +360,7 @@ fn handle_single_matching_line(
     if !env::args().any(|x| x == "-o") {
         let test = res.join("");
         let input = split_input_by_space.join("");
-        if ! input.contains(&test) {
+        if !input.contains(&test) {
             return Vec::new();
         }
         let cleaned = res
