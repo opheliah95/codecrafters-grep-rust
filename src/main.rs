@@ -338,7 +338,7 @@ fn handle_single_matching_line(
             res.push(res_str)
         }
     }
-    println!("the res string length : {} ", res.len());
+    eprintln!("the res string length : {} ", res.len());
     if !env::args().any(|x| x == "-o") {
         let cleaned = res
             .iter()
