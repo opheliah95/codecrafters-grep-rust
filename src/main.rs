@@ -233,7 +233,12 @@ fn main() {
         } else {
              println!("{}", res.join(""));
         }
-    } else if res.len() > 0 && res.len() >= ptn_len_by_space {
+    }  else if res.len() > 0 && env::args().nth(1).unwrap() == "-E" && !color_always {
+        println!("{input_line}");
+    }
+    
+    
+    else if res.len () > 0 && res.len() >= ptn_len_by_space {
         for r in res.chunks(ptn_len_by_space) {
             if r.len() == ptn_len_by_space {
                 println!("{}", r.join(" "));
