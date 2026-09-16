@@ -219,7 +219,6 @@ fn main() {
         if !color_always {
             println!("{}", input_line);
         } else {
-            
             println!("{}", res.join(""));
         }
     } else if res.len() > 0 && res.len() >= ptn_len_by_space {
@@ -341,8 +340,18 @@ fn handle_single_matching_line(
             res.push(res_str)
         }
     }
-    eprintln!("the res string length : {} ", res.len());
+    eprintln!(
+        "the res string length : {} and res is {:?} ",
+        res.len(),
+        res
+    );
+
     if !env::args().any(|x| x == "-o") {
+        let test = res.join("");
+        let input = split_input_by_space.join("");
+        if ! input.contains(&test) {
+            return Vec::new();
+        }
         let cleaned = res
             .iter()
             .map(|x| x.trim().to_string())
@@ -353,5 +362,9 @@ fn handle_single_matching_line(
         return cleaned;
     }
 
-    return res;
+    if res.len() >= split_ptn_by_space.len() {
+        return res;
+    } else {
+        return Vec::new();
+    }
 }
