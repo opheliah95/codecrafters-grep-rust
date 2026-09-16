@@ -1,8 +1,9 @@
 use crate::lib::{find_match_inbetween, remove_start_end};
 use std::collections::HashMap;
 
+
 pub fn examine_repeat(mut input_line: &str, mut pattern: &str) -> Option<String> {
-    let mut repeats = vec!["\\w", "\\d"];
+    let mut repeats = vec!["\\w", "\\d", "\\d+", "\\w+"];
     let mut input_filtered = String::new();
 
     if input_line.contains(pattern) && !repeats.contains(&pattern) {
@@ -121,7 +122,8 @@ fn format_input_of_repeated_char_pattern(
 }
 
 pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
-    //eprintln!("===matches {input_line} to {pattern}");
+    eprintln!("===FN match_pattern -> Matching: {input_line} to {pattern}");
+    
     match pattern {
         // check has both start and end
         ptn if pattern.starts_with("^") && pattern.ends_with("$") => {
@@ -545,19 +547,17 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                                             }
 
                                             _ => {
-
                                                 if idx == input_line_len - 1 {
                                                     return val == pattern.chars().last().unwrap();
                                                 }
 
-
                                                 eprintln!(
                                                     "QUANT = +  idx > p matching {idx} idx::: {ptn} pattern: PTN: {} VAL: {}",
                                                     pattern_slice,
-                                                    &input_line[idx-1..]
+                                                    &input_line[idx - 1..]
                                                 );
 
-                                                return input_line[idx-1..]
+                                                return input_line[idx - 1..]
                                                     .starts_with(pattern_slice);
                                             }
                                         }
@@ -657,32 +657,54 @@ pub fn remove_underline_and_punc(input_line: &String) -> String {
     return new_input;
 }
 
-pub fn print_single_matching_line(input_line: &String, pattern: &mut String) -> String {
-    let new_input = remove_underline_and_punc(&input_line);
-    let mut input_slice = new_input.split_whitespace().collect::<Vec<&str>>();
-    eprintln!(
-        "__FN_print_single_matching_line__ INPUT: {:?} **{pattern}**",
-        input_slice
-    );
-    let input_slice_len = input_slice.len();
-    let mut res: Vec<char> = Vec::new();
-    let mut res_str: Vec<String> = vec![];
+pub fn spilt_all_white_space_punc(input_line: &str) -> Vec<String> {
+    let mut new_input = input_line.replace('_', " _ ");
+    new_input = new_input.replace(',', " , ");
+    new_input = new_input.replace('.', " . ");
 
+    //println!("new input is {new_input}");
+
+    let split_input: Vec<String> = new_input
+        .split(|t: char| t.is_whitespace())
+        .filter(|t| !t.is_empty())
+        .map(String::from)
+        .collect();
+
+    eprintln!("removed all punc and white space: {:?}", split_input);
+    split_input
+}
+
+pub fn print_single_matching_line(input_line: &String, pattern: &mut String) -> String {
     // simplest case exact match
     if input_line == pattern {
         return input_line.to_string();
     }
 
-    // handle cases with input
-    match examine_repeat(input_line, pattern) {
-        Some(a) => {
-            //eprintln!("the repeat is {a}");
-            return a;
-        }
-        None => {}
-    }
+    let new_input = remove_underline_and_punc(&input_line);
+    let new_ptn = remove_underline_and_punc(&pattern);
+    let mut input_slice = new_input.split_whitespace().collect::<Vec<&str>>();
+    let mut ptn_slice = new_ptn.split_whitespace().collect::<Vec<&str>>();
 
-    if input_slice.len() == 1 {
+    eprintln!(
+        "__FN_print_single_matching_line__ INPUT: {:?} **{:?}**",
+        input_slice, ptn_slice
+    );
+
+    let input_slice_len = input_slice.len();
+    let mut res: Vec<char> = Vec::new();
+    let mut res_str: Vec<String> = vec![];
+
+    // handle cases with input
+
+    if input_slice_len == 1 {
+        match examine_repeat(input_line, pattern) {
+            Some(a) => {
+                //eprintln!("the repeat is {a}");
+                return a;
+            }
+            None => {}
+        }
+
         if match_pattern(input_line, pattern) {
             return input_line.to_string();
         } else {
@@ -696,8 +718,20 @@ pub fn print_single_matching_line(input_line: &String, pattern: &mut String) -> 
         return "".to_string();
     }
 
+    if pattern.contains("\\d+") || pattern.contains("\\w+") {
+        println!("PTN  {pattern} contain val {input_line}");
+        if match_pattern(input_line, pattern) {
+            return input_line.to_string();
+        } else {
+            return "".to_string();
+        }
+    }
+
+
+    // more than 1 word or digit count
+
     for (idx, val) in input_slice.into_iter().enumerate() {
-        //println!("{idx}: {val} vs {pattern}");
+        eprintln!("{idx}: {val} vs {pattern}");
         if let Some(repeat_matched) = examine_repeat(val, pattern) {
             //println!("repeat: {repeat_matched}");
             return repeat_matched.trim().to_string();
@@ -720,7 +754,7 @@ pub fn print_single_matching_line(input_line: &String, pattern: &mut String) -> 
                         .iter()
                         .enumerate()
                         .map(|(idx, a)| {
-                            if idx < res.len() - 1 {
+                            if idx < res.len() - 1{
                                 format!("{a}\n")
                             } else {
                                 format!("{a}")

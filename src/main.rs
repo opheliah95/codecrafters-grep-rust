@@ -4,7 +4,10 @@ use std::process;
 mod lib;
 use lib::{check_digits, exit_process_errored, remove_start_end, start_end_is_pattern};
 mod match_func;
-use match_func::{match_pattern, print_single_matching_line};
+use match_func::{
+    match_pattern, print_single_matching_line, remove_underline_and_punc,
+    spilt_all_white_space_punc,
+};
 
 // Usage: echo <input_text> | your_program.sh -E <pattern>
 fn main() {
@@ -13,11 +16,21 @@ fn main() {
     let mut input_line = String::new();
     io::stdin().read_to_string(&mut input_line).unwrap();
     let mut pattern = env::args().nth(2).unwrap();
-    let mut split_input_by_space = input_line.split_whitespace().collect::<Vec<&str>>();
-    //println!("{input_line} line is: {:?}", split_input_by_space);
+    let mut color_always: bool = false;
     if env::args().nth(1).unwrap() == "-o" {
         pattern = env::args().nth(3).unwrap();
+        pattern = remove_underline_and_punc(&pattern);
+    } else if env::args().nth(1).unwrap() == "--color=always" {
+        color_always = true;
+        pattern = env::args().nth(3).unwrap();
+    }
 
+    let mut split_ptn_by_space = spilt_all_white_space_punc(&pattern);
+
+    let mut split_input_by_space = spilt_all_white_space_punc(&input_line);
+
+    //println!("{input_line} line is: {:?}", split_input_by_space);
+    if env::args().nth(1).unwrap() == "-o" {
         let mut split_by_full_stop: Vec<&str> = input_line.split(".").collect();
         let split_by_full_stop_cleaned: Vec<String> = split_by_full_stop
             .iter()
@@ -44,12 +57,11 @@ fn main() {
                 process::exit(1);
             }
         } else {
-            let split_ptn_by_space = pattern.split_whitespace().collect::<Vec<&str>>();
             //echo -ne "mango\n!@#$\nbanana\n+++\ntest123" | ./your_program.sh -E '\w+'
             //println!("{:?} vs PTN {:?}", split_input_by_space, split_ptn_by_space);
 
             if split_ptn_by_space.len() == split_input_by_space.len() {
-                res = handle_single_matching_line(&split_input_by_space, split_ptn_by_space);
+                res = handle_single_matching_line(&split_input_by_space, &split_ptn_by_space);
             } else if split_ptn_by_space.len() != split_input_by_space.len() {
                 res = handle_single_ptn_to_spaced_txt(&split_input_by_space, &split_ptn_by_space);
             } else if split_ptn_by_space.len() == 0 || split_ptn_by_space.len() == 0 {
@@ -90,15 +102,6 @@ fn main() {
         process::exit(1);
     }
 
-    let mut color_always = false;
-    if env::args().nth(1).unwrap() == "--color=always" {
-        color_always = true;
-        pattern = env::args().nth(3).unwrap();
-    }
-
-    //handle single input
-    let spilt_input_by_line = input_line.split('\n').collect::<Vec<&str>>();
-    let mut split_ptn_by_space = pattern.split_whitespace().collect::<Vec<&str>>();
     let ptn_len_by_space = split_ptn_by_space.len();
     eprintln!(
         "-E input {:?} ptn  {:?}",
@@ -155,6 +158,8 @@ fn main() {
                 exit_process_errored();
             }
         }
+    } else if split_input_by_space.len() == split_ptn_by_space.len() {
+        res = handle_single_matching_line(&split_input_by_space, &split_ptn_by_space);
     } else {
         res = handle_single_ptn_to_spaced_txt(&split_input_by_space, &split_ptn_by_space);
     }
@@ -169,7 +174,7 @@ fn main() {
         res = split_input_by_space
             .iter()
             .map(|a| {
-                if res_trim.contains(a) {
+                if res_trim.contains(&a.as_str()) {
                     format!("\x1b[01;31m{}\x1b[0m", a)
                 } else {
                     a.trim().to_string()
@@ -189,10 +194,13 @@ fn main() {
         res
     );
 
+    let input_has_space = input_line.split_whitespace().collect::<Vec<&str>>().len();
     if res.len() > 0 && res.len() >= ptn_len_by_space {
         for r in res.chunks(ptn_len_by_space) {
-            if r.len() == ptn_len_by_space {
+            if r.len() == ptn_len_by_space && input_has_space > 1 {
                 println!("{}", r.join(" "));
+            } else {
+                println!("{}",r.join(""));
             }
         }
         process::exit(0)
@@ -201,56 +209,15 @@ fn main() {
 
         process::exit(1)
     }
-
-    // if spilt_input_by_line.len() > 1 {
-    //     let mut matched: Vec<bool> = Vec::new();
-    //     for v in spilt_input_by_line {
-    //         if match_pattern(v, &pattern) {
-    //             if color_always {
-    //                 println!("\x1b[01;31m{v}\x1b[0m");
-    //             } else {
-    //                 println!("{v}");
-    //             }
-
-    //             matched.push(true);
-    //         } else {
-    //             matched.push(false)
-    //         }
-    //     }
-
-    //     if matched.iter().any(|c| *c == true) {
-    //         process::exit(0)
-    //     } else {
-    //         process::exit(1)
-    //     }
-    // }
-    //
-
-    // if split_input_by_space.len() <= 1 {
-    //     //eprintln!("{input_line} is a single word ine input");
-    //     if match_pattern(&input_line, &pattern) {
-    //         if color_always {
-    //             println!("\x1b[01;31m{input_line}\x1b[0m");
-    //         } else {
-    //             println!("{input_line}");
-    //         }
-    //         process::exit(0)
-    //     }
-    // } else {
-    //     //println!("multiword input: {input_line} passed");
-
-    // }
-    // //eprint!("failed!: {:?}", split_input_by_space);
-
-    // process::exit(1)
 }
 
 fn handle_sentence_ptn(sentences: &Vec<String>, pattern: String) -> Vec<String> {
     let mut sentence_collection: Vec<String> = Vec::new();
 
     for sentence in sentences.iter() {
-        let sentence_spilt: Vec<&str> = sentence.split_whitespace().collect();
-        let ptn_split: Vec<&str> = pattern.split_whitespace().collect();
+        let sentence_spilt: Vec<String> =
+            sentence.split_whitespace().map(|a| a.to_string()).collect();
+        let ptn_split: Vec<String> = pattern.split_whitespace().map(|a| a.to_string()).collect();
 
         let res = handle_single_ptn_to_spaced_txt(&sentence_spilt, &ptn_split);
 
@@ -278,8 +245,8 @@ fn handle_sentence_ptn(sentences: &Vec<String>, pattern: String) -> Vec<String> 
 }
 
 fn handle_single_ptn_to_spaced_txt(
-    split_input_by_space: &Vec<&str>,
-    split_ptn_by_space: &Vec<&str>,
+    split_input_by_space: &Vec<String>,
+    split_ptn_by_space: &Vec<String>,
 ) -> Vec<String> {
     let mut res = Vec::new();
     let mut start: usize = 0;
@@ -288,9 +255,9 @@ fn handle_single_ptn_to_spaced_txt(
     let mut new_ptn_spilt = split_ptn_by_space.to_vec();
 
     if ptn_len == 1 {
-        let ptn = split_ptn_by_space[0];
+        let ptn = split_ptn_by_space.iter().nth(0).unwrap();
         for i in (0..input_len - 1) {
-            new_ptn_spilt.push(ptn);
+            new_ptn_spilt.push(ptn.to_string());
         }
     }
     //println!("{:?} vs {:?}", new_ptn_spilt, split_input_by_space);
@@ -335,10 +302,11 @@ fn handle_single_ptn_to_spaced_txt(
 }
 
 fn handle_single_matching_line(
-    split_input_by_space: &Vec<&str>,
-    split_ptn_by_space: Vec<&str>,
+    split_input_by_space: &Vec<String>,
+    split_ptn_by_space: &Vec<String>,
 ) -> Vec<String> {
     let mut res = Vec::new();
+    eprintln!("===FN handle_single_matching_line===INPUT AND PTN LEN MATCH");
     for (i, p) in split_input_by_space.iter().zip(split_ptn_by_space) {
         let mut p_str = p.to_string();
 
@@ -348,7 +316,17 @@ fn handle_single_matching_line(
             res.push(res_str)
         }
     }
-    //println!("the res string length : {}", res.len());
+    println!("the res string length : {} ", res.len());
+    if !env::args().any(|x| x == "-o") {
+        let cleaned = res
+            .iter()
+            .map(|x| x.trim().to_string())
+            .map(|x| x.replace("\n", ""))
+            .collect();
+
+        eprintln!("cleaned is {:?}", cleaned);
+        return cleaned;
+    }
 
     return res;
 }
