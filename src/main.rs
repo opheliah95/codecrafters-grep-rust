@@ -234,9 +234,12 @@ fn main() {
              println!("{}", res.join(""));
         }
     }  else if res.len() > 0 && env::args().nth(1).unwrap() == "-E" && !color_always && !input_line.contains("\n") {
-        println!("{input_line}");
+        if res.len() >= split_ptn_by_space.len() {
+            println!("{input_line}");
+        }
+         process::exit(1)
+        
     }
-    
     
     else if res.len () > 0 && res.len() >= ptn_len_by_space {
         for r in res.chunks(ptn_len_by_space) {
