@@ -5,7 +5,7 @@ mod lib;
 use lib::{check_digits, exit_process_errored, remove_start_end, start_end_is_pattern};
 mod match_func;
 use match_func::{
-    match_pattern, print_single_matching_line, remove_underline_and_punc,
+    examine_repeat, match_pattern, print_single_matching_line, remove_underline_and_punc,
     spilt_all_white_space_punc,
 };
 
@@ -32,7 +32,7 @@ fn main() {
     if split_ptn_by_space.len() == 1 {
         if pattern.starts_with("^") && pattern.ends_with("$") {
             let ptn_last = pattern.len();
-            let ptn_range = &pattern[1..ptn_last-1];
+            let ptn_range = &pattern[1..ptn_last - 1];
             //println!("range is {ptn_range}");
             if *input_line == ptn_range.to_string() {
                 if color_always == true {
@@ -311,6 +311,8 @@ fn handle_single_ptn_to_spaced_txt(
                 } else {
                     if match_pattern(i, ptn) {
                         res_str = i.to_string();
+                    } else if let Some(a) = examine_repeat(&i, &ptn) {
+                        res_str = a.to_string();
                     }
                 }
                 //println!("resuot: ---{res_str}---{idx}");
