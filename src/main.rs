@@ -221,46 +221,62 @@ fn main() {
         res = split_input_by_space
             .iter()
             .map(|a| {
-                if res_trim.contains(&a.as_str()) {
-                    let a_len = a.len();
-                    let a_idx = input_line.find(a).unwrap();
-                    let a_end_idx = a_idx + a_len;
-                    let a_start_idx = a_idx.checked_sub(1).unwrap_or(0);
-                    let mut newline_end = input_line.chars().last().unwrap().to_string();
-                    let mut newline_before = input_line.chars().nth(0).unwrap().to_string();
+                let a_len = a.len();
+                let a_idx = input_line.find(a).unwrap();
+                let a_end_idx = a_idx + a_len;
+                let a_start_idx = a_idx.checked_sub(1).unwrap_or(0);
+                let mut newline_end = input_line.chars().last().unwrap().to_string();
+                let mut newline_before = input_line.chars().nth(0).unwrap().to_string();
 
-                    if a_end_idx < input_line.len() -1 {
-                        let temp = &input_line[a_end_idx..a_end_idx+1];
-                        newline_end= temp.to_string();
+                 if a_end_idx < input_line.len() - 1 {
+                        let temp = &input_line[a_end_idx..a_end_idx + 1];
+                        newline_end = temp.to_string();
                     }
                     if a_start_idx > 0 {
-                         let temp = &input_line[a_start_idx..a_idx];
-                        newline_before= temp.to_string();
+                        let temp = &input_line[a_start_idx..a_idx];
+                        newline_before = temp.to_string();
                     }
+                if res_trim.contains(&a.as_str()) {
+                   
 
-                    eprintln!("the idx for {a} is {a_idx} + {a_len} = {a_end_idx} <<{input_line}>> next (=={}==)",newline_end == "\n".to_string());
-                    eprintln!("the start idx for {a} is {a_start_idx} and before start is: {newline_before} vs input <<{input_line}>> next (=={}==)",newline_before == "\n".to_string());
+                    //eprintln!("the idx for {a} is {a_idx} + {a_len} = {a_end_idx} <<{input_line}>> next (=={}==)",newline_end == "\n".to_string());
+                    //eprintln!("the start idx for {a} is {a_start_idx} and before start is: {newline_before} vs input <<{input_line}>> next (=={}==)",newline_before == "\n".to_string());
 
-                    
                     if a.ends_with(",") || a.ends_with(".") {
-                        format!("\x1b[01;31m{}\x1b[0m{}", &a[0..a_len-1], &a[a_len-1..])
-                    } 
-                    else if newline_end == "\n".to_string() && newline_before == "\n".to_string(){
-                        format!("\n\x1b[01;31m{}\x1b[0m\n", a)
+                        format!("\x1b[01;31m{}\x1b[0m{}", &a[0..a_len - 1], &a[a_len - 1..])
                     }
+                    // else if newline_end == "\n".to_string() && newline_before == "\n".to_string(){
+                    //     format!("\n\x1b[01;31m{}\x1b[0m\n", a)
+                    // }
                     else if newline_end == "\n".to_string() {
                         format!("\x1b[01;31m{}\x1b[0m\n", a)
                     }
-                    else if newline_before == "\n".to_string() {
-                        format!("\n\x1b[01;31m{}\x1b[0m", a)
-                    }
+                    // else if newline_before == "\n".to_string() {
+                    //     format!("\n\x1b[01;31m{}\x1b[0m", a)
+                    // }
                     else {
                         format!("\x1b[01;31m{}\x1b[0m", a)
                     }
                 } else {
-                    a.trim().to_string()
+                    eprintln!("the end for {a} is {a_idx} + {a_len} = {a_end_idx}  next (=={}==)",newline_end == "\n".to_string());
+                    eprintln!("the start idx for {a} is {a_start_idx} and before start is: {newline_before}  next (=={}==)",newline_before == "\n".to_string());
+                    
+                    if newline_end == "\n".to_string() || (newline_before == "\n".to_string() && !res_trim.iter().any(|w| {
+                        input_line[a_end_idx..].trim().starts_with(w)
+                    })){
+                        "".to_string()
+                    } 
+                    else if !res_trim.iter().any(|w| 
+                        input_line[a_end_idx..].trim().starts_with(w)
+                    ) {
+                        "".to_string()
+                    }
+                    else {
+                        a.trim().to_string()
+                    }
                 }
             })
+            .filter(|a| !a.is_empty())
             .collect::<Vec<String>>();
     } else {
         res = res
@@ -299,10 +315,7 @@ fn main() {
     } else if res.len() > 0 && res.len() >= ptn_len_by_space {
         if ptn_len_by_space == 1 || color_always {
             print_with_newline(&res);
-           
-        } 
-        
-        else if !color_always {
+        } else if !color_always {
             for r in res.chunks(ptn_len_by_space) {
                 if r.len() == ptn_len_by_space {
                     println!("{}", r.join(" "));
@@ -318,15 +331,18 @@ fn main() {
 }
 
 fn print_with_newline(res: &Vec<String>) {
-    for r in res {
+    for (idx, r) in res.iter().enumerate() {
         if r.ends_with("\n") {
             print!("{r}");
         } else {
-            print!("{r} ");
+            if idx < res.len() - 1 {
+                print!("{r} ");
+            } else {
+                println!("{r}");
+            }
         }
-    
     }
-    println!("");
+    //println!("");
     io::stdout().flush();
 }
 
