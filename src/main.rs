@@ -219,11 +219,9 @@ fn main() {
         println!("{}", res.join(""));
     } else if res.len() > 0 && res.len() >= ptn_len_by_space {
         for r in res.chunks(ptn_len_by_space) {
-            if r.len() == ptn_len_by_space && input_has_space > 1 {
+            if r.len() == ptn_len_by_space  {
                 println!("{}", r.join(" "));
-            } else {
-                println!("{}", r.join(""));
-            }
+            } 
         }
         process::exit(0)
     } else {
