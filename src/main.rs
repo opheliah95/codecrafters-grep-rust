@@ -25,10 +25,27 @@ fn main() {
         pattern = env::args().nth(3).unwrap();
     }
 
+
+    
+
     let mut split_ptn_by_space = spilt_all_white_space_punc(&pattern);
 
     let mut split_input_by_space = spilt_all_white_space_punc(&input_line);
 
+    if split_ptn_by_space.len() == 1{
+        if pattern.starts_with("^") {
+            if input_line.chars().nth(0) != pattern.chars().nth(1) {
+                exit_process_errored();
+            }
+        }
+
+        if pattern.ends_with("$") {
+            let ptn_last = pattern.len();
+            if input_line.chars().last() != pattern.chars().nth(ptn_last - 1) {
+                exit_process_errored();
+            }
+        }
+    }
     //println!("{input_line} line is: {:?}", split_input_by_space);
     if env::args().nth(1).unwrap() == "-o" {
         let mut split_by_full_stop: Vec<&str> = input_line.split(".").collect();
