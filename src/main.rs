@@ -183,9 +183,27 @@ fn main() {
                 }
             }
             None => {
-                eprint!("failed!: {:?}", split_input_by_space);
+                let mut matched_char = matched.chars().into_iter().collect::<Vec<char>>();
+                let mut input_start = 0;
+                let mut result_str = String::new();
+                let result_str: String = input_line
+                    .chars()
+                    .map(|c| {
+                        if matched_char.contains(&c) {
+                            format!("\x1b[01;31m{}\x1b[0m", c)
+                        } else {
+                            c.to_string()
+                        }
+                    })
+                    .collect();
+                if !result_str.is_empty() {
+                    println!("{result_str}");
+                    process::exit(0)
+                } else {
+                    eprint!("failed!: {:?}", split_input_by_space);
 
-                exit_process_errored();
+                    exit_process_errored();
+                }
             }
         }
     } else if split_input_by_space.len() == split_ptn_by_space.len() {
