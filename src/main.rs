@@ -195,7 +195,12 @@ fn main() {
     );
 
     let input_has_space = input_line.split_whitespace().collect::<Vec<&str>>().len();
-    if res.len() > 0 && res.len() >= ptn_len_by_space {
+    eprintln!("old input has space {input_has_space}");
+
+    if res.len() > 0 && input_has_space == 1 {
+        println!("{}",res.join(""));
+    }
+    else if res.len() > 0 && res.len() >= ptn_len_by_space {
         for r in res.chunks(ptn_len_by_space) {
             if r.len() == ptn_len_by_space && input_has_space > 1 {
                 println!("{}", r.join(" "));
