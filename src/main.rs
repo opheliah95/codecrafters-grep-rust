@@ -32,7 +32,8 @@ fn main() {
     if split_ptn_by_space.len() == 1 {
         if pattern.starts_with("^") && pattern.ends_with("$") {
             let ptn_last = pattern.len();
-            let ptn_range = &pattern[1..ptn_last];
+            let ptn_range = &pattern[1..ptn_last-1];
+            //println!("range is {ptn_range}");
             if *input_line == ptn_range.to_string() {
                 if color_always == true {
                     println!("{}", format!("\x1b[01;31m{}\x1b[0m", input_line));
