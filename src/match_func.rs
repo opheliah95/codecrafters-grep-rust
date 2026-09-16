@@ -389,6 +389,7 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                             eprintln!(
                                 "===QUANT {ptn_quant} MATCHING===starting from {input_line} PREV: {old_input}, search res {c}, res pos {first_letter_to_start}"
                             );
+                            let input_line_len = input_line.len();
 
                             // // handle case like a+=> apple
                             // println!(
@@ -544,6 +545,12 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                                             }
 
                                             _ => {
+
+                                                if idx == input_line_len - 1 {
+                                                    return val == pattern.chars().last().unwrap();
+                                                }
+
+
                                                 eprintln!(
                                                     "QUANT = +  idx > p matching {idx} idx::: {ptn} pattern: PTN: {} VAL: {}",
                                                     pattern_slice,
