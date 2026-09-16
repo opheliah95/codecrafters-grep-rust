@@ -219,11 +219,8 @@ fn main() {
         if !color_always {
             println!("{}", input_line);
         } else {
-            let mut highlighted = input_line;
-            for r in res {
-                highlighted = highlighted.replace(&r, &format!("\x1b[31m{}\x1b[0m", r));
-            }
-            println!("{}", highlighted);
+            
+            println!("{}", res.join(""));
         }
     } else if res.len() > 0 && res.len() >= ptn_len_by_space {
         for r in res.chunks(ptn_len_by_space) {
