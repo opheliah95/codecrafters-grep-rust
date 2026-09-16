@@ -344,9 +344,9 @@ fn handle_single_ptn_to_spaced_txt(
             }
         }
 
-        // if start != split_input_by_space.len() {
-        //     res.push("\n".to_string())
-        // }
+        if start != split_input_by_space.len() {
+            res.push("\n".to_string())
+        }
     }
 
     return res;
