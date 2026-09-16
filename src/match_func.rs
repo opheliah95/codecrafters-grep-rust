@@ -1,16 +1,13 @@
 use crate::lib::{find_match_inbetween, remove_start_end};
 use std::collections::HashMap;
 
-
 pub fn examine_repeat(mut input_line: &str, mut pattern: &str) -> Option<String> {
-    
-     // handle plural cases
+    // handle plural cases
     if pattern.ends_with("s") && !input_line.ends_with("s") {
         eprintln!("plural not matching");
         return None;
     }
-    
-    
+
     let mut repeats = vec!["\\w", "\\d", "\\d+", "\\w+"];
     let mut input_filtered = String::new();
 
@@ -62,7 +59,7 @@ pub fn examine_repeat(mut input_line: &str, mut pattern: &str) -> Option<String>
         // );
 
         if input_line_end == *count || repeat_len * count == pattern.len() {
-            eprintln!("SUCCESS: {input_temp} -> {repeat}");
+            eprintln!("MATCHING REPEAT: {input_temp} -> {repeat}");
             format_input_of_repeated_char_pattern(
                 input_temp,
                 &mut input_filtered,
@@ -123,20 +120,20 @@ fn format_input_of_repeated_char_pattern(
                 format!("{a}\n")
             }
         })
+        .filter(|a| !a.is_empty() && a != "\n")
         .collect();
 
-    //eprintln!("input filtered: {input_filtered}");
 }
 
 pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
     //eprintln!("===FN match_pattern -> Matching: {input_line} to {pattern}");
 
-     // handle plural cases
+    // handle plural cases
     if pattern.ends_with("s") && !input_line.ends_with("s") {
         eprintln!("plural not matching");
         return false;
     }
-    
+
     match pattern {
         // check has both start and end
         ptn if pattern.starts_with("^") && pattern.ends_with("$") => {
@@ -698,7 +695,7 @@ pub fn print_single_matching_line(input_line: &String, pattern: &mut String) -> 
     let new_ptn = remove_underline_and_punc(&pattern);
     let mut input_slice = new_input.split_whitespace().collect::<Vec<&str>>();
     let mut ptn_slice = new_ptn.split_whitespace().collect::<Vec<&str>>();
-    
+
     eprintln!(
         "__FN_print_single_matching_line__ INPUT: {:?} **{:?}**",
         input_slice, ptn_slice
@@ -741,7 +738,6 @@ pub fn print_single_matching_line(input_line: &String, pattern: &mut String) -> 
         }
     }
 
-
     // more than 1 word or digit count
 
     for (idx, val) in input_slice.into_iter().enumerate() {
@@ -768,7 +764,7 @@ pub fn print_single_matching_line(input_line: &String, pattern: &mut String) -> 
                         .iter()
                         .enumerate()
                         .map(|(idx, a)| {
-                            if idx < res.len() - 1{
+                            if idx < res.len() - 1 {
                                 format!("{a}\n")
                             } else {
                                 format!("{a}")

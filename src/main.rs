@@ -328,9 +328,9 @@ fn handle_single_ptn_to_spaced_txt(
                         res_str = a.to_string();
                     }
                 }
-                //println!("resuot: ---{res_str}---{idx}");
+                //eprintln!("resuot: ---{res_str}---{idx}--len is {}", res_str.len());
                 start += 1;
-                if res_str.to_string().trim().len() > 0 {
+                if !res_str.trim().is_empty() || res_str.len() > 0 {
                     if idx == split_input_by_space.len() - 1 {
                         res.push(res_str);
                         //println!("===break===");
@@ -344,9 +344,9 @@ fn handle_single_ptn_to_spaced_txt(
             }
         }
 
-        if start != split_input_by_space.len() {
-            res.push("\n".to_string())
-        }
+        // if start != split_input_by_space.len() {
+        //     res.push("\n".to_string())
+        // }
     }
 
     return res;
