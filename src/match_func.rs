@@ -660,7 +660,7 @@ pub fn remove_underline_and_punc(input_line: &String) -> String {
 pub fn spilt_all_white_space_punc(input_line: &str) -> Vec<String> {
     let mut new_input = input_line.replace('_', " _ ");
     new_input = new_input.replace(',', " , ");
-    new_input = new_input.replace('.', " . ");
+    //new_input = new_input.replace('.', " . ");
 
     //println!("new input is {new_input}");
 
