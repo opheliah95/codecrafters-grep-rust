@@ -551,7 +551,7 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                                                 );
 
                                                 return input_line[idx-1..]
-                                                    .ends_with(pattern_slice);
+                                                    .starts_with(pattern_slice);
                                             }
                                         }
                                     }
