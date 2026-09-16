@@ -54,7 +54,7 @@ pub fn examine_repeat(mut input_line: &str, mut pattern: &str) -> Option<String>
         // );
 
         if input_line_end == *count || repeat_len * count == pattern.len() {
-            eprintln!("SUCCES: {input_temp} -> {repeat}");
+            eprintln!("SUCCESS: {input_temp} -> {repeat}");
             format_input_of_repeated_char_pattern(
                 input_temp,
                 &mut input_filtered,
@@ -109,16 +109,15 @@ fn format_input_of_repeated_char_pattern(
         .into_iter()
         .enumerate()
         .map(|(idx, a)| {
-            if count == input_res_len {
+            if count == input_res_len || ["\\w+", "\\d+"].contains(&repeat.as_str()) {
                 a.to_string()
             } else {
-                //println!("a is {a}");
                 format!("{a}\n")
             }
         })
         .collect();
 
-    eprintln!("input filtered: {input_filtered}");
+    //eprintln!("input filtered: {input_filtered}");
 }
 
 pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
@@ -697,7 +696,7 @@ pub fn print_single_matching_line(input_line: &String, pattern: &mut String) -> 
 
     // handle cases with input
 
-    if input_slice_len == 1 || ptn_slice.len() == 1 {
+    if input_slice_len == 1 && ptn_slice.len() == 1 {
         match examine_repeat(input_line, pattern) {
             Some(a) => {
                 //eprintln!("the repeat is {a}");
@@ -720,7 +719,7 @@ pub fn print_single_matching_line(input_line: &String, pattern: &mut String) -> 
     }
 
     if pattern.contains("\\d+") || pattern.contains("\\w+") {
-        println!("PTN  {pattern} contain val {input_line}");
+        eprintln!("PTN  {pattern} contain val {input_line}");
         if match_pattern(input_line, pattern) {
             return input_line.to_string();
         } else {
