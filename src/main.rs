@@ -25,23 +25,24 @@ fn main() {
         pattern = env::args().nth(3).unwrap();
     }
 
-
-    
-
     let mut split_ptn_by_space = spilt_all_white_space_punc(&pattern);
 
     let mut split_input_by_space = spilt_all_white_space_punc(&input_line);
 
-    if split_ptn_by_space.len() == 1{
+    if split_ptn_by_space.len() == 1 {
         if pattern.starts_with("^") {
-            if input_line.chars().nth(0) != pattern.chars().nth(1) {
+            let ptn_range = &pattern[1..];
+            //println!("here...{}", pattern.clone().chars().nth(1).unwrap());
+
+            if !input_line.starts_with(ptn_range) {
                 exit_process_errored();
             }
         }
 
         if pattern.ends_with("$") {
             let ptn_last = pattern.len();
-            if input_line.chars().last() != pattern.chars().nth(ptn_last - 1) {
+            let ptn_range = &pattern[0..ptn_last-1];
+            if !input_line.ends_with(ptn_range) {
                 exit_process_errored();
             }
         }
@@ -215,14 +216,13 @@ fn main() {
     eprintln!("old input has space {input_has_space}");
 
     if res.len() > 0 && input_has_space == 1 {
-        println!("{}",res.join(""));
-    }
-    else if res.len() > 0 && res.len() >= ptn_len_by_space {
+        println!("{}", res.join(""));
+    } else if res.len() > 0 && res.len() >= ptn_len_by_space {
         for r in res.chunks(ptn_len_by_space) {
             if r.len() == ptn_len_by_space && input_has_space > 1 {
                 println!("{}", r.join(" "));
             } else {
-                println!("{}",r.join(""));
+                println!("{}", r.join(""));
             }
         }
         process::exit(0)
