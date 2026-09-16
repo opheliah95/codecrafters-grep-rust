@@ -231,7 +231,11 @@ fn main() {
         if !color_always {
             println!("{}", input_line);
         } else {
-            println!("{}", res.join(""));
+            if res.len() == input_has_space {
+                println!("{}", res.join(""));
+            } else {
+                println!("{input_line}");
+            }
         }
     } else if res.len() > 0 && res.len() >= ptn_len_by_space {
         for r in res.chunks(ptn_len_by_space) {
