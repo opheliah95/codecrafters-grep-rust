@@ -246,9 +246,13 @@ fn main() {
         //eprintln!("input spilt len is {:?}", split_ptn_by_space);
         process::exit(1)
     } else if res.len() > 0 && res.len() >= ptn_len_by_space {
-        for r in res.chunks(ptn_len_by_space) {
-            if r.len() == ptn_len_by_space {
-                println!("{}", r.join(" "));
+        if ptn_len_by_space == 1 {
+            println!("{}", res.join(" "));
+        } else {
+            for r in res.chunks(ptn_len_by_space) {
+                if r.len() == ptn_len_by_space {
+                    println!("{}", r.join(" "));
+                }
             }
         }
         process::exit(0)
@@ -344,7 +348,7 @@ fn handle_single_ptn_to_spaced_txt(
             }
         }
 
-        if start != split_input_by_space.len()  && split_ptn_by_space.len() > 1{
+        if start != split_input_by_space.len() && split_ptn_by_space.len() > 1 {
             res.push("\n".to_string())
         }
     }
