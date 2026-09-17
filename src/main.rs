@@ -210,73 +210,55 @@ fn main() {
         res = handle_single_ptn_to_spaced_txt(&split_input_by_space, &split_ptn_by_space);
     }
 
-    let res_trim = res
+    let res_trim: Vec<&str> = res
         .iter()
+        .flat_map(|t| t.lines())
         .map(|t| t.trim())
         .filter(|t| !t.is_empty())
-        .collect::<Vec<&str>>();
+        .collect();
 
     eprintln!("res trimed is {:?}  and res is {:?} ", res_trim, res);
     if color_always {
-        res = split_input_by_space
+        let input_spilt_by_space_only: Vec<String> =
+            input_line.split(" ").map(|c| c.to_string()).collect();
+        // eprintln!(
+        //     "the input spilt by space is {:?} vs res {:?}",
+        //     input_spilt_by_space_only, res_trim
+        // );
+        res = input_spilt_by_space_only
             .iter()
-            .map(|a| {
-                let a_len = a.len();
-                let a_idx = input_line.find(a).unwrap();
-                let a_end_idx = a_idx + a_len;
-                let a_start_idx = a_idx.checked_sub(1).unwrap_or(0);
-                let mut newline_end = input_line.chars().last().unwrap().to_string();
-                let mut newline_before = input_line.chars().nth(0).unwrap().to_string();
+            .map(|mut a| {
+                // Strip trailing punctuation like ',' or '.' for comparison
+                let clean_a = a.trim_end_matches(|c| c == ',' || c == '.');
 
-                 if a_end_idx < input_line.len() - 1 {
-                        let temp = &input_line[a_end_idx..a_end_idx + 1];
-                        newline_end = temp.to_string();
-                    }
-                    if a_start_idx > 0 {
-                        let temp = &input_line[a_start_idx..a_idx];
-                        newline_before = temp.to_string();
-                    }
-                if res_trim.contains(&a.as_str()) {
-                   
+                // Check if `clean_a` directly exists in `res_trim` or matches any pattern entry
+                let is_matched =
+                    res_trim.contains(&clean_a) || res_trim.iter().any(|&r| clean_a == r);
 
-                    //eprintln!("the idx for {a} is {a_idx} + {a_len} = {a_end_idx} <<{input_line}>> next (=={}==)",newline_end == "\n".to_string());
-                    //eprintln!("the start idx for {a} is {a_start_idx} and before start is: {newline_before} vs input <<{input_line}>> next (=={}==)",newline_before == "\n".to_string());
-
-                    if a.ends_with(",") || a.ends_with(".") {
-                        format!("\x1b[01;31m{}\x1b[0m{}", &a[0..a_len - 1], &a[a_len - 1..])
-                    }
-                    // else if newline_end == "\n".to_string() && newline_before == "\n".to_string(){
-                    //     format!("\n\x1b[01;31m{}\x1b[0m\n", a)
-                    // }
-                    else if newline_end == "\n".to_string() {
-                        format!("\x1b[01;31m{}\x1b[0m\n", a)
-                    }
-                    // else if newline_before == "\n".to_string() {
-                    //     format!("\n\x1b[01;31m{}\x1b[0m", a)
-                    // }
-                    else {
-                        format!("\x1b[01;31m{}\x1b[0m", a)
-                    }
+                if is_matched {
+                    // Retain any trailing punctuation outside the color codes
+                    format_red_output(a)
                 } else {
-                    eprintln!("the end for {a} is {a_idx} + {a_len} = {a_end_idx}  next (=={}==)",newline_end == "\n".to_string());
-                    eprintln!("the start idx for {a} is {a_start_idx} and before start is: {newline_before}  next (=={}==)",newline_before == "\n".to_string());
-                    
-                    if newline_end == "\n".to_string() || (newline_before == "\n".to_string() && !res_trim.iter().any(|w| {
-                        input_line[a_end_idx..].trim().starts_with(w)
-                    })){
-                        "".to_string()
-                    } 
-                    else if !res_trim.iter().any(|w| 
-                        input_line[a_end_idx..].trim().starts_with(w)
-                    ) {
-                        "".to_string()
-                    }
-                    else {
-                        a.trim().to_string()
+                    // Unmatched tokens remain plain/uncolored
+                    let words: Vec<String> =
+                        a.split_inclusive('\n').map(|c| c.to_string()).collect();
+                    //println!("the words are: {:?}", words);
+                    if words.len() > 1 {
+                        let formatted_words: Vec<String> = words
+                            .iter()
+                            .map(|item| {
+                                format_and_filter_indv_letter_to_red(res_trim.clone(), item)
+                            })
+                            .collect();
+                        //println!(" res {:?}", formatted_words);
+                        formatted_words.join("")
+                    } else {
+                        // Single word (or empty): handle directly
+                        format_and_filter_indv_letter_to_red(res_trim.clone(), &a)
                     }
                 }
             })
-            .filter(|a| !a.is_empty())
+            .filter(|m| !m.is_empty())
             .collect::<Vec<String>>();
     } else {
         res = res
@@ -327,6 +309,54 @@ fn main() {
         eprint!("failed!: {:?}", split_input_by_space);
 
         process::exit(1)
+    }
+}
+
+fn format_and_filter_indv_letter_to_red(res_trim: Vec<&str>, input: &String) -> String {
+    //eprintln!("the input passed is {input}");
+    let mut out: Vec<String> = input.clone().chars().map(|c| c.to_string()).collect();
+    let mut compare = input.clone();
+    let mut out_old = out.clone();
+
+    let mut unmatch_count = 0;
+
+    for w in res_trim.iter() {
+        //println!("w is {w}");
+        let idx = compare.find(w);
+        let w_len = w.len();
+        match idx {
+            Some(i) => {
+                out[i] = format_red_output(&w.to_string());
+                
+                if w_len > 1 {
+                    out.drain(i + 1..i + w_len);
+                }
+                //println!("at {i} out is {:?}", out);
+                //compare.remove(i);
+            }
+            None => {
+                unmatch_count += 1;
+            }
+        }
+    }
+
+    if unmatch_count == input.len() || out_old == out {
+        eprintln!(" input is {input} NO MATCH");
+
+        return "".to_string();
+    } else {
+        eprintln!("out is {:?} and input is {input} -> {unmatch_count}", out);
+
+        return out.join("");
+    }
+}
+
+fn format_red_output(a: &String) -> String {
+    if a.ends_with(',') || a.ends_with('.') {
+        let a_len = a.len();
+        format!("\x1b[01;31m{}\x1b[0m{}", &a[0..a_len - 1], &a[a_len - 1..])
+    } else {
+        format!("\x1b[01;31m{}\x1b[0m", a)
     }
 }
 
@@ -387,18 +417,10 @@ fn handle_single_ptn_to_spaced_txt(
     let mut start: usize = 0;
     let input_len = split_input_by_space.len();
     let ptn_len = split_ptn_by_space.len();
-    let mut new_ptn_spilt = split_ptn_by_space.to_vec();
-
-    if ptn_len == 1 {
-        let ptn = split_ptn_by_space.iter().nth(0).unwrap();
-        for i in (0..input_len - 1) {
-            new_ptn_spilt.push(ptn.to_string());
-        }
-    }
 
     eprintln!(
         "====FN handle_single_ptn_to_spaced_txt=== {:?} vs {:?}",
-        new_ptn_spilt, split_input_by_space
+        split_input_by_space, split_input_by_space
     );
     while start < split_input_by_space.len() {
         for ptn in split_ptn_by_space.iter() {
@@ -410,16 +432,16 @@ fn handle_single_ptn_to_spaced_txt(
                 let mut i_str = i.replace(".", "").replace(",", ""); // handle plural cases
 
                 let mut res_str = String::new();
+                res_str = print_single_matching_line(&i_str, &mut ptn.to_string());
 
-                if env::args().any(|arg| arg == "-o") {
-                    res_str = print_single_matching_line(&i_str, &mut ptn.to_string());
-                } else {
-                    if match_pattern(&i_str, ptn) {
-                        res_str = i.to_string();
-                    } else if let Some(a) = examine_repeat(&i_str, &ptn) {
-                        res_str = a.to_string();
-                    }
-                }
+                // if env::args().any(|arg| arg == "-o") {
+                // } else {
+                //     if match_pattern(&i_str, ptn) {
+                //         res_str = i.to_string();
+                //     } else if let Some(a) = examine_repeat(&i_str, &ptn) {
+                //         res_str = a.to_string();
+                //     }
+                // }
                 eprintln!(
                     "resuot: ---{res_str}---idx: {idx}--len is {}",
                     res_str.len()
