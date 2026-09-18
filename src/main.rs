@@ -270,7 +270,7 @@ fn main() {
                     // let words: Vec<String> =
                     //     a.split_inclusive('\n').map(|c| c.to_string()).collect();
                     // println!("the words are: {:?}", words);
-                    format_and_filter_indv_letter_to_red(res_trim.clone(), &a)
+                    format_and_filter_indv_letter_to_red(res_trim.clone(), &a, ptn_len_counted)
                 }
             })
             .filter(|m| !m.is_empty())
@@ -332,7 +332,7 @@ fn main() {
     }
 }
 
-fn format_and_filter_indv_letter_to_red(res_trim: Vec<&str>, input: &str) -> String {
+fn format_and_filter_indv_letter_to_red(res_trim: Vec<&str>, input: &str, ptn_len: usize) -> String {
     let chars: Vec<char> = input.chars().collect();
     let mut highlight_mask = vec![false; chars.len()];
     let mut match_found = false;
@@ -368,7 +368,7 @@ fn format_and_filter_indv_letter_to_red(res_trim: Vec<&str>, input: &str) -> Str
     }
 
     let true_count = highlight_mask.iter().filter(|a| **a).count();
-    if !match_found ||   true_count < res_count{
+    if !match_found ||   true_count < ptn_len{
         return String::new();
     }
 
