@@ -322,7 +322,7 @@ fn format_and_filter_indv_letter_to_red(res_trim: Vec<&str>, input: &String) -> 
 
         match idx {
             Some(mut i) => {
-                //println!("idx {i} out is {:?} and temp {:?} ", out, out_temp);
+                println!("idx {i} out is {:?} and temp {:?} ", out, out_temp);
 
                 if w_len > 1 {
                     out_str = out_str.replace(w, &format_red_output(&w.to_string()));
