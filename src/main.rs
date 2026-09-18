@@ -133,7 +133,7 @@ fn main() {
         }
     }
 
-    if env::args().nth(1).unwrap() != "-E" && env::args().nth(1).unwrap() != "--color=always" {
+    if env::args().nth(1).unwrap() != "-E" && env::args().nth(1).unwrap() != "--color=always" && env::args().nth(1).unwrap() != "--color=never" {
         println!("Expected first argument to be '-E'");
         process::exit(1);
     }
