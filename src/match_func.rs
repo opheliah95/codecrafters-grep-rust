@@ -90,7 +90,7 @@ pub fn examine_repeat(mut input_line: &str, mut pattern: &str) -> Option<String>
         }
     }
 
-    let mut input_temp = &input_line.replace(",", "");
+    let mut input_temp = input_line.replace(",", "");
 
     let mut repeats_result: HashMap<String, usize> = HashMap::new();
 
@@ -106,11 +106,17 @@ pub fn examine_repeat(mut input_line: &str, mut pattern: &str) -> Option<String>
     if repeats_result.is_empty() {
         return None;
     }
-    //eprintln!("examine_repeat: {pattern} {:?}", repeats_result);
+    eprintln!("_FN_examine_pattern {input_line} -> examine_repeat: {pattern} {:?}", repeats_result);
     for (repeat, count) in &repeats_result {
+       if ["\\w", "\\w+"].contains(&repeat.as_str()) {
+            let input_filtered = input_temp.chars().filter(|a| a.is_alphanumeric() || *a == '_').collect::<String>();
+            input_temp = input_filtered;
+       }
+       
         let repeat_len = repeat.len();
         let input_line_end = input_temp.len();
         let mut diff = "";
+
         if input_line_end > *count {
             diff = &input_temp[*count..];
         }
@@ -126,7 +132,7 @@ pub fn examine_repeat(mut input_line: &str, mut pattern: &str) -> Option<String>
                 repeat_len * count
             );
             format_input_of_repeated_char_pattern(
-                input_temp,
+                &input_temp,
                 &mut input_filtered,
                 repeat,
                 input_line_end,
@@ -136,7 +142,7 @@ pub fn examine_repeat(mut input_line: &str, mut pattern: &str) -> Option<String>
             eprintln!("{input_temp} vs {pattern} and diff is {diff}");
             if pattern.ends_with(diff) {
                 format_input_of_repeated_char_pattern(
-                    input_temp,
+                    &input_temp,
                     &mut input_filtered,
                     repeat,
                     input_line_end,
@@ -775,7 +781,10 @@ pub fn print_single_matching_line(input_line: &String, pattern: &mut String) -> 
         return input_line.to_string();
     }
 
-    let new_input = remove_underline_and_punc(&input_line);
+    let mut new_input = remove_underline_and_punc(&input_line);
+    if input_line == "_" {
+        new_input = "_".to_string();
+    }
     let new_ptn = remove_underline_and_punc(&pattern);
     let mut input_slice = new_input.split_whitespace().collect::<Vec<&str>>();
     let mut ptn_slice = new_ptn.split_whitespace().collect::<Vec<&str>>();
