@@ -302,25 +302,34 @@ fn main() {
     }
 }
 
-fn format_and_filter_indv_letter_to_red(res_trim: Vec<&str>, input: &String) -> String {
-    let mut out_str = input.clone();
+fn format_and_filter_indv_letter_to_red(res_trim: Vec<&str>, input: &str) -> String {
+    let chars: Vec<char> = input.chars().collect();
+    let mut highlight_mask = vec![false; chars.len()];
     let mut match_found = false;
 
-    for w in res_trim.iter() {
+    // 1. Mark which character indices in the original string need highlighting
+    let mut search_offset = 0;
+    for w in res_trim {
         if w.is_empty() {
             continue;
         }
 
-        if out_str.contains(w) {
+        // Search in the remaining unparsed substring to handle sequential matches accurately
+        if let Some(byte_idx) = input[search_offset..].find(w) {
+            let abs_byte_idx = search_offset + byte_idx;
+
+            // Map byte index back to character index
+            let char_start = input[..abs_byte_idx].chars().count();
+            let w_char_len = w.chars().count();
+
+            for i in char_start..char_start + w_char_len {
+                if i < highlight_mask.len() {
+                    highlight_mask[i] = true;
+                }
+            }
+
             match_found = true;
-
-            // Format each character inside the matched word individually
-            let formatted_word: String = w
-                .chars()
-                .map(|c| format_red_output(&c.to_string()))
-                .collect();
-
-            out_str = out_str.replace(w, &formatted_word);
+            search_offset = abs_byte_idx + w.len();
         }
     }
 
@@ -328,7 +337,17 @@ fn format_and_filter_indv_letter_to_red(res_trim: Vec<&str>, input: &String) -> 
         return "".to_string();
     }
 
-    out_str
+    // 2. Build the final output string cleanly without ANSI corruption
+    let mut result = String::new();
+    for (i, &c) in chars.iter().enumerate() {
+        if highlight_mask[i] {
+            result.push_str(&format_red_output(&c.to_string()));
+        } else {
+            result.push(c);
+        }
+    }
+
+    result
 }
 
 fn format_red_output(a: &String) -> String {
