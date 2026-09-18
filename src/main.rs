@@ -288,7 +288,7 @@ fn main() {
 
         //eprintln!("input spilt len is {:?}", split_ptn_by_space);
         process::exit(1)
-    } else if res.len() > 0  {
+    } else if res.len() > 0 {
         if ptn_len_by_space == 1 || color_always {
             print_with_newline(&res);
         } else if !color_always {
@@ -300,7 +300,12 @@ fn main() {
         }
         process::exit(0)
     } else {
-        eprintln!("failed!: {:?} LEN={} vs PTN spilt {:?}", split_input_by_space, res.len(), ptn_len_by_space);
+        eprintln!(
+            "failed!: {:?} LEN={} vs PTN spilt {:?}",
+            split_input_by_space,
+            res.len(),
+            ptn_len_by_space
+        );
 
         process::exit(1)
     }
@@ -421,18 +426,26 @@ fn handle_single_ptn_to_spaced_txt(
     let mut start: usize = 0;
     let input_len = split_input_by_space.len();
     let ptn_len = split_ptn_by_space.len();
-
+    let mut temp_input_len = 0;
     eprintln!(
         "====FN handle_single_ptn_to_spaced_txt=== {:?} vs {:?}",
         split_input_by_space, split_input_by_space
     );
     while start < split_input_by_space.len() {
-        for ptn in split_ptn_by_space.iter() {
+        for (ptn_idx, ptn) in split_ptn_by_space.iter().enumerate() {
+            //start = 0;
             let mut input_to_start_at = &split_input_by_space[start..];
-            //println!("{:?}", split_input_by_space);
+            if ptn_idx != ptn_len - 1 && input_to_start_at.is_empty() {
+                eprintln!(
+                    "--AT {ptn_idx} matching {ptn} --- to input (  {:?}  ) start ={start}",
+                    input_to_start_at
+                );
+                start -= temp_input_len;
+                input_to_start_at = &split_input_by_space[start..];
+            }
             for (idx, i) in input_to_start_at.iter().enumerate() {
                 //println!("index: {start} matching: {i} == {ptn}");
-
+                temp_input_len = input_to_start_at.len();
                 let mut i_str = i.replace(".", "").replace(",", ""); // handle plural cases
 
                 let mut res_str = String::new();
@@ -451,10 +464,22 @@ fn handle_single_ptn_to_spaced_txt(
                         //println!("idx reached ==== {start}=== idx {idx}");
                     } else {
                         res.push(format!("{res_str}\n"));
-                        //break;
+                        break;
+                    }
+                } else if res_str.trim().is_empty() {
+                    if idx == input_to_start_at.len() - 1 {
+                        eprintln!(
+                            "NO MATCH! for {:?} at {ptn_idx} {ptn} NOT matching {i} whose idx is {idx}, LEN ={}",
+                            input_to_start_at,
+                            input_to_start_at.len()
+                        );
+
+                        eprintln!("END OF INDEX");
+                        // start = 0;
                     }
                 }
             }
+            eprintln!("--at {ptn_idx} matching... {ptn} finished-- start ={start}");
         }
 
         if start != split_input_by_space.len() && split_ptn_by_space.len() > 1 {
