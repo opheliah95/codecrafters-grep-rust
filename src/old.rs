@@ -308,28 +308,35 @@ fn format_and_filter_indv_letter_to_red(res_trim: Vec<&str>, input: &String) -> 
     let mut compare = input.clone();
     let mut out_old = out.clone();
     let mut out_temp = out.clone();
-
+    let mut out_str = input.clone();
+    let mut current_search = input.as_str();
+    
     let mut unmatch_count = 0;
     let mut i_last = 0;
-    
     for w in res_trim.iter() {
-        let idx: Option<usize> = compare.find(w);
         let w_len = w.len();
+        let mut idx: Option<usize> = input.find(w);
+        if w_len == 1 {
+            idx = compare.find(w);
+        }
         eprintln!("FN_format_ LOOP str to compare: <<{compare}>> -> compare {w}");
 
         match idx {
             Some(mut i) => {
-                println!("idx {i} out is {:?} and temp {:?} ", out, out_temp);
+                eprintln!("{w} at idx {i} out is {:?} and temp {:?} ", out, out_temp);
 
-                out[i] = format_red_output(&w.to_string());
-
-                out_temp = out[i_last + w_len..].to_vec();
-                compare = out_temp.join("");
                 if w_len > 1 {
-                    out.drain(i + 1..i + w_len);
+                    out_str = out_str.replace(w, &format_red_output(&w.to_string()));
+                } else {
+                    out[i] = format_red_output(&w.to_string());
+
+                    out_temp = out[i + 1..].to_vec();
+                    compare = out_temp.join("");
+                    out_str = out.join("");
+                    i_last = i;
                 }
 
-                println!("----PASS--at---{i}---{w}---end---{:?}------", out);
+                //eprintln!("----PASS--at---{i}---{w}---end---{out_str}------");
                 //compare.remove(i);
             }
             None => {
@@ -339,17 +346,17 @@ fn format_and_filter_indv_letter_to_red(res_trim: Vec<&str>, input: &String) -> 
         }
     }
 
-    if unmatch_count == input.len() || out_old == out {
+    //eprintln!("for {input} unmatched count: {unmatch_count}");
+    if unmatch_count >= res_trim.len() {
         eprintln!(" input is {input} NO MATCH");
 
         return "".to_string();
     } else {
         eprintln!("out is {:?} and input is {input} -> {unmatch_count}", out);
 
-        return out.join("");
+        return out_str;
     }
 }
-
 fn format_red_output(a: &String) -> String {
     if a.ends_with(',') || a.ends_with('.') {
         let a_len = a.len();
