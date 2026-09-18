@@ -17,6 +17,23 @@ pub fn count_single_repeat(mut pattern: &str) -> usize {
     return 0;
 }
 
+pub fn count_ptn_len(mut pattern_split: Vec<String>) -> usize  {
+    let mut ptn_len = pattern_split.len();
+    //println!("ptn len {ptn_len} and {:?}", pattern_split);
+    for ptn in pattern_split {
+        if ptn.ends_with("?") && !ptn.starts_with("(") {
+            //println!("found it {ptn}");
+            ptn_len -=1;
+        }
+    }
+
+    if ptn_len <= 1 {
+        return 1;
+    } else {
+        return ptn_len;
+    }
+}
+
 pub fn re_formatted_res_with_pattern(input: Vec<&str>, pattern: &str) -> Vec<String> {
     let mut out: Vec<String> = Vec::new();
     let mut c = 0;

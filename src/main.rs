@@ -9,7 +9,7 @@ use match_func::{
     remove_underline_and_punc, spilt_all_white_space_punc,
 };
 
-use crate::match_func::re_formatted_res_with_pattern;
+use crate::match_func::{count_ptn_len, re_formatted_res_with_pattern};
 
 // Usage: echo <input_text> | your_program.sh -E <pattern>
 fn main() {
@@ -219,18 +219,39 @@ fn main() {
         .filter(|t| !t.is_empty())
         .collect();
 
-    let res_temp = re_formatted_res_with_pattern(res_trim.clone(), &pattern);
-    res_trim = res_temp.iter().map(String::as_str).collect();
-    eprintln!("res trimed is {:?}  and res is {:?} ", res_trim, res);
+    let mut res_temp = re_formatted_res_with_pattern(res_trim.clone(), &pattern);
+    //eprintln!("res temp {:?}", res_temp);
+
+    let ptn_len_counted = count_ptn_len(split_ptn_by_space.clone());
+    if ptn_len_counted > 1 {
+        let res_temp_len = res_temp.len();
+        let quotient = res_temp_len % ptn_len_counted;
+
+        if quotient > 0 {
+            // need to improve
+            res_temp = res_temp[0..res_temp_len - quotient].to_vec();
+
+            // eprintln!(
+            //     "quotent={quotient}, len is {res_temp_len} and ptn_len_counted={ptn_len_counted}, res_temp={:?}",
+            //     res_temp
+            // );
+        }
+    }
+    res_trim = res_temp
+        .iter()
+        .filter(|s| !s.is_empty())
+        .map(String::as_str)
+        .collect();
+    //eprintln!("res trimed is {:?}  and res is {:?} ", res_trim, res);
     if color_always {
         let input_spilt_by_space_only: Vec<String> = input_line
             .split_inclusive('\n')
             .map(|c| c.to_string())
             .collect();
-        // eprintln!(
-        //     "the input spilt by space is {:?} vs res {:?}",
-        //     input_spilt_by_space_only, res_trim
-        // );
+        eprintln!(
+            "the input spilt by space is {:?} vs res {:?}",
+            input_spilt_by_space_only, res_trim
+        );
         res = input_spilt_by_space_only
             .iter()
             .map(|mut a| {
@@ -317,11 +338,14 @@ fn format_and_filter_indv_letter_to_red(res_trim: Vec<&str>, input: &str) -> Str
     let mut match_found = false;
 
     let mut search_offset = 0;
+    let res_count =res_trim.len();
 
     for w in res_trim.into_iter() {
+
         if w.is_empty() || search_offset >= input.len() {
             continue;
         }
+        eprintln!("the input is {input} vs {w} and highlight_mask: {:?}", highlight_mask);
 
         // Find match strictly after the previous search offset
         if let Some(byte_idx) = input[search_offset..].find(w) {
@@ -343,7 +367,8 @@ fn format_and_filter_indv_letter_to_red(res_trim: Vec<&str>, input: &str) -> Str
         }
     }
 
-    if !match_found {
+    let true_count = highlight_mask.iter().filter(|a| **a).count();
+    if !match_found ||   true_count < res_count{
         return String::new();
     }
 
