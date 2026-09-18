@@ -438,14 +438,6 @@ fn handle_single_ptn_to_spaced_txt(
                 let mut res_str = String::new();
                 res_str = print_single_matching_line(&i_str, &mut ptn.to_string());
 
-                // if env::args().any(|arg| arg == "-o") {
-                // } else {
-                //     if match_pattern(&i_str, ptn) {
-                //         res_str = i.to_string();
-                //     } else if let Some(a) = examine_repeat(&i_str, &ptn) {
-                //         res_str = a.to_string();
-                //     }
-                // }
                 eprintln!(
                     "resuot: ---{res_str}---idx: {idx}--len is {}",
                     res_str.len()
@@ -459,7 +451,7 @@ fn handle_single_ptn_to_spaced_txt(
                         //println!("idx reached ==== {start}=== idx {idx}");
                     } else {
                         res.push(format!("{res_str}\n"));
-                        break;
+                        //break;
                     }
                 }
             }
