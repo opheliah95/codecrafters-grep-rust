@@ -307,6 +307,7 @@ fn format_and_filter_indv_letter_to_red(res_trim: Vec<&str>, input: &String) -> 
     let mut current_search = input.as_str();
     let mut global_offset = 0;
     let mut unmatch_count = 0;
+    let mut out_str = input.clone();
     for w in res_trim.iter() {
         if w.is_empty() {
             continue;
@@ -323,11 +324,10 @@ fn format_and_filter_indv_letter_to_red(res_trim: Vec<&str>, input: &String) -> 
                 let advance = relative_idx + w.len();
                 global_offset += advance;
                 current_search = &current_search[advance..];
+                out_str = out.join("");
             } else {
                 // For multi-character matches, perform multi-char replacement
-                let mut temp_str = out.join("");
-                temp_str = temp_str.replace(w, &format_red_output(&w.to_string()));
-                return temp_str;
+                out_str = out_str.replace(w, &format_red_output(&w.to_string()));
             }
         } else {
             unmatch_count += 1;
@@ -336,7 +336,7 @@ fn format_and_filter_indv_letter_to_red(res_trim: Vec<&str>, input: &String) -> 
     if unmatch_count >= res_trim.len() {
         return "".to_string();
     }
-    out.join("")
+    return out_str
 }
 fn format_red_output(a: &String) -> String {
     if a.ends_with(',') || a.ends_with('.') {
