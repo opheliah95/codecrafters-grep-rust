@@ -288,12 +288,27 @@ fn main() {
         res
     );
 
-    let input_has_space = input_line.split_whitespace().collect::<Vec<&str>>().len();
-    //eprintln!("old input has space {input_has_space}");
+    let input_has_space = input_line.split(" ").collect::<Vec<&str>>().len();
+    eprintln!("old input has space {input_has_space}");
 
     if res.len() > 0 && input_has_space == 1 {
         if !color_always {
-            println!("{}", input_line);
+            let res_udpated = res
+                .iter()
+                .map(|a| {
+                    let cleaned = a.replace("\n", "");
+
+                    cleaned.trim().to_string()
+                })
+                .collect::<Vec<String>>();
+
+            eprintln!(" input_has_space == 1 -=> res updated {:?}", res_udpated);
+            for r in res_udpated {
+                split_input_by_space
+                    .iter()
+                    .filter(|a| a.contains(&r))
+                    .for_each(|a| println!("{}", a));
+            }
         } else {
             println!("{}", res.join(""));
         }
@@ -332,20 +347,26 @@ fn main() {
     }
 }
 
-fn format_and_filter_indv_letter_to_red(res_trim: Vec<&str>, input: &str, ptn_len: usize) -> String {
+fn format_and_filter_indv_letter_to_red(
+    res_trim: Vec<&str>,
+    input: &str,
+    ptn_len: usize,
+) -> String {
     let chars: Vec<char> = input.chars().collect();
     let mut highlight_mask = vec![false; chars.len()];
     let mut match_found = false;
 
     let mut search_offset = 0;
-    let res_count =res_trim.len();
+    let res_count = res_trim.len();
 
     for w in res_trim.into_iter() {
-
         if w.is_empty() || search_offset >= input.len() {
             continue;
         }
-        eprintln!("the input is {input} vs {w} and highlight_mask: {:?}", highlight_mask);
+        eprintln!(
+            "the input is {input} vs {w} and highlight_mask: {:?}",
+            highlight_mask
+        );
 
         // Find match strictly after the previous search offset
         if let Some(byte_idx) = input[search_offset..].find(w) {
@@ -368,7 +389,7 @@ fn format_and_filter_indv_letter_to_red(res_trim: Vec<&str>, input: &str, ptn_le
     }
 
     let true_count = highlight_mask.iter().filter(|a| **a).count();
-    if !match_found ||   true_count < ptn_len{
+    if !match_found || true_count < ptn_len {
         return String::new();
     }
 
