@@ -303,8 +303,9 @@ fn main() {
                 .collect::<Vec<String>>();
 
             eprintln!(" input_has_space == 1 -=> res updated {:?}", res_udpated);
+            let spilt_input_whitespace_only: Vec<String> = input_line.split_whitespace().map(|a| a.to_string()).collect();
             for r in res_udpated {
-                split_input_by_space
+                spilt_input_whitespace_only
                     .iter()
                     .filter(|a| a.contains(&r))
                     .for_each(|a| println!("{}", a));
