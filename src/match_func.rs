@@ -1,6 +1,48 @@
 use crate::lib::{find_match_inbetween, remove_start_end};
 use std::collections::HashMap;
 
+pub fn count_single_repeat(mut pattern: &str) -> usize {
+    // handle plural cases
+
+    let mut repeats = vec!["\\w", "\\d", "\\d+", "\\w+"];
+
+    for repeat in repeats.into_iter() {
+        if pattern.contains(repeat) {
+            let count = pattern.matches(repeat).count();
+            if count * repeat.len() == pattern.len() {
+                return count;
+            }
+        }
+    }
+    return 0;
+}
+
+pub fn re_formatted_res_with_pattern(input: Vec<&str>, pattern: &str) -> Vec<String> {
+    let mut out: Vec<String> = Vec::new();
+    let mut c = 0;
+    let count = count_single_repeat(pattern);
+
+    //eprintln!("the input is {:?}", input);
+    if count <=1 {
+        return input.iter().map(|a| a.to_string()).collect();
+    }
+   while c < input.len() {
+        if input[c].len() == count {
+            out.push(input[c].to_string());
+            c += 1;
+        } else if c + count <= input.len() {
+            // Safely slice count elements when available
+            out.push(input[c..c + count].concat());
+            c += count;
+        } else {
+            // Push remaining trailing elements individually or as a final slice
+            out.push(input[c..].concat());
+            break;
+        }
+    }
+    
+    out
+}
 pub fn examine_repeat(mut input_line: &str, mut pattern: &str) -> Option<String> {
     // handle plural cases
     if pattern.ends_with("s") && !input_line.ends_with("s") {
@@ -59,7 +101,10 @@ pub fn examine_repeat(mut input_line: &str, mut pattern: &str) -> Option<String>
         // );
 
         if input_line_end == *count || repeat_len * count == pattern.len() {
-            eprintln!("MATCHING REPEAT: {input_temp} -> {repeat} with {}", repeat_len * count );
+            eprintln!(
+                "MATCHING REPEAT: {input_temp} -> {repeat} with {}",
+                repeat_len * count
+            );
             format_input_of_repeated_char_pattern(
                 input_temp,
                 &mut input_filtered,
@@ -109,11 +154,11 @@ fn format_input_of_repeated_char_pattern(
         *input_filtered = "".to_string();
         return;
     }
-    
+
     match (input_res_len % count) {
-        0 => {},
+        0 => {}
         quotient => {
-            input_res = input_res[0..input_res_len-quotient].to_vec();
+            input_res = input_res[0..input_res_len - quotient].to_vec();
         }
     }
 
@@ -132,7 +177,7 @@ fn format_input_of_repeated_char_pattern(
 }
 
 pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
-    eprintln!("===FN match_pattern -> Matching: {input_line} to {pattern}");
+    //eprintln!("===FN match_pattern -> Matching: {input_line} to {pattern}");
     if pattern.ends_with("s") && !input_line.ends_with("s") {
         eprintln!("plural not matching");
         return false;

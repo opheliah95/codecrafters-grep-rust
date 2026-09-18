@@ -5,9 +5,11 @@ mod lib;
 use lib::{check_digits, exit_process_errored, remove_start_end, start_end_is_pattern};
 mod match_func;
 use match_func::{
-    examine_repeat, match_pattern, print_single_matching_line, remove_underline_and_punc,
-    spilt_all_white_space_punc,
+    count_single_repeat, examine_repeat, match_pattern, print_single_matching_line,
+    remove_underline_and_punc, spilt_all_white_space_punc,
 };
+
+use crate::match_func::re_formatted_res_with_pattern;
 
 // Usage: echo <input_text> | your_program.sh -E <pattern>
 fn main() {
@@ -210,13 +212,15 @@ fn main() {
         res = handle_single_ptn_to_spaced_txt(&split_input_by_space, &split_ptn_by_space);
     }
 
-    let res_trim: Vec<&str> = res
+    let mut res_trim: Vec<&str> = res
         .iter()
         .flat_map(|t| t.lines())
         .map(|t| t.trim())
         .filter(|t| !t.is_empty())
         .collect();
 
+    let res_temp = re_formatted_res_with_pattern(res_trim.clone(), &pattern);
+    res_trim = res_temp.iter().map(String::as_str).collect();
     eprintln!("res trimed is {:?}  and res is {:?} ", res_trim, res);
     if color_always {
         let input_spilt_by_space_only: Vec<String> = input_line
@@ -258,13 +262,13 @@ fn main() {
             .collect::<Vec<String>>();
     }
 
-    eprintln!(
-        "handle single ptn to sentence: {:?}  vd ptn_len {ptn_len_by_space}",
-        res
-    );
+    // eprintln!(
+    //     "handle single ptn to sentence: {:?}  vd ptn_len {ptn_len_by_space}",
+    //     res
+    // );
 
     let input_has_space = input_line.split_whitespace().collect::<Vec<&str>>().len();
-    eprintln!("old input has space {input_has_space}");
+    //eprintln!("old input has space {input_has_space}");
 
     if res.len() > 0 && input_has_space == 1 {
         if !color_always {
@@ -307,18 +311,18 @@ fn format_and_filter_indv_letter_to_red(res_trim: Vec<&str>, input: &str) -> Str
     let mut highlight_mask = vec![false; chars.len()];
     let mut match_found = false;
 
-    // 1. Mark which character indices in the original string need highlighting
     let mut search_offset = 0;
-    for w in res_trim {
-        if w.is_empty() {
+
+    for w in res_trim.into_iter() {
+        if w.is_empty() || search_offset >= input.len() {
             continue;
         }
 
-        // Search in the remaining unparsed substring to handle sequential matches accurately
+        // Find match strictly after the previous search offset
         if let Some(byte_idx) = input[search_offset..].find(w) {
             let abs_byte_idx = search_offset + byte_idx;
 
-            // Map byte index back to character index
+            // Map byte indices back to character indices
             let char_start = input[..abs_byte_idx].chars().count();
             let w_char_len = w.chars().count();
 
@@ -329,15 +333,16 @@ fn format_and_filter_indv_letter_to_red(res_trim: Vec<&str>, input: &str) -> Str
             }
 
             match_found = true;
+            // Advance search_offset past the matched segment
             search_offset = abs_byte_idx + w.len();
         }
     }
 
     if !match_found {
-        return "".to_string();
+        return String::new();
     }
 
-    // 2. Build the final output string cleanly without ANSI corruption
+    // Reconstruct string with red formatting where masked
     let mut result = String::new();
     for (i, &c) in chars.iter().enumerate() {
         if highlight_mask[i] {
