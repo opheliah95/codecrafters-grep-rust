@@ -22,7 +22,7 @@ pub fn re_formatted_res_with_pattern(input: Vec<&str>, pattern: &str) -> Vec<Str
     let mut c = 0;
     let count = count_single_repeat(pattern);
 
-    //eprintln!("the input is {:?}", input);
+    eprintln!("Fn==re_formatted_res_with_pattern==the input is {:?} and count is {}", input, count);
     if count <=1 {
         return input.iter().map(|a| a.to_string()).collect();
     }

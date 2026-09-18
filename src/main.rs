@@ -262,10 +262,10 @@ fn main() {
             .collect::<Vec<String>>();
     }
 
-    // eprintln!(
-    //     "handle single ptn to sentence: {:?}  vd ptn_len {ptn_len_by_space}",
-    //     res
-    // );
+    eprintln!(
+        "handle single ptn to sentence: {:?}  vd ptn_len {ptn_len_by_space}",
+        res
+    );
 
     let input_has_space = input_line.split_whitespace().collect::<Vec<&str>>().len();
     //eprintln!("old input has space {input_has_space}");
@@ -288,7 +288,7 @@ fn main() {
 
         //eprintln!("input spilt len is {:?}", split_ptn_by_space);
         process::exit(1)
-    } else if res.len() > 0 && res.len() >= ptn_len_by_space {
+    } else if res.len() > 0  {
         if ptn_len_by_space == 1 || color_always {
             print_with_newline(&res);
         } else if !color_always {
@@ -300,7 +300,7 @@ fn main() {
         }
         process::exit(0)
     } else {
-        eprint!("failed!: {:?}", split_input_by_space);
+        eprintln!("failed!: {:?} LEN={} vs PTN spilt {:?}", split_input_by_space, res.len(), ptn_len_by_space);
 
         process::exit(1)
     }
