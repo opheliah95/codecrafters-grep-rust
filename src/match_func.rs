@@ -59,7 +59,7 @@ pub fn examine_repeat(mut input_line: &str, mut pattern: &str) -> Option<String>
         // );
 
         if input_line_end == *count || repeat_len * count == pattern.len() {
-            eprintln!("MATCHING REPEAT: {input_temp} -> {repeat}");
+            eprintln!("MATCHING REPEAT: {input_temp} -> {repeat} with {}", repeat_len * count );
             format_input_of_repeated_char_pattern(
                 input_temp,
                 &mut input_filtered,
@@ -98,7 +98,7 @@ fn format_input_of_repeated_char_pattern(
     input_line_end: usize,
     count: usize,
 ) {
-    let input_res = input_temp
+    let mut input_res = input_temp
         .chars()
         .into_iter()
         .filter(|a| match_pattern(&a.to_string(), repeat))
@@ -108,6 +108,13 @@ fn format_input_of_repeated_char_pattern(
     if input_res_len == 0 {
         *input_filtered = "".to_string();
         return;
+    }
+    
+    match (input_res_len % count) {
+        0 => {},
+        quotient => {
+            input_res = input_res[0..input_res_len-quotient].to_vec();
+        }
     }
 
     *input_filtered = input_res
