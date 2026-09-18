@@ -303,41 +303,34 @@ fn main() {
 }
 
 fn format_and_filter_indv_letter_to_red(res_trim: Vec<&str>, input: &String) -> String {
-    let mut out: Vec<String> = input.chars().map(|c| c.to_string()).collect();
-    let mut current_search = input.as_str();
-    let mut global_offset = 0;
-    let mut unmatch_count = 0;
     let mut out_str = input.clone();
+    let mut match_found = false;
+
     for w in res_trim.iter() {
         if w.is_empty() {
             continue;
         }
 
-        if let Some(relative_idx) = current_search.find(w) {
-            // Calculate absolute index in the original vector
-            let absolute_idx = global_offset + relative_idx;
+        if out_str.contains(w) {
+            match_found = true;
 
-            if w.len() == 1 {
-                out[absolute_idx] = format_red_output(&w.to_string());
+            // Format each character inside the matched word individually
+            let formatted_word: String = w
+                .chars()
+                .map(|c| format_red_output(&c.to_string()))
+                .collect();
 
-                // Advance search buffer past the matched character
-                let advance = relative_idx + w.len();
-                global_offset += advance;
-                current_search = &current_search[advance..];
-                out_str = out.join("");
-            } else {
-                // For multi-character matches, perform multi-char replacement
-                out_str = out_str.replace(w, &format_red_output(&w.to_string()));
-            }
-        } else {
-            unmatch_count += 1;
+            out_str = out_str.replace(w, &formatted_word);
         }
     }
-    if unmatch_count >= res_trim.len() {
+
+    if !match_found {
         return "".to_string();
     }
-    return out_str
+
+    out_str
 }
+
 fn format_red_output(a: &String) -> String {
     if a.ends_with(',') || a.ends_with('.') {
         let a_len = a.len();

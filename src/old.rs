@@ -303,59 +303,40 @@ fn main() {
 }
 
 fn format_and_filter_indv_letter_to_red(res_trim: Vec<&str>, input: &String) -> String {
-    eprintln!("FN_format_the input passed is {input} vs {:?}", res_trim);
-    let mut out: Vec<String> = input.clone().chars().map(|c| c.to_string()).collect();
-    let mut compare = input.clone();
-    let mut out_old = out.clone();
-    let mut out_temp = out.clone();
-    let mut out_str = input.clone();
+    let mut out: Vec<String> = input.chars().map(|c| c.to_string()).collect();
     let mut current_search = input.as_str();
-    
+    let mut global_offset = 0;
     let mut unmatch_count = 0;
-    let mut i_last = 0;
+    let mut out_str = input.clone();
     for w in res_trim.iter() {
-        let w_len = w.len();
-        let mut idx: Option<usize> = input.find(w);
-        if w_len == 1 {
-            idx = compare.find(w);
+        if w.is_empty() {
+            continue;
         }
-        eprintln!("FN_format_ LOOP str to compare: <<{compare}>> -> compare {w}");
 
-        match idx {
-            Some(mut i) => {
-                eprintln!("{w} at idx {i} out is {:?} and temp {:?} ", out, out_temp);
+        if let Some(relative_idx) = current_search.find(w) {
+            // Calculate absolute index in the original vector
+            let absolute_idx = global_offset + relative_idx;
 
-                if w_len > 1 {
-                    out_str = out_str.replace(w, &format_red_output(&w.to_string()));
-                } else {
-                    out[i] = format_red_output(&w.to_string());
+            if w.len() == 1 {
+                out[absolute_idx] = format_red_output(&w.to_string());
 
-                    out_temp = out[i + 1..].to_vec();
-                    compare = out_temp.join("");
-                    out_str = out.join("");
-                    i_last = i;
-                }
-
-                //eprintln!("----PASS--at---{i}---{w}---end---{out_str}------");
-                //compare.remove(i);
+                // Advance search buffer past the matched character
+                let advance = relative_idx + w.len();
+                global_offset += advance;
+                current_search = &current_search[advance..];
+                out_str = out.join("");
+            } else {
+                // For multi-character matches, perform multi-char replacement
+                out_str = out_str.replace(w, &format_red_output(&w.to_string()));
             }
-            None => {
-                eprintln!("{w} does not have a matching idx");
-                unmatch_count += 1;
-            }
+        } else {
+            unmatch_count += 1;
         }
     }
-
-    //eprintln!("for {input} unmatched count: {unmatch_count}");
     if unmatch_count >= res_trim.len() {
-        eprintln!(" input is {input} NO MATCH");
-
         return "".to_string();
-    } else {
-        eprintln!("out is {:?} and input is {input} -> {unmatch_count}", out);
-
-        return out_str;
     }
+    return out_str
 }
 fn format_red_output(a: &String) -> String {
     if a.ends_with(',') || a.ends_with('.') {
