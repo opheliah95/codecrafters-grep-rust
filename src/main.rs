@@ -26,6 +26,10 @@ fn main() {
         color_always = true;
         pattern = env::args().nth(3).unwrap();
     }
+    else if env::args().nth(1).unwrap() == "--color=never" {
+        color_always = false;
+        pattern = env::args().nth(3).unwrap();
+    }
 
     let mut split_ptn_by_space = spilt_all_white_space_punc(&pattern);
 
