@@ -219,8 +219,10 @@ fn main() {
 
     eprintln!("res trimed is {:?}  and res is {:?} ", res_trim, res);
     if color_always {
-        let input_spilt_by_space_only: Vec<String> =
-            input_line.split(" ").map(|c| c.to_string()).collect();
+        let input_spilt_by_space_only: Vec<String> = input_line
+            .split_inclusive('\n')
+            .map(|c| c.to_string())
+            .collect();
         // eprintln!(
         //     "the input spilt by space is {:?} vs res {:?}",
         //     input_spilt_by_space_only, res_trim
@@ -240,22 +242,10 @@ fn main() {
                     format_red_output(a)
                 } else {
                     // Unmatched tokens remain plain/uncolored
-                    let words: Vec<String> =
-                        a.split_inclusive('\n').map(|c| c.to_string()).collect();
-                    //println!("the words are: {:?}", words);
-                    if words.len() > 1 {
-                        let formatted_words: Vec<String> = words
-                            .iter()
-                            .map(|item| {
-                                format_and_filter_indv_letter_to_red(res_trim.clone(), item)
-                            })
-                            .collect();
-                        //println!(" res {:?}", formatted_words);
-                        formatted_words.join("")
-                    } else {
-                        // Single word (or empty): handle directly
-                        format_and_filter_indv_letter_to_red(res_trim.clone(), &a)
-                    }
+                    // let words: Vec<String> =
+                    //     a.split_inclusive('\n').map(|c| c.to_string()).collect();
+                    // println!("the words are: {:?}", words);
+                    format_and_filter_indv_letter_to_red(res_trim.clone(), &a)
                 }
             })
             .filter(|m| !m.is_empty())
@@ -313,44 +303,58 @@ fn main() {
 }
 
 fn format_and_filter_indv_letter_to_red(res_trim: Vec<&str>, input: &String) -> String {
-    //eprintln!("the input passed is {input}");
+    eprintln!("FN_format_the input passed is {input} vs {:?}", res_trim);
     let mut out: Vec<String> = input.clone().chars().map(|c| c.to_string()).collect();
     let mut compare = input.clone();
     let mut out_old = out.clone();
+    let mut out_temp = out.clone();
+    let mut out_str = input.clone();
 
     let mut unmatch_count = 0;
-
+    let mut i_last = 0;
     for w in res_trim.iter() {
-        //println!("w is {w}");
-        let idx = compare.find(w);
         let w_len = w.len();
+        let mut idx: Option<usize> = input.find(w);
+        if w_len == 1 {
+            idx = compare.find(w);
+        }
+        eprintln!("FN_format_ LOOP str to compare: <<{compare}>> -> compare {w}");
+
         match idx {
-            Some(i) => {
-                out[i] = format_red_output(&w.to_string());
-                
+            Some(mut i) => {
+                //println!("idx {i} out is {:?} and temp {:?} ", out, out_temp);
+
                 if w_len > 1 {
-                    out.drain(i + 1..i + w_len);
+                    out_str = out_str.replace(w, &format_red_output(&w.to_string()));
+                } else {
+                    out[i] = format_red_output(&w.to_string());
+                    out_temp = out[i + w_len..].to_vec();
+                    compare = out_temp.join("");
+                    out_str = out.join("");
                 }
-                //println!("at {i} out is {:?}", out);
+
+
+                //eprintln!("----PASS--at---{i}---{w}---end---{out_str}------");
                 //compare.remove(i);
             }
             None => {
+                eprintln!("{w} does not have a matching idx");
                 unmatch_count += 1;
             }
         }
     }
 
-    if unmatch_count == input.len() || out_old == out {
+    //eprintln!("for {input} unmatched count: {unmatch_count}");
+    if unmatch_count >= res_trim.len() {
         eprintln!(" input is {input} NO MATCH");
 
         return "".to_string();
     } else {
         eprintln!("out is {:?} and input is {input} -> {unmatch_count}", out);
 
-        return out.join("");
+        return out_str;
     }
 }
-
 fn format_red_output(a: &String) -> String {
     if a.ends_with(',') || a.ends_with('.') {
         let a_len = a.len();
