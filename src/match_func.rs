@@ -22,11 +22,14 @@ pub fn re_formatted_res_with_pattern(input: Vec<&str>, pattern: &str) -> Vec<Str
     let mut c = 0;
     let count = count_single_repeat(pattern);
 
-    eprintln!("Fn==re_formatted_res_with_pattern==the input is {:?} and count is {}", input, count);
-    if count <=1 {
+    eprintln!(
+        "Fn==re_formatted_res_with_pattern==the input is {:?} and count is {}",
+        input, count
+    );
+    if count <= 1 {
         return input.iter().map(|a| a.to_string()).collect();
     }
-   while c < input.len() {
+    while c < input.len() {
         if input[c].len() == count {
             out.push(input[c].to_string());
             c += 1;
@@ -40,7 +43,7 @@ pub fn re_formatted_res_with_pattern(input: Vec<&str>, pattern: &str) -> Vec<Str
             break;
         }
     }
-    
+
     out
 }
 pub fn examine_repeat(mut input_line: &str, mut pattern: &str) -> Option<String> {
@@ -177,7 +180,7 @@ fn format_input_of_repeated_char_pattern(
 }
 
 pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
-    //eprintln!("===FN match_pattern -> Matching: {input_line} to {pattern}");
+    eprintln!("===FN match_pattern -> Matching: {input_line} to {pattern}");
     if pattern.ends_with("s") && !input_line.ends_with("s") {
         eprintln!("plural not matching");
         return false;
@@ -312,9 +315,11 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
         }
 
         ptn if ptn.starts_with("(") => {
-            //println!("ptn start with (: {input_line} ----  {ptn}");
+            eprintln!("ptn start with (: {input_line} ----  {ptn}");
             let mut alt_end = ptn.rfind(")").unwrap_or(0);
             let pipe_find = ptn.find("|").unwrap_or(0);
+            let mut input_trimmed = false;
+            let input_temp = input_line.clone();
 
             if ptn.ends_with("?") {
                 let char_before_ptn = ptn
@@ -322,11 +327,15 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                     .chars()
                     .nth(ptn.len().saturating_sub(2))
                     .unwrap_or('\0');
+
                 if char_before_ptn != '\0' && input_line.chars().last() == Some(char_before_ptn) {
                     if let Some((last_char_byte_idx, _)) = input_line.char_indices().last() {
                         input_line = &input_line[..last_char_byte_idx];
+                        input_trimmed = true;
                     }
                 }
+
+                //eprintln!("char before ptn is {char_before_ptn} input is {input_line}");
             }
 
             if alt_end == 0 || pipe_find == 0 {
@@ -339,8 +348,17 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                 let mut ptn_p1_old = ptn.get(1..alt_end).unwrap();
                 let ptn_p1_string = format!("({ptn_p1_old})");
                 let ptn_p1: &str = &ptn_p1_string;
-                //println!("( ) | all present => matching {input_line} -------- {ptn_p1}");
-                let ptn_1_match = match_pattern(input_line, ptn_p1);
+                eprintln!("( ) | all present => matching {input_line} -------- {ptn_p1}");
+                let mut ptn_1_match = match_pattern(input_line, ptn_p1);
+
+                // echo -ne "I see 3 cabbages. Also, I see 4 asparaguss.\nI ate 10 asparagus today" | ./your_program.sh --color=always -E 'I see \d+ (asparagus|cabbage)s?' | cat
+                if !ptn_1_match && input_trimmed {
+                    ptn_1_match = match_pattern(input_temp, ptn_p1);
+                    if ptn_1_match {
+                        input_line = input_temp;
+                    }
+                }
+
                 let ptn_p2 = ptn.get(alt_end + 1..).unwrap();
                 if ptn_p2.len() == 0 {
                     return true;
@@ -774,7 +792,7 @@ pub fn print_single_matching_line(input_line: &String, pattern: &mut String) -> 
 
     // handle plural cases
     if pattern.ends_with("s") && !input_line.ends_with("s") {
-        //println!("not matching");
+        //eprintln!("plural case not matching");
         return "".to_string();
     }
 
