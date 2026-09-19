@@ -1,35 +1,10 @@
-[![progress-banner](https://backend.codecrafters.io/progress/grep/d4f6e586-1072-428a-adac-c7a3b04ebc31)](https://app.codecrafters.io/users/opheliah95?r=2qF)
 
-This is a starting point for Rust solutions to the
-["Build Your Own grep" Challenge](https://app.codecrafters.io/courses/grep/overview).
 
-[Regular expressions](https://en.wikipedia.org/wiki/Regular_expression)
-(Regexes, for short) are patterns used to match character combinations in
-strings. [`grep`](https://en.wikipedia.org/wiki/Grep) is a CLI tool for
-searching using Regexes.
+# My attempt for codecrafter grep challenge
 
-In this challenge you'll build your own implementation of `grep`. Along the way
-we'll learn about Regex syntax, how parsers/lexers work, and how regular
-expressions are evaluated.
+The entry point for the `grep` implementation is in `src/main.rs`. 
 
-**Note**: If you're viewing this repo on GitHub, head over to
-[codecrafters.io](https://codecrafters.io) to try the challenge.
-
-# Passing the first stage
-
-The entry point for your `grep` implementation is in `src/main.rs`. Study and
-uncomment the relevant code, and then run the command below to execute the tests
-on our servers:
-
-```sh
-codecrafters submit
-```
-
-Time to move on to the next stage!
-
-# Stage 2 & beyond
-
-Note: This section is for stages 2 and beyond.
+## How to run locally:
 
 1. Ensure you have `cargo (1.96)` installed locally
 1. Run `./your_program.sh` to run your program, which is implemented in
