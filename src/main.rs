@@ -1,5 +1,5 @@
 use std::env;
-use std::io::{self, Read, Write};
+use std::io::{self, IsTerminal, Read, Write};
 use std::process;
 mod lib;
 use lib::{check_digits, exit_process_errored, remove_start_end, start_end_is_pattern};
@@ -27,6 +27,9 @@ fn main() {
         pattern = env::args().nth(3).unwrap();
     } else if env::args().nth(1).unwrap() == "--color=never" {
         color_always = false;
+        pattern = env::args().nth(3).unwrap();
+    } else if env::args().nth(1).unwrap() == "--color=auto" {
+        color_always = io::stdout().is_terminal();
         pattern = env::args().nth(3).unwrap();
     }
 
@@ -132,14 +135,13 @@ fn main() {
         }
     }
 
-    if env::args().nth(1).unwrap() != "-E"
-        && env::args().nth(1).unwrap() != "--color=always"
-        && env::args().nth(1).unwrap() != "--color=never"
-    {
-        println!("Expected first argument to be '-E'");
-        process::exit(1);
+    match env::args().nth(1).as_deref() {
+        Some("-E" | "--color=always" | "--color=never" | "--color=auto") => {}
+        _ => {
+            println!("Expected first argument to be '-E' or a valid color flag");
+            process::exit(1);
+        }
     }
-
     let ptn_len_by_space = split_ptn_by_space.len();
     eprintln!(
         "args contain -E input {:?} ptn  {:?}",
