@@ -438,7 +438,7 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
 
                         // terminate if input len actally less than ptn i.e. echo -n 'gol' | ./your_program.sh -E 'g.+gol'
                         let current_input_slice = &input_line[idx..];
-                        println!(
+                        eprintln!(
                             "WILDCARD: match zero/more quantifier encountered, idx {idx} val in input {c}"
                         );
                         if char_after_wildcard == '+'
