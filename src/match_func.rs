@@ -413,7 +413,7 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
             for (idx, c) in input_line.chars().enumerate() {
                 let wildcard_pos = pattern.find(".").unwrap_or(0);
                 let ptn_at_idx = pattern.clone().chars().nth(idx).unwrap_or('\0');
-                println!("WILDCARD: idx {idx}, c: {c} -> match ptn: {ptn_at_idx}");
+                eprintln!("WILDCARD: idx {idx}, c: {c} -> match ptn: {ptn_at_idx}");
 
                 // if length same then line by line matching
                 if input_line.len() == pattern.len() {
