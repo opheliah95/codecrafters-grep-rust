@@ -247,6 +247,17 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
             }
             return input_line == to_match;
         }
+        // end with .*
+        ptn if ptn.ends_with(".*") => {
+            if input_line.is_empty() {
+                return false
+            } else {
+                let ptn_len = ptn.len();
+                let ptn_part = &ptn[0..ptn_len-2];
+
+                return match_pattern(input_line, ptn_part)
+            }
+        }
 
         // check start anchor
         ptn if pattern.starts_with("^") => {
@@ -396,7 +407,7 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                 return false;
             }
         }
-
+        
         // check wildcard
         ptn if ptn.contains(".") => {
             for (idx, c) in input_line.chars().enumerate() {

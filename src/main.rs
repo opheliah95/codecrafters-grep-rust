@@ -1,4 +1,5 @@
 use std::env;
+use std::fs;
 use std::io::{self, IsTerminal, Read, Write};
 use std::process;
 mod lib;
@@ -16,9 +17,22 @@ fn main() {
     // You can use print statements as follows for debugging, they'll be visible when running tests.
     eprintln!("Logs from your program will appear here!");
     let mut input_line = String::new();
-    io::stdin().read_to_string(&mut input_line).unwrap();
+    if let Some(path) = env::args().nth(3) {
+        let content = fs::read_to_string(path);
+
+        match content {
+            Ok(res) => input_line = res,
+            Err(e) => {
+                eprintln!("Error! File does not exists!");
+            }
+        }
+
+    } else {
+        io::stdin().read_to_string(&mut input_line).unwrap();
+    }
     let mut pattern = env::args().nth(2).unwrap();
     let mut color_always: bool = false;
+
     if env::args().nth(1).unwrap() == "-o" {
         pattern = env::args().nth(3).unwrap();
         pattern = remove_underline_and_punc(&pattern);
@@ -317,26 +331,16 @@ fn main() {
                 .collect();
             let spilt_input_space_only: Vec<String> =
                 input_line.split("\n").map(|a| a.to_string()).collect();
-            eprintln!("spilt input space {:?} len of space {}", spilt_input_space_only,  spilt_input_space_only.len());
+            eprintln!(
+                "spilt input space {:?} len of space {}",
+                spilt_input_space_only,
+                spilt_input_space_only.len()
+            );
 
-                spilt_input_space_only
-                    .iter()
-                    .filter(|a| res_updated.iter().any(|b| a.contains(b)))
-                    .for_each(|a| println!("{}", a));
-            
-            // if spilt_input_space_only.len() <= 1 {
-            //     for r in res_updated {
-            //         spilt_input_whitespace_only
-            //             .iter()
-            //             .filter(|a| a.contains(&r))
-            //             .for_each(|a| println!("{}", a));
-            //     }
-            // } else {
-            //     spilt_input_space_only
-            //         .iter()
-            //         .filter(|a| res_updated.iter().any(|b| a.contains(b)))
-            //         .for_each(|a| println!("{}", a));
-            // }
+            spilt_input_space_only
+                .iter()
+                .filter(|a| res_updated.iter().any(|b| a.contains(b)))
+                .for_each(|a| println!("{}", a));
         } else {
             println!("{}", res.join(""));
         }
