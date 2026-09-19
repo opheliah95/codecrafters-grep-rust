@@ -310,28 +310,33 @@ fn main() {
                 })
                 .collect::<Vec<String>>();
 
-            eprintln!(" input_has_space == 1 -=> res updated {:?}", res_updated);
+            eprintln!("input_has_space == 1 -=> res updated {:?}", res_updated);
             let spilt_input_whitespace_only: Vec<String> = input_line
                 .split_whitespace()
                 .map(|a| a.to_string())
                 .collect();
             let spilt_input_space_only: Vec<String> =
                 input_line.split("\n").map(|a| a.to_string()).collect();
-            eprintln!("spilt input space {:?}", spilt_input_space_only);
+            eprintln!("spilt input space {:?} len of space {}", spilt_input_space_only,  spilt_input_space_only.len());
 
-            if spilt_input_space_only.len() <= 1 {
-                for r in res_updated {
-                    spilt_input_whitespace_only
-                        .iter()
-                        .filter(|a| a.contains(&r))
-                        .for_each(|a| println!("{}", a));
-                }
-            } else {
                 spilt_input_space_only
                     .iter()
                     .filter(|a| res_updated.iter().any(|b| a.contains(b)))
                     .for_each(|a| println!("{}", a));
-            }
+            
+            // if spilt_input_space_only.len() <= 1 {
+            //     for r in res_updated {
+            //         spilt_input_whitespace_only
+            //             .iter()
+            //             .filter(|a| a.contains(&r))
+            //             .for_each(|a| println!("{}", a));
+            //     }
+            // } else {
+            //     spilt_input_space_only
+            //         .iter()
+            //         .filter(|a| res_updated.iter().any(|b| a.contains(b)))
+            //         .for_each(|a| println!("{}", a));
+            // }
         } else {
             println!("{}", res.join(""));
         }
