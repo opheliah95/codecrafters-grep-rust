@@ -25,8 +25,7 @@ fn main() {
     } else if env::args().nth(1).unwrap() == "--color=always" {
         color_always = true;
         pattern = env::args().nth(3).unwrap();
-    }
-    else if env::args().nth(1).unwrap() == "--color=never" {
+    } else if env::args().nth(1).unwrap() == "--color=never" {
         color_always = false;
         pattern = env::args().nth(3).unwrap();
     }
@@ -133,7 +132,10 @@ fn main() {
         }
     }
 
-    if env::args().nth(1).unwrap() != "-E" && env::args().nth(1).unwrap() != "--color=always" && env::args().nth(1).unwrap() != "--color=never" {
+    if env::args().nth(1).unwrap() != "-E"
+        && env::args().nth(1).unwrap() != "--color=always"
+        && env::args().nth(1).unwrap() != "--color=never"
+    {
         println!("Expected first argument to be '-E'");
         process::exit(1);
     }
@@ -295,9 +297,9 @@ fn main() {
     let input_has_space = input_line.split(" ").collect::<Vec<&str>>().len();
     eprintln!("old input has space {input_has_space}");
 
-    if res.len() > 0 && input_has_space == 1 {
+    if res.len() > 0 && (input_has_space == 1 || ptn_len_by_space == 1) {
         if !color_always {
-            let res_udpated = res
+            let res_updated = res
                 .iter()
                 .map(|a| {
                     let cleaned = a.replace("\n", "");
@@ -306,12 +308,26 @@ fn main() {
                 })
                 .collect::<Vec<String>>();
 
-            eprintln!(" input_has_space == 1 -=> res updated {:?}", res_udpated);
-            let spilt_input_whitespace_only: Vec<String> = input_line.split_whitespace().map(|a| a.to_string()).collect();
-            for r in res_udpated {
-                spilt_input_whitespace_only
+            eprintln!(" input_has_space == 1 -=> res updated {:?}", res_updated);
+            let spilt_input_whitespace_only: Vec<String> = input_line
+                .split_whitespace()
+                .map(|a| a.to_string())
+                .collect();
+            let spilt_input_space_only: Vec<String> =
+                input_line.split("\n").map(|a| a.to_string()).collect();
+            eprintln!("spilt input space {:?}", spilt_input_space_only);
+
+            if spilt_input_space_only.len() <= 1 {
+                for r in res_updated {
+                    spilt_input_whitespace_only
+                        .iter()
+                        .filter(|a| a.contains(&r))
+                        .for_each(|a| println!("{}", a));
+                }
+            } else {
+                spilt_input_space_only
                     .iter()
-                    .filter(|a| a.contains(&r))
+                    .filter(|a| res_updated.iter().any(|b| a.contains(b)))
                     .for_each(|a| println!("{}", a));
             }
         } else {
