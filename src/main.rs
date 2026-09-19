@@ -17,6 +17,10 @@ fn main() {
     // You can use print statements as follows for debugging, they'll be visible when running tests.
     eprintln!("Logs from your program will appear here!");
     let mut input_line = String::new();
+    io::stdin().read_to_string(&mut input_line).unwrap();
+
+
+    // if a file is passed
     if let Some(path) = env::args().nth(3) {
         let content = fs::read_to_string(path);
 
@@ -26,10 +30,8 @@ fn main() {
                 eprintln!("Error! File does not exists!");
             }
         }
-
-    } else {
-        io::stdin().read_to_string(&mut input_line).unwrap();
     }
+
     let mut pattern = env::args().nth(2).unwrap();
     let mut color_always: bool = false;
 
