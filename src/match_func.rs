@@ -458,7 +458,7 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                         // shorten pattern and re-search wildcard pos
                         for (rev_idx, rev_c) in after_wildcard_rev.iter().enumerate() {
                             let m = input_back_rev.pop().unwrap();
-                            println!("Now reverse match at ptn idx {rev_idx} :  {rev_c} -> {m} ");
+                            eprintln!("Now reverse match at ptn idx {rev_idx} :  {rev_c} -> {m} ");
                             if *rev_c != m {
                                 return false;
                             }
