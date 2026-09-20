@@ -145,8 +145,9 @@ fn handle_pattern_matching(
     match_found: &mut Vec<bool>,
     total_files:usize
 ) {
-    eprintln!("at filename:={filename} Total files {total_files} and file_count = {file_count}");
-    let suffix = if filename.is_empty() || (file_count <= 1 && total_files<file_count) {
+    let suffix = if filename.is_empty() || (file_count <= 1 && total_files!=file_count) {
+           eprintln!("at filename:={filename} Total files {total_files} and file_count = {file_count}");
+
         ""
     } else {
         &format!("{filename}:")
