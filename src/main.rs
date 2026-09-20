@@ -47,7 +47,7 @@ fn main() {
             start += 1;
         }
         // finished all loop
-        println!("END");
+        eprintln!("===Program END with all matches===");
         process::exit(0);
     } else {
         // we will need args more than 3
