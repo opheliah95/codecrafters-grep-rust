@@ -43,7 +43,7 @@ fn main() {
                 start,
                 &mut match_found,
             );
-            eprintln!("<----Matched file name {:?}---->", match_found   );
+            eprintln!("<----Matched file name {:?}---->", match_found);
             start += 1;
         }
         // finished all loop
@@ -51,7 +51,7 @@ fn main() {
             eprintln!("===END PROGRAM== NO MATCH");
             process::exit(1);
         } else {
-            eprintln!("===END PROGRAM== ALL MATCHED");
+            eprintln!("===END PROGRAM== MATCHED");
 
             process::exit(0);
         }
@@ -453,8 +453,15 @@ fn handle_pattern_matching(
                 .iter()
                 .filter(|a| res_updated.iter().any(|b| a.contains(b)))
                 .for_each(|a| println!("{suffix}{}", a));
+
+            if !can_success_exit(is_last, match_found) {
+                return;
+            };
         } else {
             println!("{suffix}{}", res.join(""));
+            if !can_success_exit(is_last, match_found) {
+                return;
+            };
         }
     } else if res.len() > 0
         && env::args().nth(1).unwrap() == "-E"

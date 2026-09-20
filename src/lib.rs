@@ -96,7 +96,7 @@ pub fn check_digits(input: &str) -> usize {
 }
 
 pub fn exit_process_errored(is_last: bool, match_found: &mut Vec<bool>) -> bool {
-    if is_last && match_found.is_empty(){
+    if is_last && match_found.is_empty() {
         eprintln!("At last index...ERROR===Exit");
         process::exit(1);
     }
@@ -104,11 +104,12 @@ pub fn exit_process_errored(is_last: bool, match_found: &mut Vec<bool>) -> bool 
     return is_last;
 }
 
-pub fn can_success_exit(is_last: bool,   match_found: &mut Vec<bool>) -> bool {
+pub fn can_success_exit(is_last: bool, match_found: &mut Vec<bool>) -> bool {
+    match_found.push(true);
+    eprintln!("========MATCH FOUND=====");
     if is_last {
         eprintln!("======Exit Success==========");
         process::exit(0);
     }
-    match_found.push(true);
     return is_last;
 }
