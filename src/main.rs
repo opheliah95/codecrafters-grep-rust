@@ -30,6 +30,8 @@ fn main() {
     // if a file is passed
     if args.len() >= 3 {
         let mut start = 3;
+        let mut total_files = args.len() - 2;
+
         while start < args.len() {
             is_last = start == args.len() - 1;
             //eprintln!("<------checking idx {start} args len {}  is end: {}------>", args.len(), is_last);
@@ -41,6 +43,7 @@ fn main() {
                 &mut color_always,
                 start,
                 &mut match_found,
+                &mut total_files
             );
             eprintln!("<----Matched file name {:?}---->", match_found);
             start += 1;
@@ -68,6 +71,7 @@ fn match_by_files_or_input(
     color_always: &mut bool,
     start: usize,
     match_found: &mut Vec<bool>,
+    total_files: &mut usize
 ) {
     let mut pattern = env::args().nth(2).unwrap();
     let mut input_line = String::new();
@@ -83,6 +87,7 @@ fn match_by_files_or_input(
             }
             Err(e) => {
                 eprintln!("Error! File does not exists!");
+                *total_files -=1;
                 io::stdin().read_to_string(&mut input_line).unwrap();
             }
         }
@@ -124,6 +129,7 @@ fn match_by_files_or_input(
         *file_count,
         is_last,
         match_found,
+        *total_files
     );
 }
 
@@ -137,8 +143,9 @@ fn handle_pattern_matching(
     file_count: usize,
     is_last: bool,
     match_found: &mut Vec<bool>,
+    total_files:usize
 ) {
-    let suffix = if filename.is_empty() || file_count < 1 {
+    let suffix = if filename.is_empty() || (file_count <= 1 && total_files==file_count) {
         ""
     } else {
         &format!("{filename}:")
