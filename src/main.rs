@@ -138,7 +138,7 @@ fn handle_pattern_matching(
     is_last: bool,
     match_found: &mut Vec<bool>,
 ) {
-    let suffix = if filename.is_empty() || file_count <= 1 {
+    let suffix = if filename.is_empty() || file_count < 1 {
         ""
     } else {
         &format!("{filename}:")
