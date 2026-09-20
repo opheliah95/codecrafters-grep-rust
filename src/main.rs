@@ -135,7 +135,7 @@ fn handle_pattern_matching(
     let suffix = if filename.is_empty() {
         ""
     } else {
-        &format!("{filename}: ")
+        &format!("{filename}:")
     };
     if split_ptn_by_space.len() == 1 {
         if pattern.starts_with("^") && pattern.ends_with("$") {
