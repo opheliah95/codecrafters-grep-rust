@@ -43,7 +43,7 @@ fn main() {
                 start,
                 &mut match_found,
             );
-            //eprintln!("<----Matched file name {filename}---->");
+            eprintln!("<----Matched file name {:?}---->", match_found   );
             start += 1;
         }
         // finished all loop
