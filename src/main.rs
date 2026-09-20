@@ -30,7 +30,7 @@ fn main() {
     // if a file is passed
     if args.len() >= 3 {
         let mut start = 3;
-
+        file_count = args.len() - 2;
         while start < args.len() {
             is_last = start == args.len() - 1;
             //eprintln!("<------checking idx {start} args len {}  is end: {}------>", args.len(), is_last);
@@ -78,10 +78,11 @@ fn match_by_files_or_input(
             Ok(res) => {
                 input_line = res;
                 //eprintln!("the content is << {input_line} >>");
-                *file_count += 1;
                 *is_file = true;
             }
             Err(e) => {
+                *file_count -= 1;
+
                 eprintln!("Error! File does not exists!");
                 io::stdin().read_to_string(&mut input_line).unwrap();
             }
