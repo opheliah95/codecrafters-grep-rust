@@ -47,8 +47,14 @@ fn main() {
             start += 1;
         }
         // finished all loop
-        eprintln!("===Program END with all matches===");
-        process::exit(0);
+        if match_found.is_empty() {
+            eprintln!("===END PROGRAM== NO MATCH");
+            process::exit(1);
+        } else {
+            eprintln!("===END PROGRAM== ALL MATCHED");
+
+            process::exit(0);
+        }
     } else {
         // we will need args more than 3
         process::exit(1);
