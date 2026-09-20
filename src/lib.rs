@@ -98,3 +98,12 @@ pub fn check_digits(input: &str) -> usize {
 pub fn exit_process_errored() {
     process::exit(1);
 }
+
+pub fn can_success_exit(is_last: bool) -> bool  {
+    if is_last {
+        eprintln!("======Exit Success==========");
+        process::exit(0);
+    }
+
+    return is_last;
+}

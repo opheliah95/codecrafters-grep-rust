@@ -1,5 +1,5 @@
 use crate::lib::{find_match_inbetween, remove_start_end};
-use std::collections::HashMap;
+use std::{collections::HashMap, ops::BitAnd};
 
 pub fn count_single_repeat(mut pattern: &str) -> usize {
     // handle plural cases
@@ -17,13 +17,13 @@ pub fn count_single_repeat(mut pattern: &str) -> usize {
     return 0;
 }
 
-pub fn count_ptn_len(mut pattern_split: Vec<String>) -> usize  {
+pub fn count_ptn_len(mut pattern_split: Vec<String>) -> usize {
     let mut ptn_len = pattern_split.len();
     //println!("ptn len {ptn_len} and {:?}", pattern_split);
     for ptn in pattern_split {
         if ptn.ends_with("?") && !ptn.starts_with("(") {
             //println!("found it {ptn}");
-            ptn_len -=1;
+            ptn_len -= 1;
         }
     }
 
@@ -106,13 +106,19 @@ pub fn examine_repeat(mut input_line: &str, mut pattern: &str) -> Option<String>
     if repeats_result.is_empty() {
         return None;
     }
-    eprintln!("_FN_examine_pattern {input_line} -> examine_repeat: {pattern} {:?}", repeats_result);
+    eprintln!(
+        "_FN_examine_pattern {input_line} -> examine_repeat: {pattern} {:?}",
+        repeats_result
+    );
     for (repeat, count) in &repeats_result {
-       if ["\\w", "\\w+"].contains(&repeat.as_str()) {
-            let input_filtered = input_temp.chars().filter(|a| a.is_alphanumeric() || *a == '_').collect::<String>();
+        if ["\\w", "\\w+"].contains(&repeat.as_str()) {
+            let input_filtered = input_temp
+                .chars()
+                .filter(|a| a.is_alphanumeric() || *a == '_')
+                .collect::<String>();
             input_temp = input_filtered;
-       }
-       
+        }
+
         let repeat_len = repeat.len();
         let input_line_end = input_temp.len();
         let mut diff = "";
@@ -248,15 +254,24 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
             return input_line == to_match;
         }
         // end with .*
-        ptn if ptn.ends_with(".*") => {
+        ptn if ptn.ends_with(".*") || ptn.ends_with(".*$") => {
             if input_line.is_empty() {
-                return false
-            } else {
-                let ptn_len = ptn.len();
-                let ptn_part = &ptn[0..ptn_len-2];
-
-                return match_pattern(input_line, ptn_part)
+                return false;
             }
+
+            if ptn == ".*"  || ptn == ".*$" {
+                return true;
+            }
+
+            let ptn_len = ptn.len();
+            let ptn_start = ptn.find(".*").unwrap();
+            let ptn_part = &ptn[0..ptn_start];
+            eprintln!("=={ptn} ==ptn part is 1 ptn_part: {ptn_part} vs input: {input_line}");
+
+            if ptn_part.len() == 1 {
+                return input_line.starts_with(ptn_part);
+            }
+            return match_pattern(input_line, ptn_part);
         }
 
         // check start anchor
@@ -407,7 +422,7 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                 return false;
             }
         }
-        
+
         // check wildcard
         ptn if ptn.contains(".") => {
             for (idx, c) in input_line.chars().enumerate() {
@@ -458,7 +473,7 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                         // shorten pattern and re-search wildcard pos
                         for (rev_idx, rev_c) in after_wildcard_rev.iter().enumerate() {
                             let m = input_back_rev.pop().unwrap();
-                            eprintln!("Now reverse match at ptn idx {rev_idx} :  {rev_c} -> {m} ");
+                            //eprintln!("Now reverse match at ptn idx {rev_idx} :  {rev_c} -> {m} ");
                             if *rev_c != m {
                                 return false;
                             }

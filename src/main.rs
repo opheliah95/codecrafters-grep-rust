@@ -3,7 +3,7 @@ use std::fs;
 use std::io::{self, IsTerminal, Read, Write};
 use std::process;
 mod lib;
-use lib::{check_digits, exit_process_errored, remove_start_end, start_end_is_pattern};
+use lib::{can_success_exit, exit_process_errored, remove_start_end, start_end_is_pattern};
 mod match_func;
 use match_func::{
     count_single_repeat, examine_repeat, match_pattern, print_single_matching_line,
@@ -13,39 +13,78 @@ use match_func::{
 use crate::match_func::{count_ptn_len, re_formatted_res_with_pattern};
 
 // Usage: echo <input_text> | your_program.sh -E <pattern>
+// COMMON PATTERNS: echo -n "jekyll and hyde" | ./your_program.sh --color=always -E '(jekyll|hyde)'
+// echo -n "I have 3 cows" | ./your_program.sh --color=auto -E 'cows'
+
 fn main() {
     // You can use print statements as follows for debugging, they'll be visible when running tests.
     eprintln!("Logs from your program will appear here!");
-    let mut input_line = String::new();
-    io::stdin().read_to_string(&mut input_line).unwrap();
-
+    let args = env::args();
+    let mut filename = String::new();
+    let mut is_file: bool = false;
+    let mut file_count: usize = 0;
+    let mut is_last: bool = true;
+    let mut color_always: bool = false;
 
     // if a file is passed
-    if let Some(path) = env::args().nth(3) {
-        let content = fs::read_to_string(path);
+    if args.len() >= 3 {
+        let mut start = 3;
 
+        while start < args.len() {
+            is_last = start == args.len() -1;
+            //eprintln!("<------checking idx {start} args len {}  is end: {}------>", args.len(), is_last);
+            match_by_files_or_input(&mut filename, &mut is_file, &mut file_count, is_last, &mut color_always, start);
+            //eprintln!("<----Matched file name {filename}---->");
+            start += 1;
+        }
+        // finished all loop
+        //println!("END");
+        process::exit(0);
+        
+    } else {
+        // we will need args more than 3
+        exit_process_errored();
+    }
+}
+
+fn match_by_files_or_input(filename: &mut String, is_file: &mut bool, file_count: &mut usize, is_last: bool, color_always: &mut bool, start:usize) {
+    let mut pattern = env::args().nth(2).unwrap();
+    let mut input_line = String::new();
+    if let Some(path) = env::args().nth(start) {
+        let content = fs::read_to_string(path);
         match content {
-            Ok(res) => input_line = res,
+            Ok(res) => {
+                input_line = res;
+                eprintln!("the content is << {input_line} >>");
+                *file_count += 1;
+                *is_file = true;
+            }
             Err(e) => {
                 eprintln!("Error! File does not exists!");
+                io::stdin().read_to_string(&mut input_line).unwrap();
             }
         }
+    } else {
+        io::stdin().read_to_string(&mut input_line).unwrap();
     }
 
-    let mut pattern = env::args().nth(2).unwrap();
-    let mut color_always: bool = false;
+    *filename = if *is_file {
+        env::args().nth(start).unwrap()
+    } else {
+        "".to_string()
+    };
 
     if env::args().nth(1).unwrap() == "-o" {
         pattern = env::args().nth(3).unwrap();
         pattern = remove_underline_and_punc(&pattern);
     } else if env::args().nth(1).unwrap() == "--color=always" {
-        color_always = true;
+        *color_always = true;
         pattern = env::args().nth(3).unwrap();
     } else if env::args().nth(1).unwrap() == "--color=never" {
-        color_always = false;
+        *color_always = false;
         pattern = env::args().nth(3).unwrap();
     } else if env::args().nth(1).unwrap() == "--color=auto" {
-        color_always = io::stdout().is_terminal();
+        *color_always = io::stdout().is_terminal();
         pattern = env::args().nth(3).unwrap();
     }
 
@@ -53,6 +92,33 @@ fn main() {
 
     let mut split_input_by_space = spilt_all_white_space_punc(&input_line);
 
+    handle_pattern_matching(
+        input_line,
+        pattern,
+        *color_always,
+        split_ptn_by_space,
+        split_input_by_space,
+        &*filename,
+        *file_count,
+        is_last,
+    );
+}
+
+fn handle_pattern_matching(
+    input_line: String,
+    mut pattern: String,
+    color_always: bool,
+    split_ptn_by_space: Vec<String>,
+    split_input_by_space: Vec<String>,
+    filename: &str,
+    file_count: usize,
+    is_last: bool,
+) {
+    let suffix = if filename.is_empty() {
+        ""
+    } else {
+        &format!("{filename}: ")
+    };
     if split_ptn_by_space.len() == 1 {
         if pattern.starts_with("^") && pattern.ends_with("$") {
             let ptn_last = pattern.len();
@@ -60,11 +126,13 @@ fn main() {
             //println!("range is {ptn_range}");
             if *input_line == ptn_range.to_string() {
                 if color_always == true {
-                    println!("{}", format!("\x1b[01;31m{}\x1b[0m", input_line));
+                    println!("{suffix}{}", format!("\x1b[01;31m{}\x1b[0m", input_line));
                 } else {
-                    println!("{input_line}");
+                    println!("{suffix}{input_line}");
                 }
-                process::exit(0);
+                if !can_success_exit(is_last) {
+                    return;
+                };
             } else {
                 exit_process_errored();
             }
@@ -78,7 +146,9 @@ fn main() {
         } else if pattern.ends_with("$") {
             let ptn_last = pattern.len();
             let ptn_range = &pattern[0..ptn_last - 1];
-            if !input_line.ends_with(ptn_range) {
+
+            if ptn_range.ends_with(".*") {
+            } else if !input_line.ends_with(ptn_range) {
                 exit_process_errored();
             }
         }
@@ -94,38 +164,34 @@ fn main() {
         //println!("res of spilt full stop: {:?}", split_by_full_stop_cleaned);
 
         let mut res: Vec<String> = Vec::new();
+        let mut res_len = res.len();
 
         if split_by_full_stop_cleaned.len() > 1 {
             res = handle_sentence_ptn(&split_by_full_stop_cleaned, pattern.clone());
-            if res.len() >= 1 {
-                for r in res {
-                    //eprintln!("DEBUG: original='{}'", r); // See raw value
-                    let s = r.trim_end().to_string();
-                    // eprintln!("DEBUG: trimmed='{}'", s); // See after trim
-                    println!("{}", s.trim());
-                }
+            // if res_len >= 1 {
+            //     for r in res {
+            //         //eprintln!("DEBUG: original='{}'", r); // See raw value
+            //         let s = r.trim_end().to_string();
+            //         // eprintln!("DEBUG: trimmed='{}'", s); // See after trim
+            //         println!("{suffix}{}", s.trim());
+            //     }
 
-                process::exit(0);
-            } else {
-                //eprintln!("res empty");
-                process::exit(1);
-            }
-        } else {
-            //echo -ne "mango\n!@#$\nbanana\n+++\ntest123" | ./your_program.sh -E '\w+'
-            //println!("{:?} vs PTN {:?}", split_input_by_space, split_ptn_by_space);
-
-            if split_ptn_by_space.len() == split_input_by_space.len() {
-                res = handle_single_matching_line(&split_input_by_space, &split_ptn_by_space);
-            } else if split_ptn_by_space.len() != split_input_by_space.len() {
-                res = handle_single_ptn_to_spaced_txt(&split_input_by_space, &split_ptn_by_space);
-            } else if split_ptn_by_space.len() == 0 || split_ptn_by_space.len() == 0 {
-                exit_process_errored();
-            }
+            // }
+        } else if split_ptn_by_space.len() == split_input_by_space.len() {
+            res = handle_single_matching_line(&split_input_by_space, &split_ptn_by_space);
+        } else if split_ptn_by_space.len() != split_input_by_space.len() {
+            res = handle_single_ptn_to_spaced_txt(&split_input_by_space, &split_ptn_by_space);
+        } else if split_ptn_by_space.len() == 0 || split_ptn_by_space.len() == 0 {
+            res = Vec::new();
         }
 
-        eprintln!("res: {:?}", res);
+        //eprintln!("res: {:?}", res.clone());
+        if res.is_empty() {
+            exit_process_errored();
+        } else {
+            res_len = res.len(); // by opass borrow error
+        }
 
-        let res_len = res.len();
         if res_len >= 1 {
             let res_collected: Vec<String> = res
                 .iter()
@@ -137,14 +203,16 @@ fn main() {
                         if a.chars().last().unwrap() == 0xA as char {
                             a.to_string()
                         } else {
-                            format!("{} ", a)
+                            format!("{suffix}{} ", a)
                         }
                     }
                 })
                 .collect();
             //println!("{:?}", res_collected);
-            println!("{}", res_collected.join(""));
-            process::exit(0);
+            println!("{suffix}{}", res_collected.join(""));
+            if !can_success_exit(is_last) {
+                return;
+            }
         } else {
             //println!("res empty");
             process::exit(1);
@@ -199,9 +267,11 @@ fn main() {
                     .collect::<Vec<String>>();
 
                 if res.len() > 0 {
-                    println!("{}", res.join(""));
+                    println!("{suffix}{}", res.join(""));
                     io::stdout().flush().unwrap();
-                    process::exit(0)
+                    if !can_success_exit(is_last) {
+                        return;
+                    }
                 } else {
                     eprint!("failed!: {:?}", split_input_by_space);
 
@@ -221,8 +291,10 @@ fn main() {
                     })
                     .collect();
                 if !result_str.is_empty() {
-                    println!("{result_str}");
-                    process::exit(0)
+                    println!("{suffix}{result_str}");
+                    if !can_success_exit(is_last) {
+                        return;
+                    }
                 } else {
                     eprint!("failed!: {:?}", split_input_by_space);
 
@@ -313,7 +385,7 @@ fn main() {
     );
 
     let input_has_space = input_line.split(" ").collect::<Vec<&str>>().len();
-    eprintln!("old input has space {input_has_space}");
+    eprintln!("old input has space {input_has_space} and suffix is {suffix}");
 
     if res.len() > 0 && (input_has_space == 1 || ptn_len_by_space == 1) {
         if !color_always {
@@ -342,9 +414,9 @@ fn main() {
             spilt_input_space_only
                 .iter()
                 .filter(|a| res_updated.iter().any(|b| a.contains(b)))
-                .for_each(|a| println!("{}", a));
+                .for_each(|a| println!("{suffix}{}", a));
         } else {
-            println!("{}", res.join(""));
+            println!("{suffix}{}", res.join(""));
         }
     } else if res.len() > 0
         && env::args().nth(1).unwrap() == "-E"
@@ -352,8 +424,10 @@ fn main() {
         && !input_line.contains("\n")
     {
         if res.len() >= split_ptn_by_space.len() {
-            println!("{input_line}");
-            process::exit(0)
+            println!("{suffix}{input_line}");
+            if !can_success_exit(is_last) {
+                return;
+            }
         }
 
         //eprintln!("input spilt len is {:?}", split_ptn_by_space);
@@ -364,11 +438,13 @@ fn main() {
         } else if !color_always {
             for r in res.chunks(ptn_len_by_space) {
                 if r.len() == ptn_len_by_space {
-                    println!("{}", r.join(" "));
+                    println!("{suffix}{}", r.join(" "));
                 }
             }
         }
-        process::exit(0)
+        if !can_success_exit(is_last) {
+            return;
+        }
     } else {
         eprintln!(
             "failed!: {:?} LEN={} vs PTN spilt {:?}",

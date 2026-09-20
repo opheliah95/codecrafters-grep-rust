@@ -10,8 +10,6 @@ set -e # Exit early if any commands fail
 
 # Copied from .codecrafters/compile.sh
 
-echo "apple" > fruits.txt
-
 (
   cd "$(dirname "$0")" # Ensure compile steps are run within the repository directory
   cargo build --release --target-dir=/tmp/codecrafters-build-grep-rust --manifest-path Cargo.toml
