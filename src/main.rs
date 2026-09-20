@@ -145,6 +145,7 @@ fn handle_pattern_matching(
     match_found: &mut Vec<bool>,
     total_files:usize
 ) {
+    eprintln!("total files {total_files}");
     let suffix = if filename.is_empty() || (file_count <= 1 && total_files==file_count) {
         ""
     } else {
