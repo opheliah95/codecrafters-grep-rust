@@ -147,7 +147,7 @@ fn handle_pattern_matching(
             let ptn_last = pattern.len();
             let ptn_range = &pattern[0..ptn_last - 1];
 
-            if ptn_range.ends_with(".*") {
+            if ptn_range.ends_with(".*") || ptn_range.ends_with(".+") {
             } else if !input_line.ends_with(ptn_range) {
                 exit_process_errored();
             }
