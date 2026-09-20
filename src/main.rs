@@ -253,7 +253,7 @@ fn handle_pattern_matching(
                 .collect();
             eprintln!("----res collected is {:?}", res_collected);
             let ptn_len = count_ptn_len(split_ptn_by_space.clone());
-            if ptn_len == 1 {
+            if ptn_len == 1 || res_collected.len() == ptn_len{
                 println!("{suffix}{}", res_collected.join(""));
             } else {
                 for r in res_collected {
