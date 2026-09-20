@@ -251,8 +251,10 @@ fn handle_pattern_matching(
                     }
                 })
                 .collect();
-            //println!("{:?}", res_collected);
-            println!("{suffix}{}", res_collected.join(""));
+            eprintln!("----res collected is {:?}", res_collected);
+            for r in res_collected {
+                println!("{suffix}{r}");
+            }
             if !can_success_exit(is_last, match_found) {
                 return;
             };
