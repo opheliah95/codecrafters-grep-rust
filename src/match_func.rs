@@ -813,7 +813,7 @@ pub fn spilt_all_white_space_punc(input_line: &str) -> Vec<String> {
         .map(String::from)
         .collect();
 
-    eprintln!("removed all punc and white space: {:?}", split_input);
+    //eprintln!("removed all punc and white space: {:?}", split_input);
     split_input
 }
 

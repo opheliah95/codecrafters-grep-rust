@@ -55,7 +55,7 @@ fn match_by_files_or_input(filename: &mut String, is_file: &mut bool, file_count
         match content {
             Ok(res) => {
                 input_line = res;
-                eprintln!("the content is << {input_line} >>");
+               //eprintln!("the content is << {input_line} >>");
                 *file_count += 1;
                 *is_file = true;
             }
