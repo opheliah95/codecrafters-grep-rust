@@ -30,7 +30,7 @@ fn main() {
     // if a file is passed
     if args.len() >= 3 {
         let mut start = 3;
-        let mut total_files = args.len() - 2;
+        let mut total_files = args.len() - start;
 
         while start < args.len() {
             is_last = start == args.len() - 1;
