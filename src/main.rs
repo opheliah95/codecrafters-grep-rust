@@ -32,7 +32,7 @@ fn main() {
         let mut start = 3;
         let mut total_files = args.len() - start;
 
-        while start < args.len() {
+        while start <= args.len() {
             is_last = start == args.len() - 1;
             //eprintln!("<------checking idx {start} args len {}  is end: {}------>", args.len(), is_last);
             match_by_files_or_input(
