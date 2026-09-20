@@ -307,7 +307,7 @@ fn handle_pattern_matching(
                         return;
                     };
                 } else {
-                    eprint!("failed!: {:?}", split_input_by_space);
+                    eprintln!("failed!: {:?}", split_input_by_space);
 
                     if !exit_process_errored(is_last, match_found) {
                         return;
@@ -491,7 +491,7 @@ fn handle_pattern_matching(
             ptn_len_by_space
         );
 
-        if !can_success_exit(is_last, match_found) {
+        if !exit_process_errored(is_last, match_found) {
             return;
         };
     }
