@@ -95,15 +95,20 @@ pub fn check_digits(input: &str) -> usize {
     return res;
 }
 
-pub fn exit_process_errored() {
-    process::exit(1);
+pub fn exit_process_errored(is_last: bool, match_found: &mut Vec<bool>) -> bool {
+    if is_last && match_found.is_empty(){
+        eprintln!("At last index...ERROR===Exit");
+        process::exit(1);
+    }
+    eprintln!("<<NO Match>> -> MOVE to next file...No match...");
+    return is_last;
 }
 
-pub fn can_success_exit(is_last: bool) -> bool  {
+pub fn can_success_exit(is_last: bool,   match_found: &mut Vec<bool>) -> bool {
     if is_last {
         eprintln!("======Exit Success==========");
         process::exit(0);
     }
-
+    match_found.push(true);
     return is_last;
 }

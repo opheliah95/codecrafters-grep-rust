@@ -25,29 +25,45 @@ fn main() {
     let mut file_count: usize = 0;
     let mut is_last: bool = true;
     let mut color_always: bool = false;
+    let mut match_found: Vec<bool> = Vec::new();
 
     // if a file is passed
     if args.len() >= 3 {
         let mut start = 3;
 
         while start < args.len() {
-            is_last = start == args.len() -1;
+            is_last = start == args.len() - 1;
             //eprintln!("<------checking idx {start} args len {}  is end: {}------>", args.len(), is_last);
-            match_by_files_or_input(&mut filename, &mut is_file, &mut file_count, is_last, &mut color_always, start);
+            match_by_files_or_input(
+                &mut filename,
+                &mut is_file,
+                &mut file_count,
+                is_last,
+                &mut color_always,
+                start,
+                &mut match_found,
+            );
             //eprintln!("<----Matched file name {filename}---->");
             start += 1;
         }
         // finished all loop
-        //println!("END");
+        println!("END");
         process::exit(0);
-        
     } else {
         // we will need args more than 3
-        exit_process_errored();
+        process::exit(1);
     }
 }
 
-fn match_by_files_or_input(filename: &mut String, is_file: &mut bool, file_count: &mut usize, is_last: bool, color_always: &mut bool, start:usize) {
+fn match_by_files_or_input(
+    filename: &mut String,
+    is_file: &mut bool,
+    file_count: &mut usize,
+    is_last: bool,
+    color_always: &mut bool,
+    start: usize,
+    match_found: &mut Vec<bool>,
+) {
     let mut pattern = env::args().nth(2).unwrap();
     let mut input_line = String::new();
     if let Some(path) = env::args().nth(start) {
@@ -55,7 +71,7 @@ fn match_by_files_or_input(filename: &mut String, is_file: &mut bool, file_count
         match content {
             Ok(res) => {
                 input_line = res;
-               //eprintln!("the content is << {input_line} >>");
+                //eprintln!("the content is << {input_line} >>");
                 *file_count += 1;
                 *is_file = true;
             }
@@ -101,6 +117,7 @@ fn match_by_files_or_input(filename: &mut String, is_file: &mut bool, file_count
         &*filename,
         *file_count,
         is_last,
+        match_found,
     );
 }
 
@@ -113,6 +130,7 @@ fn handle_pattern_matching(
     filename: &str,
     file_count: usize,
     is_last: bool,
+    match_found: &mut Vec<bool>,
 ) {
     let suffix = if filename.is_empty() {
         ""
@@ -130,18 +148,22 @@ fn handle_pattern_matching(
                 } else {
                     println!("{suffix}{input_line}");
                 }
-                if !can_success_exit(is_last) {
+                if !can_success_exit(is_last, match_found) {
                     return;
                 };
             } else {
-                exit_process_errored();
+                if !exit_process_errored(is_last, match_found) {
+                    return;
+                };
             }
         } else if pattern.starts_with("^") {
             let ptn_range = &pattern[1..];
             //println!("here...{}", pattern.clone().chars().nth(1).unwrap());
 
             if !input_line.starts_with(ptn_range) {
-                exit_process_errored();
+                if !exit_process_errored(is_last, match_found) {
+                    return;
+                };
             }
         } else if pattern.ends_with("$") {
             let ptn_last = pattern.len();
@@ -149,7 +171,9 @@ fn handle_pattern_matching(
 
             if ptn_range.ends_with(".*") || ptn_range.ends_with(".+") {
             } else if !input_line.ends_with(ptn_range) {
-                exit_process_errored();
+                if !exit_process_errored(is_last, match_found) {
+                    return;
+                };
             }
         }
     }
@@ -187,7 +211,9 @@ fn handle_pattern_matching(
 
         //eprintln!("res: {:?}", res.clone());
         if res.is_empty() {
-            exit_process_errored();
+            if !exit_process_errored(is_last, match_found) {
+                return;
+            };
         } else {
             res_len = res.len(); // by opass borrow error
         }
@@ -210,9 +236,9 @@ fn handle_pattern_matching(
                 .collect();
             //println!("{:?}", res_collected);
             println!("{suffix}{}", res_collected.join(""));
-            if !can_success_exit(is_last) {
+            if !can_success_exit(is_last, match_found) {
                 return;
-            }
+            };
         } else {
             //println!("res empty");
             process::exit(1);
@@ -237,7 +263,9 @@ fn handle_pattern_matching(
     if split_input_by_space.len() == 1 && split_ptn_by_space.len() == 1 {
         let mut matched = print_single_matching_line(&input_line, &mut pattern);
         if matched.len() == 0 {
-            exit_process_errored();
+            if !exit_process_errored(is_last, match_found) {
+                return;
+            };
         }
         let matched = matched
             .trim()
@@ -269,13 +297,15 @@ fn handle_pattern_matching(
                 if res.len() > 0 {
                     println!("{suffix}{}", res.join(""));
                     io::stdout().flush().unwrap();
-                    if !can_success_exit(is_last) {
+                    if !can_success_exit(is_last, match_found) {
                         return;
-                    }
+                    };
                 } else {
                     eprint!("failed!: {:?}", split_input_by_space);
 
-                    process::exit(1)
+                    if !exit_process_errored(is_last, match_found) {
+                        return;
+                    };
                 }
             }
             None => {
@@ -292,13 +322,15 @@ fn handle_pattern_matching(
                     .collect();
                 if !result_str.is_empty() {
                     println!("{suffix}{result_str}");
-                    if !can_success_exit(is_last) {
+                    if !can_success_exit(is_last, match_found) {
                         return;
-                    }
+                    };
                 } else {
-                    eprint!("failed!: {:?}", split_input_by_space);
+                    eprintln!("failed!: {:?}", split_input_by_space);
 
-                    exit_process_errored();
+                    if !exit_process_errored(is_last, match_found) {
+                        return;
+                    };
                 }
             }
         }
@@ -425,9 +457,9 @@ fn handle_pattern_matching(
     {
         if res.len() >= split_ptn_by_space.len() {
             println!("{suffix}{input_line}");
-            if !can_success_exit(is_last) {
+            if !can_success_exit(is_last, match_found) {
                 return;
-            }
+            };
         }
 
         //eprintln!("input spilt len is {:?}", split_ptn_by_space);
@@ -442,9 +474,9 @@ fn handle_pattern_matching(
                 }
             }
         }
-        if !can_success_exit(is_last) {
+        if !can_success_exit(is_last, match_found) {
             return;
-        }
+        };
     } else {
         eprintln!(
             "failed!: {:?} LEN={} vs PTN spilt {:?}",
@@ -453,7 +485,9 @@ fn handle_pattern_matching(
             ptn_len_by_space
         );
 
-        process::exit(1)
+        if !can_success_exit(is_last, match_found) {
+            return;
+        };
     }
 }
 

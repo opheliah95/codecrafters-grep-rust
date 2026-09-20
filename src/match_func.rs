@@ -1,5 +1,5 @@
 use crate::lib::{find_match_inbetween, remove_start_end};
-use std::{collections::HashMap, ops::BitAnd};
+use std::{collections::HashMap};
 
 pub fn count_single_repeat(mut pattern: &str) -> usize {
     // handle plural cases
