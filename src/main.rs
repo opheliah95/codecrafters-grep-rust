@@ -68,7 +68,11 @@ fn main() {
     if args.len() >= 3 {
         while start <= args.len() {
             is_last = start == args.len() - 1;
-            //eprintln!("<------checking idx {start} args len {}  is end: {}------>", args.len(), is_last);
+            eprintln!(
+                "<------checking idx {start} args len {}  is end: {}------>",
+                args.len(),
+                is_last
+            );
             match_by_files_or_input(
                 &mut filename,
                 &mut is_file,
@@ -113,7 +117,7 @@ fn match_by_files_or_input(
     eprintln!("Filename={filename} start={start}");
 
     if start >= env::args().len() {
-        return
+        return;
     }
 
     if let Some(path) = env::args().nth(start) {
@@ -122,6 +126,7 @@ fn match_by_files_or_input(
             Ok(res) => {
                 input_line = res;
                 *file_count += 1;
+                *filename = env::args().nth(start).unwrap();
 
                 //eprintln!("txt passed! the content is << {input_line} >>");
                 *is_file = true;
@@ -157,7 +162,7 @@ fn match_by_files_or_input(
         } else {
             "".to_string()
         };
-    }
+    } 
 
     if env::args().nth(1).unwrap() == "-o" {
         pattern = env::args().nth(3).unwrap();
