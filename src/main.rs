@@ -79,6 +79,7 @@ fn main() {
                 &mut match_found,
                 &mut total_files,
             );
+            start += 1;
             eprintln!("<----Matched file name {:?}---->", match_found);
         }
 
@@ -109,7 +110,11 @@ fn match_by_files_or_input(
 ) {
     let mut pattern = env::args().nth(2).unwrap();
     let mut input_line = String::new();
-    //eprintln!("Filename={filename} start={start}");
+    eprintln!("Filename={filename} start={start}");
+
+    if start >= env::args().len() {
+        return
+    }
 
     if let Some(path) = env::args().nth(start) {
         let content = fs::read_to_string(path);
