@@ -116,7 +116,7 @@ fn match_by_files_or_input(
     let mut input_line = String::new();
     eprintln!("Filename={filename} start={start}");
 
-    if start >= env::args().len() {
+    if start > env::args().len() {
         return;
     }
 
@@ -141,7 +141,7 @@ fn match_by_files_or_input(
                     *file_count += 1;
                     //eprintln!("FILENAME found {filename} => {input_line}")
                 } else {
-                    eprintln!("Error! File does not exists! {filename}  -<");
+                    eprintln!("Error! File does not exists! filename={filename} ");
                     *total_files -= 1;
                     io::stdin().read_to_string(&mut input_line).unwrap();
                     if input_line.is_empty() {
