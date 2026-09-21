@@ -163,6 +163,10 @@ fn match_by_files_or_input(
             "".to_string()
         };
     } 
+    
+    if *file_count <= 1 {
+        *filename = "".to_string();
+    }
 
     if env::args().nth(1).unwrap() == "-o" {
         pattern = env::args().nth(3).unwrap();
