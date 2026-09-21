@@ -1,10 +1,40 @@
+use std::path::Path;
 use std::process;
+use std::{fs, io};
 
 pub fn check_all_true(vec: &Vec<bool>) -> bool {
     if vec.len() == 0 {
         return false;
     }
     vec.iter().all(|e| *e == true)
+}
+
+pub fn check_dir(path_str: String) -> io::Result<Vec<String>> {
+    let path_clone = path_str.clone();
+    let is_dir = Path::new(&path_str).is_dir();
+    let entries = fs::read_dir(path_str)?;
+
+    eprintln!("path str passed is_dir={is_dir}");
+let files: Vec<String> = entries
+    .flatten()
+    .flat_map(|entry| {
+        let path = entry.path();
+        let mut paths = Vec::new();
+
+        if path.is_file() {
+            paths.push(path);
+        } else if path.is_dir() {
+            if let Ok(sub_entries) = fs::read_dir(&path) {
+                paths.extend(sub_entries.flatten().map(|e| e.path()).filter(|p| p.is_file()));
+            }
+        }
+
+        paths
+    })
+    .map(|s| s.into_os_string().into_string().unwrap())
+    .collect();
+
+    Ok(files)
 }
 
 pub fn contain_digits(input: &str) -> bool {

@@ -3,7 +3,7 @@ use std::fs;
 use std::io::{self, IsTerminal, Read, Write};
 use std::process;
 mod lib;
-use lib::{can_success_exit, exit_process_errored, remove_start_end, start_end_is_pattern};
+use lib::{can_success_exit, check_dir, exit_process_errored, start_end_is_pattern};
 mod match_func;
 use match_func::{
     count_single_repeat, examine_repeat, match_pattern, print_single_matching_line,
@@ -26,12 +26,46 @@ fn main() {
     let mut is_last: bool = true;
     let mut color_always: bool = false;
     let mut match_found: Vec<bool> = Vec::new();
+    let mut start = 3;
+    let mut total_files = args.len() - start;
+
+    // check dir
+    if env::args().nth(1).unwrap() == "-r" {
+        if let Some(path) = env::args().nth(4) {
+            match check_dir(path) {
+                Ok(files) => {
+                    let mut start = 4;
+                    eprintln!("files passed {:?}", files);
+
+                    for (idx, file) in files.iter().enumerate() {
+                        let mut last = idx == files.len() - 1;
+                        filename = file.to_string();
+
+                        eprintln!("DIR => filename {filename}");
+                        match_by_files_or_input(
+                            &mut filename,
+                            &mut is_file,
+                            &mut file_count,
+                            &mut last,
+                            &mut color_always,
+                            start,
+                            &mut match_found,
+                            &mut total_files,
+                        );
+                    }
+
+                    eprintln!("execution file from dir successful");
+                    process::exit(0)
+                }
+                Err(e) => {
+                    eprintln!("NO arg given");
+                } // continue for now
+            }
+        }
+    }
 
     // if a file is passed
     if args.len() >= 3 {
-        let mut start = 3;
-        let mut total_files = args.len() - start;
-
         while start <= args.len() {
             is_last = start == args.len() - 1;
             //eprintln!("<------checking idx {start} args len {}  is end: {}------>", args.len(), is_last);
@@ -39,15 +73,15 @@ fn main() {
                 &mut filename,
                 &mut is_file,
                 &mut file_count,
-                is_last,
+                &mut is_last,
                 &mut color_always,
                 start,
                 &mut match_found,
                 &mut total_files,
             );
             eprintln!("<----Matched file name {:?}---->", match_found);
-            start += 1;
         }
+
         // finished all loop
         if match_found.is_empty() {
             eprintln!("===END PROGRAM== NO MATCH");
@@ -67,7 +101,7 @@ fn match_by_files_or_input(
     filename: &mut String,
     is_file: &mut bool,
     file_count: &mut usize,
-    is_last: bool,
+    is_last: &mut bool,
     color_always: &mut bool,
     start: usize,
     match_found: &mut Vec<bool>,
@@ -75,6 +109,8 @@ fn match_by_files_or_input(
 ) {
     let mut pattern = env::args().nth(2).unwrap();
     let mut input_line = String::new();
+    //eprintln!("Filename={filename} start={start}");
+
     if let Some(path) = env::args().nth(start) {
         let content = fs::read_to_string(path);
         match content {
@@ -82,24 +118,41 @@ fn match_by_files_or_input(
                 input_line = res;
                 *file_count += 1;
 
-                //eprintln!("the content is << {input_line} >>");
+                //eprintln!("txt passed! the content is << {input_line} >>");
                 *is_file = true;
             }
             Err(e) => {
-                eprintln!("Error! File does not exists!");
-                *total_files -= 1;
-                io::stdin().read_to_string(&mut input_line).unwrap();
+                //eprintln!("FILENAME NOT found {filename}");
+
+                if !filename.is_empty() {
+                    let f_temp = filename.clone();
+                    let content = fs::read_to_string(f_temp).unwrap();
+                    input_line = content;
+                    *file_count += 1;
+                    //eprintln!("FILENAME found {filename} => {input_line}")
+                } else {
+                    eprintln!("Error! File does not exists! {filename}  -<");
+                    *total_files -= 1;
+                    io::stdin().read_to_string(&mut input_line).unwrap();
+                    if input_line.is_empty() {
+                        eprintln!("Error parsing file/dir");
+                        process::exit(1);
+                    }
+                }
             }
         }
     } else {
+        eprintln!("not a txt file");
         io::stdin().read_to_string(&mut input_line).unwrap();
     }
 
-    *filename = if *is_file {
-        env::args().nth(start).unwrap()
-    } else {
-        "".to_string()
-    };
+    if filename.is_empty() {
+        *filename = if *is_file {
+            env::args().nth(start).unwrap()
+        } else {
+            "".to_string()
+        };
+    }
 
     if env::args().nth(1).unwrap() == "-o" {
         pattern = env::args().nth(3).unwrap();
@@ -113,7 +166,12 @@ fn match_by_files_or_input(
     } else if env::args().nth(1).unwrap() == "--color=auto" {
         *color_always = io::stdout().is_terminal();
         pattern = env::args().nth(3).unwrap();
+    } else if env::args().nth(1).unwrap() == "-r" {
+        pattern = env::args().nth(3).unwrap();
+        // filename = format!("{}{filename}")
     }
+
+    eprintln!("pattern is {pattern}");
 
     let mut split_ptn_by_space = spilt_all_white_space_punc(&pattern);
 
@@ -125,9 +183,9 @@ fn match_by_files_or_input(
         *color_always,
         split_ptn_by_space,
         split_input_by_space,
-        &*filename,
+        &filename,
         *file_count,
-        is_last,
+        *is_last,
         match_found,
         *total_files,
     );
@@ -145,15 +203,14 @@ fn handle_pattern_matching(
     match_found: &mut Vec<bool>,
     total_files: usize,
 ) {
-    let suffix = if filename.is_empty() || total_files < 2 {
+    let suffix = if filename.is_empty() || (total_files < 2 && env::args().nth(1).unwrap() == "-r")
+    {
         ""
     } else {
-        eprintln!(
-            "at filename:={filename} Total files {total_files} and file_count = {file_count}"
-        );
-
         &format!("{filename}:")
     };
+    eprintln!("at filename:={filename} Total files {total_files} and file_count = {file_count}");
+    eprintln!("the suffix is {suffix}");
     if split_ptn_by_space.len() == 1 {
         if pattern.starts_with("^") && pattern.ends_with("$") {
             let ptn_last = pattern.len();
@@ -253,7 +310,7 @@ fn handle_pattern_matching(
                 .collect();
             eprintln!("----res collected is {:?}", res_collected);
             let ptn_len = count_ptn_len(split_ptn_by_space.clone());
-            if ptn_len == 1 || res_collected.len() == ptn_len{
+            if ptn_len == 1 || res_collected.len() == ptn_len {
                 println!("{suffix}{}", res_collected.join(""));
             } else {
                 for r in res_collected {
@@ -270,7 +327,7 @@ fn handle_pattern_matching(
     }
 
     match env::args().nth(1).as_deref() {
-        Some("-E" | "--color=always" | "--color=never" | "--color=auto") => {}
+        Some("-E" | "-r" | "--color=always" | "--color=never" | "--color=auto") => {}
         _ => {
             println!("Expected first argument to be '-E' or a valid color flag");
             process::exit(1);

@@ -1,5 +1,5 @@
 use crate::lib::{find_match_inbetween, remove_start_end};
-use std::{collections::HashMap};
+use std::collections::HashMap;
 
 pub fn count_single_repeat(mut pattern: &str) -> usize {
     // handle plural cases
@@ -254,6 +254,18 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
             return input_line == to_match;
         }
         // end with .*
+        ptn if ptn.starts_with(".*") => {
+            if input_line.is_empty() {
+                return false;
+            }
+
+            let ptn_start = ptn.find(".*").unwrap();
+
+            let ptn_part = &ptn[ptn_start+2..];
+            eprintln!("=={ptn} ==ptn part is 1 ptn_part: {ptn_part} vs input: {input_line}");
+
+            return input_line.contains(ptn_part);
+        }
         ptn if ptn.ends_with(".+$") => {
             if input_line.is_empty() {
                 return false;
@@ -265,9 +277,7 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
             let ptn_part = &ptn[0..ptn_start];
             eprintln!("=={ptn} ==ptn part is 1 ptn_part: {ptn_part} vs input: {input_line}");
 
-           
             return match_pattern(input_line, ptn_part);
-
         }
         ptn if ptn.ends_with(".*") || ptn.ends_with(".*$") => {
             if input_line.is_empty() {
