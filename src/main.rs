@@ -164,7 +164,7 @@ fn match_by_files_or_input(
         };
     } 
     
-    if *file_count <= 1 {
+    if *file_count <= 1 && !filename.contains("/"){
         *filename = "".to_string();
     }
 
