@@ -157,7 +157,7 @@ fn match_by_files_or_input(
     }
 
     if filename.is_empty() {
-        *filename = if *is_file && *file_count > 1 {
+        *filename = if *is_file {
             env::args().nth(start).unwrap()
         } else {
             "".to_string()
