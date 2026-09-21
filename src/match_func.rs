@@ -259,9 +259,13 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                 return false;
             }
 
-            let ptn_start = ptn.find(".*").unwrap();
+            let ptn_start: usize = if ptn.contains(".*") {
+                ptn.find(".*").unwrap()
+            } else {
+                ptn.find(".+").unwrap()
+            };
 
-            let ptn_part = &ptn[ptn_start+2..];
+            let ptn_part = &ptn[ptn_start + 2..];
             eprintln!("=={ptn} ==ptn part is 1 ptn_part: {ptn_part} vs input: {input_line}");
 
             return input_line.contains(ptn_part);
