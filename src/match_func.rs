@@ -254,7 +254,7 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
             return input_line == to_match;
         }
         // end with .*
-        ptn if ptn.starts_with(".*") => {
+        ptn if ptn.starts_with(".*") || ptn.starts_with(".+") => {
             if input_line.is_empty() {
                 return false;
             }
