@@ -393,7 +393,7 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
 
             // if input < ptn
             let mut ptn_merged = vec![ptn_before, ptn_after].join("");
-            eprintln!("ptn merged {ptn_merged}");
+            eprintln!("===> Simple * match ptn merged {ptn_merged}");
 
             // handle cases -> kt matching k*t
             if input_line.len() < pattern.len() {
@@ -436,7 +436,7 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
 
                 // if input < ptn
                 let mut ptn_merged = vec![ptn_before, ptn_after].join("");
-                eprintln!("ptn merged {ptn_merged}");
+                eprintln!("===> []* match --ptn merged {ptn_merged}");
 
                 // handle cases -> kt matching k*t
                 if input_line.len() < pattern.len() {
@@ -483,7 +483,7 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                                 }
                             }
                         }
-                        eprintln!("[]* input end range is {input_end_range}");
+                        eprintln!("[]* input end range is {input_end_range}, start with {ptn_after} ? {}", input_end_range.starts_with(ptn_after));
 
                         // only handles completely non-pattern match
                         return input_end_range.starts_with(ptn_after);
@@ -492,7 +492,6 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                     None => return false,
                 }
             }
-            return false;
         }
 
         ptn if ptn.contains("\\d*") => {
