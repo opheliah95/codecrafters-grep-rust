@@ -370,7 +370,7 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
         "." => return input_line != ("\\n"),
         "+" => return true,
 
-        ptn if ptn.ends_with("*") && !ptn.ends_with("]*") => {
+        ptn if ptn.ends_with("*") && !ptn.ends_with("]*") && !ptn.ends_with(")*") => {
             let ptn_len = ptn.len();
             let ptn_before = &ptn[0..ptn_len - 1];
 
@@ -378,7 +378,7 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
 
             //edge case pea vs pear*
             // i.e. zero match last char
-            if input_line.len() == ptn_before.len() -1 {
+            if input_line.len() == ptn_before.len() - 1 {
                 return ptn_before.starts_with(input_line);
             }
             return match_pattern(input_line, ptn_before);
@@ -459,7 +459,7 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                                 "input = {input_range} at {idx} {ch} in range: [{ptn_range}]* = {char_in_ptn} "
                             );
                             if !char_in_ptn {
-                                input_end_range = &input_line[s_idx + idx+1..];
+                                input_end_range = &input_line[s_idx + idx + 1..];
                                 break;
                             }
 
@@ -527,18 +527,25 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
             let ptn_formatted = remove_start_end(ptn);
             let ptn_spilt = ptn_formatted.split("|").collect::<Vec<&str>>();
             if ptn_spilt.len() <= 1 {
-                println!("{:?}", ptn_spilt);
+                //eprintln!("{:?}", ptn_spilt);
                 return false;
             } else {
                 let mut contain_alt: Vec<bool> = Vec::new();
-
+                let mut input_compare = input_line.to_string();
                 for val in ptn_spilt {
-                    //println!("eval if {input_line} contain {val}");
-                    if input_line == val {
+                    eprintln!("(|) eval if {input_compare} contain {val}");
+                    // one word straightforward match
+                    if input_compare == val {
                         return true;
+                    } else if input_compare.contains(val) {
+                        input_compare = input_compare.replace(val, "");
+
+                        contain_alt.push(true);
+                    } else {
+                        contain_alt.push(false);
                     }
-                    contain_alt.push(input_line == val);
-                    //println!("the vec is {:?} ", contain_alt);
+
+                    //eprintln!("the vec is {:?} ", contain_alt);
                 }
                 return contain_alt.iter().any(|v| *v == true);
             }
@@ -550,7 +557,7 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
             let pipe_find = ptn.find("|").unwrap_or(0);
             let mut input_trimmed = false;
             let input_temp = input_line.clone();
-
+            // Handles ?
             if ptn.ends_with("?") {
                 let char_before_ptn = ptn
                     .clone()
@@ -566,6 +573,24 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                 }
 
                 //eprintln!("char before ptn is {char_before_ptn} input is {input_line}");
+            }
+
+            // handle )*
+            if ptn.ends_with("*") {
+                let char_before_ptn = ptn
+                    .clone()
+                    .chars()
+                    .nth(ptn.len().saturating_sub(2))
+                    .unwrap_or('\0');
+
+                if char_before_ptn != '\0' && input_line.chars().last() == Some(char_before_ptn) {
+                    if let Some((last_char_byte_idx, _)) = input_line.char_indices().last() {
+                        input_line = &input_line[..last_char_byte_idx];
+                        input_trimmed = true;
+                    }
+                }
+
+                eprintln!("PTN=()* char before ptn is {char_before_ptn} input is {input_line}");
             }
 
             if alt_end == 0 || pipe_find == 0 {
