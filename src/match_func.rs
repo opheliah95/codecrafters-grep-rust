@@ -433,10 +433,18 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                 let ptn_pos_end = ptn.find("]*").unwrap();
                 let ptn_before = &ptn[0..ptn_pos_start];
                 let ptn_after = &ptn[ptn_pos_end + 2..]; //]* len is 2 hardcoded
+                                        let ptn_range = &ptn[ptn_pos_start + 1..ptn_pos_end];
 
                 // if input < ptn
                 let mut ptn_merged = vec![ptn_before, ptn_after].join("");
+                eprintln!("===> []*  --ptn BEFORE {ptn_before}");
                 eprintln!("===> []* match --ptn merged {ptn_merged}");
+
+                // just []* pattern
+                if ptn_merged.is_empty() {
+                    let input_vec: Vec<String> = input_line.chars().map(|a| a.to_string()).collect();
+                    return input_vec.iter().all(|a| ptn_range.contains(a));
+                }
 
                 // handle cases -> kt matching k*t
                 if input_line.len() < pattern.len() {
@@ -449,7 +457,6 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                 match input_start_match {
                     Some(s_idx) => {
                         let input_range = &input_line[s_idx + 1..];
-                        let ptn_range = &ptn[ptn_pos_start + 1..ptn_pos_end];
                         let mut input_end_range = "";
                         let mut match_found = false;
                         //match the range of input range to [abc]*
@@ -484,7 +491,6 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                             }
                         }
                         eprintln!("[]* input end range is {input_end_range}, start with {ptn_after} ? {}", input_end_range.starts_with(ptn_after));
-
                         // only handles completely non-pattern match
                         return input_end_range.starts_with(ptn_after);
                     }
