@@ -375,6 +375,12 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
             let ptn_before = &ptn[0..ptn_len - 1];
 
             eprintln!("{input_line} matching ptn end with * {ptn}");
+
+            //edge case pea vs pear*
+            // i.e. zero match last char
+            if input_line.len() == ptn_before.len() -1 {
+                return ptn_before.starts_with(input_line);
+            }
             return match_pattern(input_line, ptn_before);
         }
 
