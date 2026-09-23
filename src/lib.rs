@@ -60,7 +60,7 @@ pub fn find_match_inbetween(source: &str, pattern: &str) -> String {
     let mut matched_chars: Vec<char> = Vec::new();
 
     // remove all brackets
-    let special_symbols = ["|", ")", "(", "$", "^", "?"];
+    let special_symbols = ["|", ")", "(", "$", "^", "?", "[", "]"];
     let source_contain_symbols = special_symbols.iter().any(|a| source.contains(*a));
     let mut new_pattern = pattern;
     if !source_contain_symbols {
@@ -85,7 +85,7 @@ pub fn find_match_inbetween(source: &str, pattern: &str) -> String {
             }
 
             if start_pos >= source_len - 1 {
-                println!("{:?}", matched_chars);
+                eprintln!("==FN---find_match_inbetween_=== inbetween={:?}", matched_chars);
                 return matched_chars.iter().collect();
             }
         }

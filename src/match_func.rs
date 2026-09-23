@@ -370,6 +370,151 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
         "." => return input_line != ("\\n"),
         "+" => return true,
 
+        ptn if ptn.ends_with("*") && !ptn.ends_with("]*") => {
+            let ptn_len = ptn.len();
+            let ptn_before = &ptn[0..ptn_len - 1];
+
+            eprintln!("{input_line} matching ptn end with * {ptn}");
+            return match_pattern(input_line, ptn_before);
+        }
+
+        // this only handle simplest * match case
+        ptn if ptn.contains("*") && !ptn.contains(['[', ']', ')', '(']) && !ptn.contains("\\d") => {
+            // simple case apple = apple***
+            let ptn_pos = ptn.find("*").unwrap();
+            let ptn_before = &ptn[0..ptn_pos];
+            let ptn_after = &ptn[ptn_pos + 1..];
+
+            // if input < ptn
+            let mut ptn_merged = vec![ptn_before, ptn_after].join("");
+            eprintln!("ptn merged {ptn_merged}");
+
+            // handle cases -> kt matching k*t
+            if input_line.len() < pattern.len() {
+                if ptn_merged == input_line {
+                    return true;
+                } else {
+                    let mut ptn_before_without = ptn_before;
+                    ptn_merged = vec![ptn_before_without, ptn_after].join("");
+                    eprintln!(
+                        "amtching: {ptn_merged} -> to input: {input_line}, last _char is {:?}, {} ",
+                        ptn_before.chars(),
+                        ptn_before.ends_with("\\d")
+                    );
+                    //return input_line == ptn_merged;
+                    return match_pattern(input_line, &ptn_merged);
+                }
+            }
+
+            //ka*t -> match kt and kaat
+            if match_pattern(input_line, ptn_before) {
+                return input_line.contains(ptn_after);
+            } else {
+                return false;
+            }
+        }
+
+        ptn if ptn.contains("[") && ptn.contains("]*") => {
+            let bracket_ptn = "[]*".to_string();
+            let brac_starter_idx = ptn.find("[").unwrap();
+            let brac_end_idx = ptn.find("]*").unwrap();
+            if brac_end_idx < brac_starter_idx {
+                eprintln!("]* appear in front of [");
+                return input_line == pattern;
+            } else {
+                let ptn_pos_start = ptn.find("[").unwrap();
+
+                let ptn_pos_end = ptn.find("]*").unwrap();
+                let ptn_before = &ptn[0..ptn_pos_start];
+                let ptn_after = &ptn[ptn_pos_end + 2..]; //]* len is 2 hardcoded
+
+                // if input < ptn
+                let mut ptn_merged = vec![ptn_before, ptn_after].join("");
+                eprintln!("ptn merged {ptn_merged}");
+
+                // handle cases -> kt matching k*t
+                if input_line.len() < pattern.len() {
+                    if ptn_merged == input_line {
+                        return true;
+                    }
+                }
+
+                let input_start_match = input_line.find(ptn_before);
+                match input_start_match {
+                    Some(s_idx) => {
+                        let input_range = &input_line[s_idx + 1..];
+                        let ptn_range = &ptn[ptn_pos_start + 1..ptn_pos_end];
+                        let mut input_end_range = "";
+                        let mut match_found = false;
+                        //match the range of input range to [abc]*
+                        for (idx, ch) in input_range.chars().enumerate() {
+                            let char_in_ptn = ptn_range.contains(ch);
+                            eprintln!(
+                                "input = {input_range} at {idx} {ch} in range: [{ptn_range}]* = {char_in_ptn} "
+                            );
+                            if !char_in_ptn {
+                                input_end_range = &input_line[s_idx + idx+1..];
+                                break;
+                            }
+
+                            if idx == input_range.len() - 1 {
+                                match_found = true;
+                                // input completely match pattern
+                                eprintln!(
+                                    "range len {} = input len {}",
+                                    s_idx + input_range.len(),
+                                    input_line.len() - 1
+                                );
+                                if s_idx + input_range.len() == input_line.len() - 1 {
+                                    if ptn_after.len() == 0 {
+                                        return true; // ptn end at *
+                                    } else {
+                                        // echo -n "kabacb" | ./your_program.sh -E "k[abc]*b"
+                                        return input_range.ends_with(ptn_after);
+                                    }
+                                } else {
+                                    input_end_range = &input_line[s_idx + input_range.len() + 1..];
+                                }
+                            }
+                        }
+                        eprintln!("[]* input end range is {input_end_range}");
+
+                        // only handles completely non-pattern match
+                        return input_end_range.starts_with(ptn_after);
+                    }
+
+                    None => return false,
+                }
+            }
+            return false;
+        }
+
+        ptn if ptn.contains("\\d*") => {
+            let ptn_to_detect = "\\d*";
+            let ptn_to_detect_len = ptn_to_detect.len();
+            let ptn_pos = ptn.find("\\d*").unwrap();
+            let ptn_before = &ptn[0..ptn_pos];
+            let ptn_after = &ptn[ptn_pos + ptn_to_detect_len..];
+
+            // simple case input does not contain digit
+            let ptn_merged = vec![ptn_before, ptn_after].join("");
+            eprintln!("merged ptn for \\d* is {ptn_merged}");
+
+            if input_line.to_string() == ptn_merged {
+                return true;
+            }
+
+            if input_line.starts_with(ptn_before) && input_line.ends_with(ptn_after) {
+                let input_start_ends = input_line.find(ptn_before).unwrap() + ptn_before.len();
+                let input_end_start = input_line.find(ptn_after).unwrap();
+                let input_range = &input_line[input_start_ends..input_end_start];
+
+                return match_pattern(input_range, "\\d");
+            }
+
+            return false;
+        }
+
         //check alt | operator
         ptn if pattern.starts_with("(") && pattern.ends_with(")") => {
             //println!("{ptn} eval alternat");
