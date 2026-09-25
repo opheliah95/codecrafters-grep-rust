@@ -1,4 +1,4 @@
-use crate::lib::{find_match_inbetween, remove_start_end};
+use crate::lib::{find_index_of_ptn, find_match_inbetween, remove_start_end};
 use std::collections::HashMap;
 
 pub fn count_single_repeat(mut pattern: &str) -> usize {
@@ -63,7 +63,56 @@ pub fn re_formatted_res_with_pattern(input: Vec<&str>, pattern: &str) -> Vec<Str
 
     out
 }
+
+pub fn check_quant_pattern(mut ptn: String) -> Option<(usize, usize, String)> {
+    let quant_start = find_index_of_ptn(ptn.as_str(), "{");
+    let quant_end = find_index_of_ptn(ptn.as_str(), "}");
+
+    match (quant_start, quant_end) {
+        (Some(start), Some(end)) => {
+            if start >= end {
+                return None;
+            } else {
+                let quant_words = &ptn[start + 1..end];
+                match quant_words.parse::<usize>() {
+                    Ok(n) => {
+                        eprintln!("checking quantifiers...break down input {:?}", ptn.chars());
+                        let mut letter_before = ptn.chars().nth(start - 1).unwrap().to_string();
+                        let mut quant_start = start;
+                        let slash = &ptn[start - 2..start - 1];
+                        if slash == "\\" {
+                            letter_before = format!("\\{letter_before}");
+                            quant_start -= 1;
+                        };
+
+                        eprintln!("Letter to be repeated: {letter_before} for {n} times");
+                        let repeated_letter = letter_before.repeat(n);
+                        // need to remove the letter to repeat
+                        let ptn_new = format!(
+                            "{}{}{}",
+                            &ptn[0..quant_start - 1],
+                            repeated_letter,
+                            &ptn[end + 1..]
+                        );
+                        eprintln!("Quant MATCH the new pattern is {ptn_new} -> matching {n}");
+
+                        return Some((start, end, ptn_new));
+                    }
+                    Err(e) => {
+                        eprintln!("{quant_words} is not digits");
+                        return None;
+                    }
+                };
+            }
+        }
+        _ => {
+            return None;
+        }
+    }
+}
+
 pub fn examine_repeat(mut input_line: &str, mut pattern: &str) -> Option<String> {
+
     // handle plural cases
     if pattern.ends_with("s") && !input_line.ends_with("s") {
         eprintln!("plural not matching");
@@ -74,7 +123,7 @@ pub fn examine_repeat(mut input_line: &str, mut pattern: &str) -> Option<String>
     let mut input_filtered = String::new();
 
     if input_line.contains(pattern) && !repeats.contains(&pattern) {
-        let matches: Vec<_> = input_line.match_indices(pattern).collect();
+        let matches: Vec<_> = input_line.match_indices(&pattern).collect();
         let matches_len = matches.len();
         if matches_len == 0 {
             return None;
@@ -122,15 +171,19 @@ pub fn examine_repeat(mut input_line: &str, mut pattern: &str) -> Option<String>
         let repeat_len = repeat.len();
         let input_line_end = input_temp.len();
         let mut diff = "";
+        let mut count_end = "";
+        let mut pattern_diff_end = "";
 
         if input_line_end > *count {
             diff = &input_temp[*count..];
+            let count_end = pattern.rfind(repeat).unwrap();
+            pattern_diff_end = &pattern[count_end+repeat_len+1..];
         }
 
-        // eprintln!(
-        //     "{input_temp} -> {repeat} -> {count} -> diff len {diff} -> {}",
-        //     *count + diff.len()
-        // );
+        eprintln!(
+            "__FN__examine_repeat__INPUT={input_temp} ->REPEAT={repeat} ->REPEAT_COUNT={count} -> diff len {diff} -> {}",
+            *count + diff.len()
+        );
 
         if input_line_end == *count || repeat_len * count == pattern.len() {
             eprintln!(
@@ -146,7 +199,8 @@ pub fn examine_repeat(mut input_line: &str, mut pattern: &str) -> Option<String>
             );
         } else if input_line_end == *count + diff.len() {
             eprintln!("{input_temp} vs {pattern} and diff is {diff}");
-            if pattern.ends_with(diff) {
+            // expanded make sure not count /d into matching only match non-patterns
+            if diff.ends_with(pattern_diff_end) {
                 format_input_of_repeated_char_pattern(
                     &input_temp,
                     &mut input_filtered,
@@ -175,6 +229,7 @@ fn format_input_of_repeated_char_pattern(
     input_line_end: usize,
     count: usize,
 ) {
+    eprintln!("format input: {input_temp}");
     let mut input_res = input_temp
         .chars()
         .into_iter()
@@ -420,6 +475,43 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
             }
         }
 
+        ptn if ptn.contains("}") && ptn.contains("{") => {
+            eprintln!("PATTERN CONTAINS{{}}");
+            let quant_start = find_index_of_ptn(ptn, "{").unwrap();
+            let quant_end = find_index_of_ptn(ptn, "}").unwrap();
+
+            // just return false now if }{ no matching pair is included
+            if quant_start > quant_end {
+                return false;
+            }
+
+            let quant_words = &ptn[quant_start + 1..quant_end];
+
+            // normal case considering
+            let num = match quant_words.parse::<usize>() {
+                Ok(n) => {
+                    let letter_before = ptn.chars().nth(quant_start - 1).unwrap();
+                    eprintln!("Letter to be repeated: {letter_before} for {n} times");
+                    let repeated_letter = letter_before.to_string().repeat(n);
+                    // need to remove the letter to repeat
+                    let ptn_new = format!(
+                        "{}{}{}",
+                        &ptn[0..quant_start - 1],
+                        repeated_letter,
+                        &ptn[quant_end + 1..]
+                    );
+                    eprintln!("the new pattern is {ptn_new} -> matching {input_line}");
+
+                    return match_pattern(input_line, &ptn_new);
+                }
+                Err(e) => {
+                    eprintln!("{quant_words} is not digits");
+                    return false;
+                }
+            };
+
+            return false;
+        }
         ptn if ptn.contains("[") && ptn.contains("]*") => {
             let bracket_ptn = "[]*".to_string();
             let brac_starter_idx = ptn.find("[").unwrap();
@@ -433,7 +525,7 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                 let ptn_pos_end = ptn.find("]*").unwrap();
                 let ptn_before = &ptn[0..ptn_pos_start];
                 let ptn_after = &ptn[ptn_pos_end + 2..]; //]* len is 2 hardcoded
-                                        let ptn_range = &ptn[ptn_pos_start + 1..ptn_pos_end];
+                let ptn_range = &ptn[ptn_pos_start + 1..ptn_pos_end];
 
                 // if input < ptn
                 let mut ptn_merged = vec![ptn_before, ptn_after].join("");
@@ -442,7 +534,8 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
 
                 // just []* pattern
                 if ptn_merged.is_empty() {
-                    let input_vec: Vec<String> = input_line.chars().map(|a| a.to_string()).collect();
+                    let input_vec: Vec<String> =
+                        input_line.chars().map(|a| a.to_string()).collect();
                     return input_vec.iter().all(|a| ptn_range.contains(a));
                 }
 
@@ -490,7 +583,10 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                                 }
                             }
                         }
-                        eprintln!("[]* input end range is {input_end_range}, start with {ptn_after} ? {}", input_end_range.starts_with(ptn_after));
+                        eprintln!(
+                            "[]* input end range is {input_end_range}, start with {ptn_after} ? {}",
+                            input_end_range.starts_with(ptn_after)
+                        );
                         // only handles completely non-pattern match
                         return input_end_range.starts_with(ptn_after);
                     }
@@ -1012,7 +1108,18 @@ pub fn spilt_all_white_space_punc(input_line: &str) -> Vec<String> {
     split_input
 }
 
-pub fn print_single_matching_line(input_line: &String, pattern: &mut String) -> String {
+pub fn print_single_matching_line(input_line: &String, ptn: &mut String) -> String {
+    let mut pattern = &mut ptn.clone();
+    let ptn_clone = pattern.clone().to_string();
+    let mut ptn_temp = pattern.to_string();
+    if let Some((quant_start, quant_end, new_ptn)) = check_quant_pattern(ptn_clone) {
+        ptn_temp = new_ptn;
+    }
+
+    pattern = &mut ptn_temp;
+
+    eprintln!("FN___print_single_matching_line__pattern={pattern}");
+
     // simplest case exact match
     if input_line == pattern {
         return input_line.to_string();

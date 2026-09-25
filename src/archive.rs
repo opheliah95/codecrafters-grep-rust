@@ -244,3 +244,115 @@ fn check_input_pattern(input: &str, pattern: &str, input_ptn: &str) -> bool {
         return res.into_iter().any(|c| c == true);
     }
 }
+
+
+pub fn examine_repeat(mut input_line: &str, mut pattern: &str) -> Option<String> {
+    // handle plural cases
+    if pattern.ends_with("s") && !input_line.ends_with("s") {
+        eprintln!("plural not matching");
+        return None;
+    }
+
+    let mut ptn = pattern.clone().to_string();
+
+    let contain_quant = check_quant_pattern(ptn);
+
+  
+
+    let mut repeats = vec!["\\w", "\\d", "\\d+", "\\w+"];
+    let mut input_filtered = String::new();
+
+    if input_line.contains(pattern) && !repeats.contains(&pattern) {
+        let matches: Vec<_> = input_line.match_indices(pattern).collect();
+        let matches_len = matches.len();
+        if matches_len == 0 {
+            return None;
+        } else {
+            for (idx, m) in matches {
+                if idx == matches_len - 1 {
+                    input_filtered.push_str(&m.to_string());
+                } else {
+                    input_filtered.push_str(&format!("{m}\n"));
+                }
+            }
+            return Some(input_filtered);
+        }
+    }
+
+    let mut input_temp = input_line.replace(",", "");
+
+    let mut repeats_result: HashMap<String, usize> = HashMap::new();
+
+    for repeat in repeats.into_iter() {
+        if pattern.contains(repeat) {
+            let count = pattern.matches(repeat).count();
+            if count > 0 {
+                repeats_result.insert(repeat.to_string(), count);
+            }
+        }
+    }
+
+    if repeats_result.is_empty() {
+        return None;
+    }
+    eprintln!(
+        "_FN_examine_pattern {input_line} -> examine_repeat: {pattern} {:?}",
+        repeats_result
+    );
+    for (repeat, count) in &repeats_result {
+        if ["\\w", "\\w+"].contains(&repeat.as_str()) {
+            let input_filtered = input_temp
+                .chars()
+                .filter(|a| a.is_alphanumeric() || *a == '_')
+                .collect::<String>();
+            input_temp = input_filtered;
+        }
+
+        let repeat_len = repeat.len();
+        let input_line_end = input_temp.len();
+        let mut diff = "";
+
+        if input_line_end > *count {
+            diff = &input_temp[*count..];
+        }
+
+        // eprintln!(
+        //     "{input_temp} -> {repeat} -> {count} -> diff len {diff} -> {}",
+        //     *count + diff.len()
+        // );
+
+        if input_line_end == *count || repeat_len * count == pattern.len() {
+            eprintln!(
+                "MATCHING REPEAT: {input_temp} -> {repeat} with {}",
+                repeat_len * count
+            );
+            format_input_of_repeated_char_pattern(
+                &input_temp,
+                &mut input_filtered,
+                repeat,
+                input_line_end,
+                *count,
+            );
+        } else if input_line_end == *count + diff.len() {
+            eprintln!("{input_temp} vs {pattern} and diff is {diff}");
+            if pattern.ends_with(diff) {
+                format_input_of_repeated_char_pattern(
+                    &input_temp,
+                    &mut input_filtered,
+                    repeat,
+                    input_line_end,
+                    *count,
+                );
+            }
+        } else {
+            return None;
+        }
+    }
+    //println!("res is {:?}", res_output);
+    //input_filtered.push_str(diff);
+    if input_filtered.len() > 0 {
+        return Some(input_filtered);
+    } else {
+        return None;
+    }
+}

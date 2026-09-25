@@ -2,6 +2,10 @@ use std::path::Path;
 use std::process;
 use std::{fs, io};
 
+
+pub fn find_index_of_ptn(input: &str, ptn: &str) -> Option<usize> {
+    return input.find(ptn);
+}
 pub fn check_all_true(vec: &Vec<bool>) -> bool {
     if vec.len() == 0 {
         return false;
