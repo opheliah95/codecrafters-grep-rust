@@ -112,7 +112,6 @@ pub fn check_quant_pattern(mut ptn: String) -> Option<(usize, usize, String)> {
 }
 
 pub fn examine_repeat(mut input_line: &str, mut pattern: &str) -> Option<String> {
-
     // handle plural cases
     if pattern.ends_with("s") && !input_line.ends_with("s") {
         eprintln!("plural not matching");
@@ -176,8 +175,16 @@ pub fn examine_repeat(mut input_line: &str, mut pattern: &str) -> Option<String>
 
         if input_line_end > *count {
             diff = &input_temp[*count..];
-            let count_end = pattern.rfind(repeat).unwrap();
-            pattern_diff_end = &pattern[count_end+repeat_len+1..];
+            let count_end = pattern.rfind(repeat);
+            match count_end {
+                Some(n) => {
+                    eprintln!("repeat ends at {n} => {}", pattern.chars().nth(n).unwrap());
+                    pattern_diff_end = &pattern[n + repeat_len..];
+                }
+                None => {
+                    // meaning ptn end with ptn;
+                }
+            }
         }
 
         eprintln!(
