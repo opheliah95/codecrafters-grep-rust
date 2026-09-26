@@ -1093,7 +1093,7 @@ pub fn check_individual_match(input_line: &str, pattern: &str) -> bool {
 }
 
 pub fn remove_underline_and_punc(input_line: &String) -> String {
-    let mut new_input = input_line.replace("_", "_");
+    let mut new_input = input_line.replace("_", "_ ");
     new_input = new_input.replace(",", ", ");
     new_input = new_input.replace(".", ". ");
     return new_input;
