@@ -162,15 +162,14 @@ fn match_by_files_or_input(
         } else {
             "".to_string()
         };
-    } 
-    
-    if *total_files <= 1 && !filename.contains("/"){
+    }
+
+    if *total_files <= 1 && !filename.contains("/") {
         *filename = "".to_string();
     }
 
     if env::args().nth(1).unwrap() == "-o" {
         pattern = env::args().nth(3).unwrap();
-        pattern = remove_underline_and_punc(&pattern);
     } else if env::args().nth(1).unwrap() == "--color=always" {
         *color_always = true;
         pattern = env::args().nth(3).unwrap();
@@ -185,11 +184,17 @@ fn match_by_files_or_input(
         // filename = format!("{}{filename}")
     }
 
-    eprintln!("pattern is {pattern}");
+    pattern = remove_underline_and_punc(&pattern);
+    input_line = remove_underline_and_punc(&input_line);
 
     let mut split_ptn_by_space = spilt_all_white_space_punc(&pattern);
 
     let mut split_input_by_space = spilt_all_white_space_punc(&input_line);
+
+    eprintln!(
+        "sptilt_input={:?}, spilt_pattern={:?}",
+        split_input_by_space, split_ptn_by_space
+    );
 
     handle_pattern_matching(
         input_line,
@@ -724,6 +729,11 @@ fn handle_single_ptn_to_spaced_txt(
         split_input_by_space, split_input_by_space
     );
     while start < split_input_by_space.len() {
+        if input_len == ptn_len {
+            eprintln!("===input and ptn same len {input_len}");
+        } else {
+            eprintln!("input len {input_len} ptn_len={ptn_len}");
+        }
         for (ptn_idx, ptn) in split_ptn_by_space.iter().enumerate() {
             //start = 0;
             let mut input_to_start_at = &split_input_by_space[start..];

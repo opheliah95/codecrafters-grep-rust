@@ -170,7 +170,7 @@ pub fn examine_repeat(mut input_line: &str, mut pattern: &str) -> Option<String>
         let repeat_len = repeat.len();
         let input_line_end = input_temp.len();
         let mut diff = "";
-        let mut count_end = "";
+        let mut count_end: &str = "";
         let mut pattern_diff_end = "";
 
         if input_line_end > *count {
@@ -183,6 +183,7 @@ pub fn examine_repeat(mut input_line: &str, mut pattern: &str) -> Option<String>
                 }
                 None => {
                     // meaning ptn end with ptn;
+                    //eprintln!("PTN ends without anything else...");
                 }
             }
         }
@@ -1092,26 +1093,26 @@ pub fn check_individual_match(input_line: &str, pattern: &str) -> bool {
 }
 
 pub fn remove_underline_and_punc(input_line: &String) -> String {
-    let mut new_input = input_line.replace("_", " ");
-    new_input = new_input.replace(",", "");
-    new_input = new_input.replace(".", "");
+    let mut new_input = input_line.replace("_", "_");
+    new_input = new_input.replace(",", ", ");
+    new_input = new_input.replace(".", ". ");
     return new_input;
 }
 
 pub fn spilt_all_white_space_punc(input_line: &str) -> Vec<String> {
-    let mut new_input = input_line.replace('_', " _ ");
-    //new_input = new_input.replace(',', " , ");
-    //new_input = new_input.replace('.', " . ");
+    // let mut new_input = input_line.replace('_', " _ ");
+    // new_input = new_input.replace(',', " , ");
+    // new_input = new_input.replace('.', " . ");
 
     //println!("new input is {new_input}");
 
-    let split_input: Vec<String> = new_input
+    let split_input: Vec<String> = input_line
         .split(|t: char| t.is_whitespace())
         .filter(|t| !t.is_empty())
         .map(String::from)
         .collect();
 
-    //eprintln!("removed all punc and white space: {:?}", split_input);
+    eprintln!("removed all punc and white space: {:?}", split_input);
     split_input
 }
 
@@ -1150,8 +1151,9 @@ pub fn print_single_matching_line(input_line: &String, ptn: &mut String) -> Stri
     let mut res_str: Vec<String> = vec![];
 
     // handle cases with input
-
+    eprintln!("input slice len {input_slice_len} vs ptn_slice len= {}", ptn_slice.len());
     if input_slice_len == 1 && ptn_slice.len() == 1 {
+        
         match examine_repeat(input_line, pattern) {
             Some(a) => {
                 //eprintln!("the repeat is {a}");
