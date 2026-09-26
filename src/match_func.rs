@@ -1,5 +1,5 @@
 use crate::lib::{find_index_of_ptn, find_match_inbetween, remove_start_end};
-use std::collections::HashMap;
+use std::{collections::HashMap, f32::consts::E};
 
 pub fn count_single_repeat(mut pattern: &str) -> usize {
     // handle plural cases
@@ -74,10 +74,36 @@ pub fn check_quant_pattern(mut ptn: String) -> Option<(usize, usize, String)> {
                 return None;
             } else {
                 let quant_words = &ptn[start + 1..end];
+
                 match quant_words.parse::<usize>() {
                     Ok(n) => {
-                        eprintln!("checking quantifiers...break down input {:?}", ptn.chars());
+                        eprintln!(
+                            "___FN___check_quant_pattern-> checking quantifiers...break down input {:?}",
+                            ptn.chars()
+                        );
                         let mut letter_before = ptn.chars().nth(start - 1).unwrap().to_string();
+
+                        if vec!["]", ")"].contains(&letter_before.as_str()) {
+                            let bracket_start = match &*letter_before {
+                                "]" => "[",
+                                _ => "(",
+                            };
+                            let bracket_start_idx = find_index_of_ptn(&ptn, bracket_start);
+                            match bracket_start_idx {
+                                Some(start_idx) => {
+                                    let range_between = &ptn[start_idx + 1..start - 1];
+                                    let range_before = &ptn[0..start_idx];
+                                    let range_full = &ptn[start_idx..start].repeat(n);
+                                    let ptn_formatted = format!("{range_before}{range_full}");
+                                    eprintln!("bracket start idx: {range_before} vs {range_between} vs fornmatted={ptn_formatted}");
+
+                                    return Some((start, end, ptn_formatted.to_string()));
+                                }
+
+                                None => {}
+                            }
+                        };
+                        // handling single letters
                         let mut quant_start = start;
                         let slash = &ptn[start - 2..start - 1];
                         if slash == "\\" {
@@ -85,7 +111,9 @@ pub fn check_quant_pattern(mut ptn: String) -> Option<(usize, usize, String)> {
                             quant_start -= 1;
                         };
 
-                        eprintln!("Letter to be repeated: {letter_before} for {n} times");
+                        eprintln!(
+                            "___FN___check_quant_pattern-> letter to repeat: {letter_before} for {n} times"
+                        );
                         let repeated_letter = letter_before.repeat(n);
                         // need to remove the letter to repeat
                         let ptn_new = format!(
@@ -94,12 +122,14 @@ pub fn check_quant_pattern(mut ptn: String) -> Option<(usize, usize, String)> {
                             repeated_letter,
                             &ptn[end + 1..]
                         );
-                        eprintln!("Quant MATCH the new pattern is {ptn_new} -> matching {n}");
+                        eprintln!(
+                            "___FN___check_quant_pattern->Quant MATCH the new pattern is {ptn_new} -> matching {n}"
+                        );
 
                         return Some((start, end, ptn_new));
                     }
                     Err(e) => {
-                        eprintln!("{quant_words} is not digits");
+                        eprintln!("___FN___check_quant_pattern->{quant_words} is not digits");
                         return None;
                     }
                 };
@@ -493,14 +523,38 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                 return false;
             }
 
-            let quant_words = &ptn[quant_start + 1..quant_end];
+            let mut quant_num = &ptn[quant_start + 1..quant_end];
 
             // normal case considering
-            let num = match quant_words.parse::<usize>() {
+            let num = match quant_num.parse::<usize>() {
                 Ok(n) => {
-                    let letter_before = ptn.chars().nth(quant_start - 1).unwrap();
+                    let letter_before = ptn.chars().nth(quant_start - 1).unwrap().to_string();
+                    if vec!["]", ")"].contains(&letter_before.as_str()) {
+                        let bracket_start = match &*letter_before {
+                            "]" => "[",
+                            _ => "(",
+                        };
+                        let bracket_start_idx = find_index_of_ptn(ptn, bracket_start);
+                        eprintln!("bracket start idx: {letter_before}");
+                        match bracket_start_idx {
+                            Some(start_idx) => {
+                                let range_between = &ptn[start_idx + 1..quant_start - 1];
+                                let range_before = &ptn[0..start_idx];
+                                if match_pattern(input_line, range_before) {
+                                    eprintln!(
+                                        "===MATCH QUANT WITH [] {range_before} is within {input_line}"
+                                    );
+                                    return true;
+                                } else {
+                                    return false;
+                                }
+                            }
+
+                            None => {}
+                        }
+                    }
                     eprintln!("Letter to be repeated: {letter_before} for {n} times");
-                    let repeated_letter = letter_before.to_string().repeat(n);
+                    let repeated_letter = letter_before.repeat(n);
                     // need to remove the letter to repeat
                     let ptn_new = format!(
                         "{}{}{}",
@@ -513,32 +567,47 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                     return match_pattern(input_line, &ptn_new);
                 }
                 Err(e) => {
-                    eprintln!("{quant_words} is not digits");
+                    eprintln!("{quant_num} is not digits");
                     return false;
                 }
             };
 
             return false;
         }
-        ptn if ptn.contains("[") && ptn.contains("]*") => {
-            let bracket_ptn = "[]*".to_string();
+        ptn if ptn.contains("[") && ptn.contains("]") => {
+            let mut bracket_ptn = "[]".to_string();
             let brac_starter_idx = ptn.find("[").unwrap();
-            let brac_end_idx = ptn.find("]*").unwrap();
+            let mut brac_end_idx = ptn.find("]").unwrap();
+            let mut brac_end_inclusive = brac_end_idx + 1;
+            let behind_bracket = find_index_of_ptn(ptn, "*");
+            match behind_bracket {
+                Some(n) => {
+                    if n ==brac_end_idx + 1 {
+                        brac_end_idx += 1;
+                        bracket_ptn = "[]*".to_string();
+                        brac_end_inclusive += 1; // ]* is one more than ]
+                    }
+
+                },
+
+                None => {}
+            }
+            
             if brac_end_idx < brac_starter_idx {
                 eprintln!("]* appear in front of [");
                 return input_line == pattern;
             } else {
-                let ptn_pos_start = ptn.find("[").unwrap();
 
-                let ptn_pos_end = ptn.find("]*").unwrap();
-                let ptn_before = &ptn[0..ptn_pos_start];
-                let ptn_after = &ptn[ptn_pos_end + 2..]; //]* len is 2 hardcoded
-                let ptn_range = &ptn[ptn_pos_start + 1..ptn_pos_end];
+                let ptn_before = &ptn[0..brac_starter_idx];
+                let ptn_before_len = ptn_before.len();
+                let ptn_after = &ptn[brac_end_inclusive..]; //]* len is 2 hardcoded
+                let ptn_range = &ptn[brac_starter_idx + 1..brac_end_idx];
 
                 // if input < ptn
                 let mut ptn_merged = vec![ptn_before, ptn_after].join("");
-                eprintln!("===> []*  --ptn BEFORE {ptn_before}");
-                eprintln!("===> []* match --ptn merged {ptn_merged}");
+                eprintln!("===> {bracket_ptn}  --ptn BEFORE={ptn_before}");
+                 eprintln!("===> {bracket_ptn}  --ptn AFTER={ptn_after}");
+                eprintln!("===> {bracket_ptn} match --ptn merged={ptn_merged}");
 
                 // just []* pattern
                 if ptn_merged.is_empty() {
@@ -557,7 +626,7 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                 let input_start_match = input_line.find(ptn_before);
                 match input_start_match {
                     Some(s_idx) => {
-                        let input_range = &input_line[s_idx + 1..];
+                        let input_range = &input_line[s_idx+ptn_before_len..];
                         let mut input_end_range = "";
                         let mut match_found = false;
                         //match the range of input range to [abc]*
@@ -1151,9 +1220,11 @@ pub fn print_single_matching_line(input_line: &String, ptn: &mut String) -> Stri
     let mut res_str: Vec<String> = vec![];
 
     // handle cases with input
-    eprintln!("input slice len {input_slice_len} vs ptn_slice len= {}", ptn_slice.len());
+    eprintln!(
+        "input slice len {input_slice_len} vs ptn_slice len= {}",
+        ptn_slice.len()
+    );
     if input_slice_len == 1 && ptn_slice.len() == 1 {
-        
         match examine_repeat(input_line, pattern) {
             Some(a) => {
                 //eprintln!("the repeat is {a}");
