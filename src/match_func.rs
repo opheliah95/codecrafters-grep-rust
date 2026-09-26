@@ -577,7 +577,7 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
         ptn if ptn.contains("[") && ptn.contains("]") => {
             let mut bracket_ptn = "[]".to_string();
             let brac_starter_idx = ptn.find("[").unwrap();
-            let mut brac_end_idx = ptn.find("]").unwrap();
+            let mut brac_end_idx = ptn.rfind("]").unwrap(); // get the very last one
             let mut brac_end_inclusive = brac_end_idx + 1;
             let behind_bracket = find_index_of_ptn(ptn, "*");
             match behind_bracket {
@@ -644,11 +644,11 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                                 match_found = true;
                                 // input completely match pattern
                                 eprintln!(
-                                    "range len {} = input len {}",
-                                    s_idx + input_range.len(),
-                                    input_line.len() - 1
+                                    "FN_match_pattern-> case: {bracket_ptn}--> {s_idx}--->range len {} = input len {}",
+                                    s_idx + input_range.len() + ptn_before_len,
+                                    input_line.len()
                                 );
-                                if s_idx + input_range.len() == input_line.len() - 1 {
+                                if s_idx + input_range.len() + ptn_before_len== input_line.len() {
                                     if ptn_after.len() == 0 {
                                         return true; // ptn end at *
                                     } else {
