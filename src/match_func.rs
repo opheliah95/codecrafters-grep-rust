@@ -1179,12 +1179,12 @@ pub fn remove_underline_and_punc(input_line: &String, is_input: bool) -> String 
     match dot_pos {
         Some(p) => {
             let has_dot = new_input.chars().nth(p + 1).unwrap();
-            if !vec!['*', '+'].contains(&has_dot) && ! is_input {
-                new_input = new_input.replace(".", ". ");
+            if !vec!['*', '+'].contains(&has_dot) && !is_input {
+                new_input = new_input.replace(".", " . ");
             }
 
             if is_input {
-                new_input = new_input.replace(".", ". ");
+                new_input = new_input.replace(".", " . ");
             }
         }
         None => {}
