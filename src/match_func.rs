@@ -236,6 +236,7 @@ pub fn examine_repeat(mut input_line: &str, mut pattern: &str) -> Option<String>
                 repeat,
                 input_line_end,
                 *count,
+                &pattern
             );
         } else if input_line_end == *count + diff.len() {
             eprintln!("{input_temp} vs {pattern} and diff is {diff}");
@@ -247,6 +248,7 @@ pub fn examine_repeat(mut input_line: &str, mut pattern: &str) -> Option<String>
                     repeat,
                     input_line_end,
                     *count,
+                    &pattern
                 );
             }
         } else {
@@ -268,16 +270,18 @@ fn format_input_of_repeated_char_pattern(
     repeat: &String,
     input_line_end: usize,
     count: usize,
+    pattern: &str
 ) {
     eprintln!("format input: {input_temp}");
     let mut input_res = input_temp
         .chars()
         .into_iter()
         .filter(|a| {
+            // need to handle
             if *a != '_' {
                 match_pattern(&a.to_string(), repeat)
             } else {
-                true
+                pattern.ends_with("_") //_ always appear at the end
             }
         })
         .collect::<Vec<char>>();
@@ -1189,7 +1193,7 @@ pub fn remove_underline_and_punc(input_line: &String, is_input: bool) -> String 
             if is_input {
                 new_input = new_input.replace(".", " . ");
             } else {
-                eprintln!("has dot is {has_dot}");
+               //eprintln!("has dot is {has_dot}");
                 if has_dot == ' ' {
                     new_input = new_input.replace(".", " . ");
                 }
