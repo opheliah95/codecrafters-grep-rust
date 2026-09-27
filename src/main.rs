@@ -35,13 +35,13 @@ fn main() {
             match check_dir(path) {
                 Ok(files) => {
                     let mut start = 4;
-                    eprintln!("files passed {:?}", files);
+                    //eprintln!("files passed {:?}", files);
 
                     for (idx, file) in files.iter().enumerate() {
                         let mut last = idx == files.len() - 1;
                         filename = file.to_string();
 
-                        eprintln!("DIR => filename {filename}");
+                        //eprintln!("DIR => filename {filename}");
                         match_by_files_or_input(
                             &mut filename,
                             &mut is_file,
