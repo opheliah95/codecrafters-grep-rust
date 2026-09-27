@@ -95,7 +95,9 @@ pub fn check_quant_pattern(mut ptn: String) -> Option<(usize, usize, String)> {
                                     let range_before = &ptn[0..start_idx];
                                     let range_full = &ptn[start_idx..start].repeat(n);
                                     let ptn_formatted = format!("{range_before}{range_full}");
-                                    eprintln!("bracket start idx: {range_before} vs {range_between} vs fornmatted={ptn_formatted}");
+                                    eprintln!(
+                                        "bracket start idx: {range_before} vs {range_between} vs fornmatted={ptn_formatted}"
+                                    );
 
                                     return Some((start, end, ptn_formatted.to_string()));
                                 }
@@ -562,7 +564,9 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                         repeated_letter,
                         &ptn[quant_end + 1..]
                     );
-                    eprintln!("__FN__match_pattern__case{{}}_the new pattern is {ptn_new} -> matching {input_line}");
+                    eprintln!(
+                        "__FN__match_pattern__case{{}}_the new pattern is {ptn_new} -> matching {input_line}"
+                    );
 
                     return match_pattern(input_line, &ptn_new);
                 }
@@ -571,7 +575,6 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                     return false;
                 }
             };
-
         }
         ptn if ptn.contains("[") && ptn.contains("]") => {
             let mut bracket_ptn = "[]".to_string();
@@ -581,22 +584,20 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
             let behind_bracket = find_index_of_ptn(ptn, "*");
             match behind_bracket {
                 Some(n) => {
-                    if n ==brac_end_idx + 1 {
+                    if n == brac_end_idx + 1 {
                         brac_end_idx += 1;
                         bracket_ptn = "[]*".to_string();
                         brac_end_inclusive += 1; // ]* is one more than ]
                     }
-
-                },
+                }
 
                 None => {}
             }
-            
+
             if brac_end_idx < brac_starter_idx {
                 eprintln!("]* appear in front of [");
                 return input_line == pattern;
             } else {
-
                 let ptn_before = &ptn[0..brac_starter_idx];
                 let ptn_before_len = ptn_before.len();
                 let ptn_after = &ptn[brac_end_inclusive..]; //]* len is 2 hardcoded
@@ -605,7 +606,7 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                 // if input < ptn
                 let mut ptn_merged = vec![ptn_before, ptn_after].join("");
                 eprintln!("===> {bracket_ptn}  --ptn BEFORE={ptn_before}");
-                 eprintln!("===> {bracket_ptn}  --ptn AFTER={ptn_after}");
+                eprintln!("===> {bracket_ptn}  --ptn AFTER={ptn_after}");
                 eprintln!("===> {bracket_ptn} match --ptn merged={ptn_merged}");
 
                 // just []* pattern
@@ -625,7 +626,7 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                 let input_start_match = input_line.find(ptn_before);
                 match input_start_match {
                     Some(s_idx) => {
-                        let input_range = &input_line[s_idx+ptn_before_len..];
+                        let input_range = &input_line[s_idx + ptn_before_len..];
                         let mut input_end_range = "";
                         let mut match_found = false;
                         //match the range of input range to [abc]*
@@ -647,7 +648,7 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                                     s_idx + input_range.len() + ptn_before_len,
                                     input_line.len()
                                 );
-                                if s_idx + input_range.len() + ptn_before_len== input_line.len() {
+                                if s_idx + input_range.len() + ptn_before_len == input_line.len() {
                                     if ptn_after.len() == 0 {
                                         return true; // ptn end at *
                                     } else {
@@ -1163,7 +1164,17 @@ pub fn check_individual_match(input_line: &str, pattern: &str) -> bool {
 pub fn remove_underline_and_punc(input_line: &String) -> String {
     let mut new_input = input_line.replace("_", " _ ");
     new_input = new_input.replace(",", ", ");
-    new_input = new_input.replace(".", ". ");
+    let dot_pos = new_input.find(".");
+    match dot_pos {
+        Some(p) => {
+            let has_dot = new_input.chars().nth(p + 1).unwrap();
+            if !vec!['*', '+'].contains(&has_dot) {
+                new_input = new_input.replace(".", ". ");
+            }
+        }
+        None => {}
+    }
+
     new_input = new_input.replace("-", " - ");
     new_input = new_input.replace(":", " : ");
 
