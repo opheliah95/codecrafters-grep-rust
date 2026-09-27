@@ -982,8 +982,8 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                                 // reached plus/? sign -> need to have one match
                                 if idx == p {
                                     eprintln!(
-                                        "reaching idx == p at {idx}, value is {val} and ptn after p {} (idx pattern: {after_p}) LTR after p {letter_after_p}",
-                                        &pattern[after_p..]
+                                        "reaching idx == p at {idx}, value is {val} and ptn after p {} (idx pattern: {after_p}) LTR after p {letter_after_p} -> ptn_char {:?}",
+                                        &pattern[after_p..], pattern_char
                                     );
                                     // handle ? after ? should only match world by word
                                     if ptn_quant == "?" {
