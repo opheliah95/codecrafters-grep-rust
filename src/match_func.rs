@@ -1197,20 +1197,20 @@ pub fn print_single_matching_line(input_line: &String, ptn: &mut String) -> Stri
 
     pattern = &mut ptn_temp;
 
-    eprintln!("FN___print_single_matching_line__pattern={pattern}");
+    eprintln!("FN___print_single_matching_line__: pattern={pattern}");
 
     // simplest case exact match
     if input_line == pattern {
         return input_line.to_string();
     }
 
-    let mut new_input = remove_underline_and_punc(&input_line);
-    if input_line == "_" {
-        new_input = "_".to_string();
-    }
-    let new_ptn = remove_underline_and_punc(&pattern);
-    let mut input_slice = new_input.split_whitespace().collect::<Vec<&str>>();
-    let mut ptn_slice = new_ptn.split_whitespace().collect::<Vec<&str>>();
+    // let mut new_input = remove_underline_and_punc(&input_line);
+    // if input_line == "_" {
+    //     new_input = "_".to_string();
+    // }
+    // let new_ptn = remove_underline_and_punc(&pattern);
+    let mut input_slice = input_line.split_whitespace().collect::<Vec<&str>>();
+    let mut ptn_slice = pattern.split_whitespace().collect::<Vec<&str>>();
 
     eprintln!(
         "__FN_print_single_matching_line__ INPUT: {:?} **{:?}**",
