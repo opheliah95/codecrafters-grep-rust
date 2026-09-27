@@ -751,10 +751,10 @@ fn handle_single_ptn_to_spaced_txt(
             for (idx, i) in input_to_start_at.iter().enumerate() {
                 //println!("index: {start} matching: {i} == {ptn}");
                 temp_input_len = input_to_start_at.len();
-                let mut i_str = i.replace(".", "").replace(",", ""); // handle plural cases
+                //let mut i_str = i.replace(".", "").replace(",", ""); // handle plural cases
 
                 let mut res_str = String::new();
-                res_str = print_single_matching_line(&i_str, &mut ptn.to_string());
+                res_str = print_single_matching_line(&i, &mut ptn.to_string());
 
                 eprintln!(
                     "resuot: ---{res_str}---idx: {idx}--len is {}",

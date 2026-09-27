@@ -1197,7 +1197,7 @@ pub fn print_single_matching_line(input_line: &String, ptn: &mut String) -> Stri
 
     pattern = &mut ptn_temp;
 
-    eprintln!("FN___print_single_matching_line__: pattern={pattern}");
+    eprintln!("FN___print_single_matching_line__: pattern={pattern} vs input={input_line}");
 
     // simplest case exact match
     if input_line == pattern {
@@ -1213,7 +1213,7 @@ pub fn print_single_matching_line(input_line: &String, ptn: &mut String) -> Stri
     let mut ptn_slice = pattern.split_whitespace().collect::<Vec<&str>>();
 
     eprintln!(
-        "__FN_print_single_matching_line__ INPUT: {:?} **{:?}**",
+        "__FN_print_single_matching_line__ INPUT: {:?} vs pattern **{:?}**",
         input_slice, ptn_slice
     );
 
