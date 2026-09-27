@@ -1,5 +1,5 @@
 use crate::lib::{find_index_of_ptn, find_match_inbetween, remove_start_end};
-use std::{collections::HashMap, f32::consts::E};
+use std::collections::HashMap;
 
 pub fn count_single_repeat(mut pattern: &str) -> usize {
     // handle plural cases
@@ -236,7 +236,7 @@ pub fn examine_repeat(mut input_line: &str, mut pattern: &str) -> Option<String>
                 repeat,
                 input_line_end,
                 *count,
-                &pattern
+                &pattern,
             );
         } else if input_line_end == *count + diff.len() {
             eprintln!("{input_temp} vs {pattern} and diff is {diff}");
@@ -248,7 +248,7 @@ pub fn examine_repeat(mut input_line: &str, mut pattern: &str) -> Option<String>
                     repeat,
                     input_line_end,
                     *count,
-                    &pattern
+                    &pattern,
                 );
             }
         } else {
@@ -270,7 +270,7 @@ fn format_input_of_repeated_char_pattern(
     repeat: &String,
     input_line_end: usize,
     count: usize,
-    pattern: &str
+    pattern: &str,
 ) {
     eprintln!("format input: {input_temp}");
     let mut input_res = input_temp
@@ -536,11 +536,11 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
             }
 
             let mut quant_num = &ptn[quant_start + 1..quant_end];
+            let letter_before = ptn.chars().nth(quant_start - 1).unwrap().to_string();
 
             // normal case considering
             let num = match quant_num.parse::<usize>() {
                 Ok(n) => {
-                    let letter_before = ptn.chars().nth(quant_start - 1).unwrap().to_string();
                     if vec!["]", ")"].contains(&letter_before.as_str()) {
                         let bracket_start = match &*letter_before {
                             "]" => "[",
@@ -582,7 +582,32 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                 }
                 Err(e) => {
                     eprintln!("{quant_num} is not digits");
-                    return false;
+                    if quant_num.ends_with(",") {
+                        let num_before = &quant_num[..quant_num.len() - 1];
+
+                        match num_before.parse::<usize>() {
+                            Ok(n_b) => {
+                                let repeated_letter = letter_before.repeat(n_b);
+                                // min requirement
+                                let ptn_new = format!(
+                                    "{}{}{}",
+                                    &ptn[0..quant_start - 1],
+                                    repeated_letter,
+                                    &ptn[quant_end + 1..]
+                                );
+
+                                return match_pattern(input_line, &ptn_new);
+                            }
+                            Err(e) => {
+                                eprintln!("unwrapped {quant_num} => {num_before} is not a num");
+                                return false;
+                            }
+                        }
+
+                        return false;
+                    } else {
+                        return false;
+                    }
                 }
             };
         }
@@ -1182,25 +1207,31 @@ pub fn check_individual_match(input_line: &str, pattern: &str) -> bool {
     return true;
 }
 
-pub fn remove_underline_and_punc(input_line: &String, is_input: bool) -> String {
-    let mut new_input = input_line.replace("_", "_ ");
-    new_input = new_input.replace(",", ", ");
-    let dot_pos = new_input.find(".");
-    match dot_pos {
+pub fn update_punc(new_input: &mut String, symbol: &str, is_input: bool) {
+    let has_symbol = new_input.find(symbol);
+    match has_symbol {
         Some(p) => {
-            let has_dot = new_input.chars().nth(p + 1).unwrap();
-
+            let behind_symbol = new_input.chars().nth(p + 1).unwrap();
+            let formatted_symbol = format!(" {symbol} ");
             if is_input {
-                new_input = new_input.replace(".", " . ");
+                *new_input = new_input.replace(symbol, &formatted_symbol);
             } else {
-               //eprintln!("has dot is {has_dot}");
-                if has_dot == ' ' {
-                    new_input = new_input.replace(".", " . ");
+                //eprintln!("has dot is {has_dot}");
+                if behind_symbol == ' ' {
+                    *new_input = new_input.replace(symbol, &formatted_symbol);
                 }
             }
         }
         None => {}
     }
+}
+pub fn remove_underline_and_punc(input_line: &String, is_input: bool) -> String {
+    let mut new_input = input_line.replace("_", "_ ");
+    //new_input = new_input.replace(",", ", ");
+
+    // decide if to update
+    update_punc(&mut new_input, ".", is_input);
+    update_punc(&mut new_input, ",", is_input);
 
     new_input = new_input.replace("-", " - ");
     new_input = new_input.replace(":", " : ");
@@ -1244,7 +1275,6 @@ pub fn print_single_matching_line(input_line: &String, ptn: &mut String) -> Stri
     }
 
     if input_line.ends_with("_") {
-        
         if !pattern.ends_with("_") && !pattern.ends_with("\\w") {
             let input_len = input_line.len();
             new_input = input_line[0..input_len - 1].to_string();
