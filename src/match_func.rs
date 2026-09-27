@@ -983,22 +983,33 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                                 if idx == p {
                                     eprintln!(
                                         "reaching idx == p at {idx}, value is {val} and ptn after p {} (idx pattern: {after_p}) LTR after p {letter_after_p} -> ptn_char {:?}",
-                                        &pattern[after_p..], pattern_char
+                                        &pattern[after_p..],
+                                        pattern_char
                                     );
                                     // handle ? after ? should only match world by word
                                     if ptn_quant == "?" {
-                                        let ptn_to_match = pattern_char.clone().nth(p + 1).unwrap();
+                                        // let mut ptn_to_match =
+                                        //     if { after_p == pattern.len() - 1 } {
+                                        //         '?'
+                                        //     } else {
+                                        //         pattern_char.clone().nth(p + 1).unwrap()
+                                        //     };
+
                                         eprintln!(
                                             "AT idx == p NOW, check ? ZERP?ONE quantifier:  val {val} ?== {} ",
-                                            ptn_to_match
+                                            letter_after_p
                                         );
 
                                         // handle case where not matching and pattern is ending after
-                                        if p + 1 == pattern.len() - 1 && val != ptn_to_match {
+                                        if p + 1 == pattern.len() - 1 && letter_after_p == '\0' {
+                                            return true;
+                                        }
+
+                                         if p + 1 == pattern.len() - 1 && val != letter_after_p {
                                             return false;
                                         }
 
-                                        if val == ptn_to_match && idx == input_line.len() - 1 {
+                                        if val == letter_after_p && idx == input_line.len() - 1 {
                                             // eprintln!("MATCHED");
                                             return true;
                                         }
@@ -1215,11 +1226,11 @@ pub fn print_single_matching_line(input_line: &String, ptn: &mut String) -> Stri
     if input_line == pattern {
         return input_line.to_string();
     }
- 
-    if input_line.ends_with("_"){
+
+    if input_line.ends_with("_") {
         if !pattern.ends_with("_") {
-            let input_len  =input_line.len();
-            new_input = input_line[0..input_len-1].to_string();
+            let input_len = input_line.len();
+            new_input = input_line[0..input_len - 1].to_string();
         }
     }
 
