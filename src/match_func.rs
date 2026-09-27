@@ -1172,14 +1172,18 @@ pub fn check_individual_match(input_line: &str, pattern: &str) -> bool {
     return true;
 }
 
-pub fn remove_underline_and_punc(input_line: &String) -> String {
+pub fn remove_underline_and_punc(input_line: &String, is_input: bool) -> String {
     let mut new_input = input_line.replace("_", "_ ");
     new_input = new_input.replace(",", ", ");
     let dot_pos = new_input.find(".");
     match dot_pos {
         Some(p) => {
             let has_dot = new_input.chars().nth(p + 1).unwrap();
-            if !vec!['*', '+'].contains(&has_dot) {
+            if !vec!['*', '+'].contains(&has_dot) && ! is_input {
+                new_input = new_input.replace(".", ". ");
+            }
+
+            if is_input {
                 new_input = new_input.replace(".", ". ");
             }
         }

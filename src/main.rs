@@ -184,9 +184,9 @@ fn match_by_files_or_input(
         // filename = format!("{}{filename}")
     }
 
-    pattern = remove_underline_and_punc(&pattern);
+    pattern = remove_underline_and_punc(&pattern, false);
     let input_clone = input_line.clone();
-    input_line = remove_underline_and_punc(&input_line);
+    input_line = remove_underline_and_punc(&input_line, true);
 
     let mut split_ptn_by_space = spilt_all_white_space_punc(&pattern);
 
