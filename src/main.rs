@@ -185,7 +185,7 @@ fn match_by_files_or_input(
     }
 
     pattern = remove_underline_and_punc(&pattern);
-    let input_clone =input_line.clone();
+    let input_clone = input_line.clone();
     input_line = remove_underline_and_punc(&input_line);
 
     let mut split_ptn_by_space = spilt_all_white_space_punc(&pattern);
@@ -208,7 +208,7 @@ fn match_by_files_or_input(
         *is_last,
         match_found,
         *total_files,
-        input_clone
+        input_clone,
     );
 }
 
@@ -223,7 +223,7 @@ fn handle_pattern_matching(
     is_last: bool,
     match_found: &mut Vec<bool>,
     total_files: usize,
-    input_clone: String
+    input_clone: String,
 ) {
     let suffix = if filename.is_empty() || (total_files < 2 && env::args().nth(1).unwrap() == "-r")
     {
@@ -450,8 +450,9 @@ fn handle_pattern_matching(
         .filter(|t| !t.is_empty())
         .collect();
 
+    eprintln!("res trim {:?}", res_trim);
+
     let mut res_temp = re_formatted_res_with_pattern(res_trim.clone(), &pattern);
-    //eprintln!("res temp {:?}", res_temp);
 
     let ptn_len_counted = count_ptn_len(split_ptn_by_space.clone());
     if ptn_len_counted > 1 {

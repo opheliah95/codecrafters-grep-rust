@@ -1200,6 +1200,7 @@ pub fn spilt_all_white_space_punc(input_line: &str) -> Vec<String> {
 
 pub fn print_single_matching_line(input_line: &String, ptn: &mut String) -> String {
     let mut pattern = &mut ptn.clone();
+    let mut new_input = input_line.clone();
     let ptn_clone = pattern.clone().to_string();
     let mut ptn_temp = pattern.to_string();
     if let Some((quant_start, quant_end, new_ptn)) = check_quant_pattern(ptn_clone) {
@@ -1214,13 +1215,15 @@ pub fn print_single_matching_line(input_line: &String, ptn: &mut String) -> Stri
     if input_line == pattern {
         return input_line.to_string();
     }
+ 
+    if input_line.ends_with("_"){
+        if !pattern.ends_with("_") {
+            let input_len  =input_line.len();
+            new_input = input_line[0..input_len-1].to_string();
+        }
+    }
 
-    // let mut new_input = remove_underline_and_punc(&input_line);
-    // if input_line == "_" {
-    //     new_input = "_".to_string();
-    // }
-    // let new_ptn = remove_underline_and_punc(&pattern);
-    let mut input_slice = input_line.split_whitespace().collect::<Vec<&str>>();
+    let mut input_slice = new_input.split_whitespace().collect::<Vec<&str>>();
     let mut ptn_slice = pattern.split_whitespace().collect::<Vec<&str>>();
 
     eprintln!(
@@ -1238,7 +1241,7 @@ pub fn print_single_matching_line(input_line: &String, ptn: &mut String) -> Stri
         ptn_slice.len()
     );
     if input_slice_len == 1 && ptn_slice.len() == 1 {
-        match examine_repeat(input_line, pattern) {
+        match examine_repeat(&new_input, pattern) {
             Some(a) => {
                 eprintln!("__FN__print_single_match__the repeat is {a}");
                 return a;
@@ -1246,23 +1249,23 @@ pub fn print_single_matching_line(input_line: &String, ptn: &mut String) -> Stri
             None => {}
         }
 
-        if match_pattern(input_line, pattern) {
-            return input_line.to_string();
+        if match_pattern(&new_input, pattern) {
+            return new_input.to_string();
         } else {
             return "".to_string();
         }
     }
 
     // handle plural cases
-    if pattern.ends_with("s") && !input_line.ends_with("s") {
+    if pattern.ends_with("s") && !new_input.ends_with("s") {
         //eprintln!("plural case not matching");
         return "".to_string();
     }
 
     if pattern.contains("\\d+") || pattern.contains("\\w+") {
         eprintln!("PTN  {pattern} contain val {input_line}");
-        if match_pattern(input_line, pattern) {
-            return input_line.to_string();
+        if match_pattern(&new_input, pattern) {
+            return new_input.to_string();
         } else {
             return "".to_string();
         }
