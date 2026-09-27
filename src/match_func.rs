@@ -65,7 +65,7 @@ pub fn re_formatted_res_with_pattern(input: Vec<&str>, pattern: &str) -> Vec<Str
 }
 
 pub fn check_quant_pattern(mut ptn: String) -> Option<(usize, usize, String)> {
-    let quant_start = find_index_of_ptn(ptn.as_str(), "{");
+    let mut quant_start = find_index_of_ptn(ptn.as_str(), "{");
     let quant_end = find_index_of_ptn(ptn.as_str(), "}");
 
     match (quant_start, quant_end) {
@@ -74,6 +74,7 @@ pub fn check_quant_pattern(mut ptn: String) -> Option<(usize, usize, String)> {
                 return None;
             } else {
                 let quant_words = &ptn[start + 1..end];
+                let mut letter_before = ptn.chars().nth(start - 1).unwrap().to_string();
 
                 match quant_words.parse::<usize>() {
                     Ok(n) => {
@@ -81,7 +82,6 @@ pub fn check_quant_pattern(mut ptn: String) -> Option<(usize, usize, String)> {
                         //     "___FN___check_quant_pattern-> checking quantifiers...break down input {:?}",
                         //     ptn.chars()
                         // );
-                        let mut letter_before = ptn.chars().nth(start - 1).unwrap().to_string();
 
                         if vec!["]", ")"].contains(&letter_before.as_str()) {
                             let bracket_start = match &*letter_before {
@@ -132,7 +132,43 @@ pub fn check_quant_pattern(mut ptn: String) -> Option<(usize, usize, String)> {
                     }
                     Err(e) => {
                         eprintln!("___FN___check_quant_pattern->{quant_words} is not digits");
-                        return None;
+                        let mut quant_start = start;
+
+                        if quant_words.ends_with(",") {
+                            let num_before = &quant_words[..quant_words.len() - 1];
+
+                            match num_before.parse::<usize>() {
+                                Ok(n_b) => {
+                                    eprintln!("Found n, Quant, {n_b}");
+                                    let mut repeated_letter = letter_before.repeat(n_b);
+                                    // handling diits
+                                    let before_quant =
+                                        &ptn[quant_start - 2..quant_start];
+
+                                    if vec!["\\d", "\\w"].contains(&before_quant) {
+                                        repeated_letter = before_quant.repeat(n_b);
+                                        quant_start -= 1;
+                                    }
+
+                                    // min requirement
+                                    let ptn_new = format!(
+                                        "{}{}{}",
+                                        &ptn[0..quant_start - 1],
+                                        repeated_letter,
+                                        &ptn[end + 1..]
+                                    );
+
+                                    return Some((quant_start, end, ptn_new));
+                                }
+                                Err(e) => {
+                                    eprintln!("unwrapped {quant_words} => {num_before} is not a num");
+                                    return None;
+                                }
+                            }
+
+                        } else {
+                            return None;
+                        }
                     }
                 };
             }
@@ -527,7 +563,7 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
 
         ptn if ptn.contains("}") && ptn.contains("{") => {
             eprintln!("PATTERN CONTAINS{{}}");
-            let quant_start = find_index_of_ptn(ptn, "{").unwrap();
+            let mut quant_start = find_index_of_ptn(ptn, "{").unwrap();
             let quant_end = find_index_of_ptn(ptn, "}").unwrap();
 
             // just return false now if }{ no matching pair is included
@@ -587,7 +623,16 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
 
                         match num_before.parse::<usize>() {
                             Ok(n_b) => {
-                                let repeated_letter = letter_before.repeat(n_b);
+                                eprintln!("Found n, Quant, {n_b}");
+                                let mut repeated_letter = letter_before.repeat(n_b);
+                                // handling diits
+                                let before_quant = &pattern[quant_start - 2..quant_start];
+
+                                if vec!["\\d", "\\w"].contains(&before_quant) {
+                                    repeated_letter = before_quant.repeat(n_b);
+                                    quant_start -= 1;
+                                }
+
                                 // min requirement
                                 let ptn_new = format!(
                                     "{}{}{}",
