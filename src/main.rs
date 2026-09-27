@@ -475,7 +475,7 @@ fn handle_pattern_matching(
         .collect();
     //eprintln!("res trimed is {:?}  and res is {:?} ", res_trim, res);
     if color_always {
-        let input_spilt_by_space_only: Vec<String> = input_line
+        let input_spilt_by_space_only: Vec<String> = input_clone
             .split_inclusive('\n')
             .map(|c| c.to_string())
             .collect();
