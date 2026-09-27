@@ -520,7 +520,7 @@ fn handle_pattern_matching(
         res
     );
 
-    let input_has_space = input_line.split(" ").collect::<Vec<&str>>().len();
+    let input_has_space = input_clone.split(" ").collect::<Vec<&str>>().len();
     eprintln!("old input has space {input_has_space} and suffix is {suffix}");
 
     if res.len() > 0 && (input_has_space == 1 || ptn_len_by_space == 1) {

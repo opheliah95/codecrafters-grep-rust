@@ -273,7 +273,13 @@ fn format_input_of_repeated_char_pattern(
     let mut input_res = input_temp
         .chars()
         .into_iter()
-        .filter(|a| match_pattern(&a.to_string(), repeat))
+        .filter(|a| {
+            if *a != '_' {
+                match_pattern(&a.to_string(), repeat)
+            } else {
+                true
+            }
+        })
         .collect::<Vec<char>>();
 
     let input_res_len = input_res.len();
@@ -1005,7 +1011,7 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                                             return true;
                                         }
 
-                                         if p + 1 == pattern.len() - 1 && val != letter_after_p {
+                                        if p + 1 == pattern.len() - 1 && val != letter_after_p {
                                             return false;
                                         }
 
@@ -1179,15 +1185,14 @@ pub fn remove_underline_and_punc(input_line: &String, is_input: bool) -> String 
     match dot_pos {
         Some(p) => {
             let has_dot = new_input.chars().nth(p + 1).unwrap();
-           
 
             if is_input {
                 new_input = new_input.replace(".", " . ");
-            }
-            else {
+            } else {
                 eprintln!("has dot is {has_dot}");
                 if has_dot == ' ' {
-                new_input = new_input.replace(".", " . ");}
+                    new_input = new_input.replace(".", " . ");
+                }
             }
         }
         None => {}
