@@ -534,12 +534,12 @@ fn handle_pattern_matching(
                 .collect::<Vec<String>>();
 
             eprintln!("input_has_space == 1 -=> res updated {:?}", res_updated);
-            let spilt_input_whitespace_only: Vec<String> = input_line
+            let spilt_input_whitespace_only: Vec<String> = input_clone
                 .split_whitespace()
                 .map(|a| a.to_string())
                 .collect();
             let spilt_input_space_only: Vec<String> =
-                input_line.split("\n").map(|a| a.to_string()).collect();
+                input_clone.split("\n").map(|a| a.to_string()).collect();
             eprintln!(
                 "spilt input space {:?} len of space {}",
                 spilt_input_space_only,
