@@ -185,6 +185,7 @@ fn match_by_files_or_input(
     }
 
     pattern = remove_underline_and_punc(&pattern);
+    let input_clone =input_line.clone();
     input_line = remove_underline_and_punc(&input_line);
 
     let mut split_ptn_by_space = spilt_all_white_space_punc(&pattern);
@@ -207,6 +208,7 @@ fn match_by_files_or_input(
         *is_last,
         match_found,
         *total_files,
+        input_clone
     );
 }
 
@@ -221,6 +223,7 @@ fn handle_pattern_matching(
     is_last: bool,
     match_found: &mut Vec<bool>,
     total_files: usize,
+    input_clone: String
 ) {
     let suffix = if filename.is_empty() || (total_files < 2 && env::args().nth(1).unwrap() == "-r")
     {
@@ -563,7 +566,7 @@ fn handle_pattern_matching(
         && !input_line.contains("\n")
     {
         if res.len() >= split_ptn_by_space.len() {
-            println!("{suffix}{input_line}");
+            println!("{suffix}{input_clone}");
             if !can_success_exit(is_last, match_found) {
                 return;
             };
@@ -802,7 +805,7 @@ fn handle_single_matching_line(
         let mut p_str = p.to_string();
 
         let res_str = print_single_matching_line(&i.to_string(), &mut p_str);
-        //eprintln!(" matching {i} -> {p_str} res-str: {res_str} -o arg");
+        eprintln!(" matching {i} -> {p_str} res-str: {res_str} -o arg");
         if res_str.len() > 0 {
             res.push(res_str)
         }
@@ -816,6 +819,7 @@ fn handle_single_matching_line(
     if !env::args().any(|x| x == "-o") {
         let test = res.join("");
         let input = split_input_by_space.join("");
+        eprintln!("test={test}, input={input}");
         if !input.contains(&test) {
             return Vec::new();
         }

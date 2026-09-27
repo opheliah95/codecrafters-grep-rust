@@ -77,10 +77,10 @@ pub fn check_quant_pattern(mut ptn: String) -> Option<(usize, usize, String)> {
 
                 match quant_words.parse::<usize>() {
                     Ok(n) => {
-                        eprintln!(
-                            "___FN___check_quant_pattern-> checking quantifiers...break down input {:?}",
-                            ptn.chars()
-                        );
+                        // eprintln!(
+                        //     "___FN___check_quant_pattern-> checking quantifiers...break down input {:?}",
+                        //     ptn.chars()
+                        // );
                         let mut letter_before = ptn.chars().nth(start - 1).unwrap().to_string();
 
                         if vec!["]", ")"].contains(&letter_before.as_str()) {
@@ -562,7 +562,7 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                         repeated_letter,
                         &ptn[quant_end + 1..]
                     );
-                    eprintln!("the new pattern is {ptn_new} -> matching {input_line}");
+                    eprintln!("__FN__match_pattern__case{{}}_the new pattern is {ptn_new} -> matching {input_line}");
 
                     return match_pattern(input_line, &ptn_new);
                 }
@@ -572,7 +572,6 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                 }
             };
 
-            return false;
         }
         ptn if ptn.contains("[") && ptn.contains("]") => {
             let mut bracket_ptn = "[]".to_string();
@@ -1165,6 +1164,9 @@ pub fn remove_underline_and_punc(input_line: &String) -> String {
     let mut new_input = input_line.replace("_", "_ ");
     new_input = new_input.replace(",", ", ");
     new_input = new_input.replace(".", ". ");
+    new_input = new_input.replace("-", " - ");
+    new_input = new_input.replace(":", " : ");
+
     return new_input;
 }
 
@@ -1227,7 +1229,7 @@ pub fn print_single_matching_line(input_line: &String, ptn: &mut String) -> Stri
     if input_slice_len == 1 && ptn_slice.len() == 1 {
         match examine_repeat(input_line, pattern) {
             Some(a) => {
-                //eprintln!("the repeat is {a}");
+                eprintln!("__FN__print_single_match__the repeat is {a}");
                 return a;
             }
             None => {}
