@@ -1300,6 +1300,15 @@ pub fn spilt_all_white_space_punc(input_line: &str) -> Vec<String> {
     split_input
 }
 
+pub fn contain_n_quant (ptn: &str) -> bool {
+    if ptn.contains("{") && ptn.contains("}") {
+        let start = ptn.find("{").unwrap();
+        let end = ptn.find("}").unwrap();
+        let in_between = &ptn[start..end];
+        return in_between.contains(",");
+    }
+    return false;
+}
 pub fn print_single_matching_line(input_line: &String, ptn: &mut String) -> String {
     let mut pattern = &mut ptn.clone();
     let mut new_input = input_line.clone();
@@ -1346,6 +1355,9 @@ pub fn print_single_matching_line(input_line: &String, ptn: &mut String) -> Stri
         match examine_repeat(&new_input, pattern) {
             Some(a) => {
                 eprintln!("__FN__print_single_match__the repeat is {a}");
+                if contain_n_quant(ptn) {
+                    return new_input;
+                }
                 return a;
             }
             None => {}
