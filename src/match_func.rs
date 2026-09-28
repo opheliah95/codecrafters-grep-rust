@@ -142,8 +142,7 @@ pub fn check_quant_pattern(mut ptn: String) -> Option<(usize, usize, String)> {
                                     eprintln!("Found n, Quant, {n_b}");
                                     let mut repeated_letter = letter_before.repeat(n_b);
                                     // handling diits
-                                    let before_quant =
-                                        &ptn[quant_start - 2..quant_start];
+                                    let before_quant = &ptn[quant_start - 2..quant_start];
 
                                     if vec!["\\d", "\\w"].contains(&before_quant) {
                                         repeated_letter = before_quant.repeat(n_b);
@@ -161,11 +160,12 @@ pub fn check_quant_pattern(mut ptn: String) -> Option<(usize, usize, String)> {
                                     return Some((quant_start, end, ptn_new));
                                 }
                                 Err(e) => {
-                                    eprintln!("unwrapped {quant_words} => {num_before} is not a num");
+                                    eprintln!(
+                                        "unwrapped {quant_words} => {num_before} is not a num"
+                                    );
                                     return None;
                                 }
                             }
-
                         } else {
                             return None;
                         }
@@ -648,7 +648,6 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                                 return false;
                             }
                         }
-
                     } else {
                         return false;
                     }
@@ -1251,19 +1250,22 @@ pub fn check_individual_match(input_line: &str, pattern: &str) -> bool {
     return true;
 }
 
-pub fn update_punc(new_input: &mut String, symbol: &str, is_input: bool) {
+pub fn update_punc(new_input: &mut String, symbol: &str, fmt: &str, is_input: bool) {
     let has_symbol = new_input.find(symbol);
     match has_symbol {
         Some(p) => {
             let behind_symbol = new_input.chars().nth(p + 1).unwrap();
-            let formatted_symbol = format!(" {symbol} ");
+            let formatted_symbol = fmt;
+            
+            // generate handling
             if is_input {
                 *new_input = new_input.replace(symbol, &formatted_symbol);
             } else {
                 //eprintln!("has dot is {has_dot}");
-                if behind_symbol == ' ' {
+                if behind_symbol == ' '{
                     *new_input = new_input.replace(symbol, &formatted_symbol);
                 }
+                
             }
         }
         None => {}
@@ -1274,8 +1276,8 @@ pub fn remove_underline_and_punc(input_line: &String, is_input: bool) -> String 
     //new_input = new_input.replace(",", ", ");
 
     // decide if to update
-    update_punc(&mut new_input, ".", is_input);
-    update_punc(&mut new_input, ",", is_input);
+    update_punc(&mut new_input, ".", &format!(" . "), is_input);
+    //update_punc(&mut new_input, ",", &format!(", "), is_input);
 
     new_input = new_input.replace("-", " - ");
     new_input = new_input.replace(":", " : ");
@@ -1300,7 +1302,7 @@ pub fn spilt_all_white_space_punc(input_line: &str) -> Vec<String> {
     split_input
 }
 
-pub fn contain_n_quant (ptn: &str) -> bool {
+pub fn contain_n_quant(ptn: &str) -> bool {
     if ptn.contains("{") && ptn.contains("}") {
         let start = ptn.find("{").unwrap();
         let end = ptn.find("}").unwrap();
