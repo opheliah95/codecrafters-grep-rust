@@ -1256,24 +1256,68 @@ pub fn update_punc(new_input: &mut String, symbol: &str, fmt: &str, is_input: bo
         Some(p) => {
             let behind_symbol = new_input.chars().nth(p + 1).unwrap();
             let formatted_symbol = fmt;
-            
+
             // generate handling
             if is_input {
                 *new_input = new_input.replace(symbol, &formatted_symbol);
             } else {
                 //eprintln!("has dot is {has_dot}");
-                if behind_symbol == ' '{
+                if behind_symbol == ' ' {
                     *new_input = new_input.replace(symbol, &formatted_symbol);
                 }
-                
             }
         }
         None => {}
     }
 }
 pub fn remove_underline_and_punc(input_line: &String, is_input: bool) -> String {
-    let mut new_input = input_line.replace("_", "_ ");
-    //new_input = new_input.replace(",", ", ");
+    let mut new_input = input_line.clone();
+    let input_len = input_line.len();
+    let comma = input_line.find(",");
+    let comma_all: Vec<_> = input_line.match_indices(",").collect();
+    let mut has_comma_underscore = false;
+
+    if comma_all.len() > 0 {
+        for (u, _) in comma_all.iter() {
+            if *u < input_len - 1 {
+                let behind_comma = input_line.chars().nth(u + 1).unwrap();
+                if !vec!['}'].contains(&behind_comma) {
+                   // eprintln!("[{input_line}] does not has: {behind_comma} idx={u} input_len={input_len}");
+                    let str_before = &new_input[0..*u];
+                    let behind_comma_str = &new_input[*u+1..];
+                    new_input = format!{"{str_before}, {behind_comma_str}"};
+                } 
+
+                let after_underscore = input_line.chars().nth(u + 1).unwrap();
+                if vec!['_'].contains(&after_underscore) {
+                    new_input = new_input.replace("_", " _");
+                    has_comma_underscore = true;
+                }
+            }
+        }
+    }
+    // match comma {
+    //     Some(u) => {
+    //         if u < new_input.len() - 1 {
+    //             let behind_comma = new_input.chars().nth(u + 1).unwrap();
+    //             if !vec!['}'].contains(&behind_comma) {
+    //                 eprintln!(" does not has: {behind_comma}");
+    //                 new_input = new_input.replace(",", ", ");
+    //             }
+
+    //             let after_underscore = input_line.chars().nth(u + 1).unwrap();
+    //             if vec!['_'].contains(&after_underscore) {
+    //                 new_input = new_input.replace("_", " _");
+    //                 has_comma_underscore = true;
+    //             }
+    //         }
+    //     }
+    //     None => {}
+    // }
+
+    if !has_comma_underscore {
+        new_input = new_input.replace("_", "_ ");
+    }
 
     // decide if to update
     update_punc(&mut new_input, ".", &format!(" . "), is_input);
