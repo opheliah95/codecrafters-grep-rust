@@ -523,7 +523,7 @@ fn handle_pattern_matching(
     let input_has_space = init_input_spilt.len();
     eprintln!("old input has space {input_has_space} and suffix is {suffix}");
    
-    if !split_input_by_space.join("").contains(&res.join("")) && filename.is_empty()
+    if !split_input_by_space.join("").contains(&res.join("")) && filename.is_empty() && !color_always
     {
         if !exit_process_errored(is_last, match_found) {
             return;
