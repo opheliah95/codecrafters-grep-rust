@@ -1278,15 +1278,26 @@ pub fn remove_underline_and_punc(input_line: &String, is_input: bool) -> String 
     let mut has_comma_underscore = false;
 
     if comma_all.len() > 0 {
+        //let mut count = 1;
         for (u, _) in comma_all.iter() {
             if *u < input_len - 1 {
                 let behind_comma = input_line.chars().nth(u + 1).unwrap();
                 if !vec!['}'].contains(&behind_comma) {
-                   // eprintln!("[{input_line}] does not has: {behind_comma} idx={u} input_len={input_len}");
+                    // new_input.replacen(",", ", ", count);
+                    // count += 1;
+                    // eprintln!("count={count} new_input is {new_input} -> is_nput={is_input}");
+
                     let str_before = &new_input[0..*u];
-                    let behind_comma_str = &new_input[*u+1..];
-                    new_input = format!{"{str_before}, {behind_comma_str}"};
-                } 
+                    let behind_comma_str = &new_input[*u + 1..];
+                    if behind_comma_str.starts_with(" ") {
+                        new_input = format! {"{str_before},{behind_comma_str}"};
+                    } else {
+                        new_input = format! {"{str_before}, {behind_comma_str}"};
+                    }
+                    eprintln!(
+                        "[{input_line}] does not has: {behind_comma} idx={u} input_len={input_len} _> {new_input}"
+                    );
+                }
 
                 let after_underscore = input_line.chars().nth(u + 1).unwrap();
                 if vec!['_'].contains(&after_underscore) {
