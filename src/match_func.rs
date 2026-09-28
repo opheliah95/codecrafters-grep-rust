@@ -1328,7 +1328,7 @@ pub fn print_single_matching_line(input_line: &String, ptn: &mut String) -> Stri
     }
 
     if input_line.ends_with("_") {
-        if !pattern.ends_with("_") && !pattern.ends_with("\\w") {
+        if !pattern.ends_with("_") && !pattern.contains("\\w") {
             let input_len = input_line.len();
             new_input = input_line[0..input_len - 1].to_string();
         }
