@@ -523,24 +523,26 @@ fn handle_pattern_matching(
     let input_has_space = init_input_spilt.len();
     eprintln!("old input has space {input_has_space} and suffix is {suffix}");
     // all match has to be in input
-    if !res.iter().all(|a| {
-        // eprintln!("res wil be : {}", split_input_by_space.iter().any(|s| {
-        //     eprintln!(
-        //         "comapre==={s} contains {a} = {}",
-        //         *s == a.replace("\n", "").trim()
-        //     );
+    // if !res.iter().all(|a| {
+    //     // eprintln!("res wil be : {}", split_input_by_space.iter().any(|s| {
+    //     //     eprintln!(
+    //     //         "comapre==={s} contains {a} = {}",
+    //     //         *s == a.replace("\n", "").trim()
+    //     //     );
 
-        //     *s == a.replace("\n", "").trim()
-        // }));
-        split_input_by_space.iter().any(|s| {
-            // eprintln!(
-            //     "comapre==={s} contains {a} = {}",
-            //     *s == a.replace("\n", "").trim()
-            // );
+    //     //     *s == a.replace("\n", "").trim()
+    //     // }));
+    //     split_input_by_space.iter().any(|s| {
+    //         // eprintln!(
+    //         //     "comapre==={s} contains {a} = {}",
+    //         //     *s == a.replace("\n", "").trim()
+    //         // );
 
-            *s == a.replace("\n", "").trim()
-        })
-    }) || res.len() > split_input_by_space.len()
+    //         *s == a.replace("\n", "").trim()
+    //     })
+    // }) || res.len() > split_input_by_space.len()
+
+    if !split_input_by_space.join("").contains(&res.join(""))
     {
         if !exit_process_errored(is_last, match_found) {
             return;
