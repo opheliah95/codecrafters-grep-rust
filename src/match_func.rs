@@ -649,7 +649,6 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                             }
                         }
 
-                        return false;
                     } else {
                         return false;
                     }

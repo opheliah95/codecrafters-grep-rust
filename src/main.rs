@@ -522,8 +522,27 @@ fn handle_pattern_matching(
 
     let input_has_space = input_clone.split(" ").collect::<Vec<&str>>().len();
     eprintln!("old input has space {input_has_space} and suffix is {suffix}");
+    // all match has to be in input
+    if !res.iter().all(|a| {
+        split_input_by_space.iter().any(|s| {
+            // eprintln!(
+            //     "comapre==={s} contains {a} = {}",
+            //     s == a.replace("\n", "").trim()
+            // );
 
-    if res.len() > 0 && res.len() >= split_ptn_by_space.len() && (input_has_space == 1 || ptn_len_by_space == 1) {
+            s == a.replace("\n", "").trim()
+        })
+    }) || res.len() > split_input_by_space.len()
+    {
+        if !exit_process_errored(is_last, match_found) {
+            return;
+        };
+    };
+
+    if res.len() > 0
+        && res.len() >= split_ptn_by_space.len()
+        && (input_has_space == 1 || ptn_len_by_space == 1)
+    {
         if !color_always {
             let res_updated = res
                 .iter()
@@ -535,7 +554,7 @@ fn handle_pattern_matching(
                 .collect::<Vec<String>>();
 
             eprintln!("input_has_space == 1 -=> res updated {:?}", res_updated);
-           
+
             let spilt_input_space_only: Vec<String> =
                 input_clone.split("\n").map(|a| a.to_string()).collect();
             eprintln!(
