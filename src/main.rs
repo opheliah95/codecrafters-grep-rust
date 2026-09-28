@@ -211,7 +211,7 @@ fn match_by_files_or_input(
         match_found,
         *total_files,
         input_clone,
-        ptn_clone
+        ptn_clone,
     );
 }
 
@@ -227,7 +227,7 @@ fn handle_pattern_matching(
     match_found: &mut Vec<bool>,
     total_files: usize,
     input_clone: String,
-    ptn_clone: String
+    ptn_clone: String,
 ) {
     let suffix = if filename.is_empty() || (total_files < 2 && env::args().nth(1).unwrap() == "-r")
     {
@@ -529,8 +529,12 @@ fn handle_pattern_matching(
     let init_ptn_spilt = ptn_clone.split(" ").collect::<Vec<&str>>();
     let ptn_has_space = init_ptn_spilt.len();
 
-    if input_has_space == ptn_has_space && !init_input_spilt.contains(&"\\n"){
-            eprintln!("old input has space {input_has_space} and ptn has space {ptn_has_space}");
+    if input_has_space == ptn_has_space && !input_clone.contains("\n") {
+        eprintln!(
+            "old input has space {input_has_space} and ptn has space {ptn_has_space} -> {:?} ={} ",
+            init_input_spilt,
+            input_clone.contains("\n")
+        );
 
         if !split_input_by_space.join("").contains(&res.join(""))
             && filename.is_empty()
