@@ -528,9 +528,10 @@ fn handle_pattern_matching(
 
     let init_ptn_spilt = ptn_clone.split(" ").collect::<Vec<&str>>();
     let ptn_has_space = init_ptn_spilt.len();
-    eprintln!("old input has space {input_has_space} and ptn has space {ptn_has_space}");
 
-    if input_has_space == ptn_has_space {
+    if input_has_space == ptn_has_space && !init_input_spilt.contains(&"\\n"){
+            eprintln!("old input has space {input_has_space} and ptn has space {ptn_has_space}");
+
         if !split_input_by_space.join("").contains(&res.join(""))
             && filename.is_empty()
             && !color_always
