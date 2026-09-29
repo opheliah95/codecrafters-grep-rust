@@ -618,6 +618,9 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                 }
                 Err(e) => {
                     eprintln!("{quant_num} is not digits");
+                    let quant_num_last = quant_num.chars().last().unwrap();
+                    let quant_num_first = quant_num.chars().nth(0).unwrap();
+
                     if quant_num.ends_with(",") {
                         let num_before = &quant_num[..quant_num.len() - 1];
 
@@ -648,6 +651,49 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                                 return false;
                             }
                         }
+                    } else if quant_num_last.is_ascii_digit() && quant_num_first.is_ascii_digit() {
+                        let parsed_last = quant_num_last.to_string().parse::<usize>().unwrap();
+                        let parsed_first = quant_num_first.to_string().parse::<usize>().unwrap();
+
+                        let mut min_match = letter_before.repeat(parsed_first);
+                        let mut max_match = letter_before.repeat(parsed_last + 1);
+
+                        // handling diits
+                        let before_quant = &pattern[quant_start - 2..quant_start];
+
+                        if vec!["\\d", "\\w"].contains(&before_quant) {
+                            min_match = before_quant.repeat(parsed_first);
+                            max_match = before_quant.repeat(parsed_last + 1);
+                            quant_start -= 1;
+                        }
+
+                        // min requirement
+                        let start_pt = &ptn[0..quant_start];
+                        let after_pt = &ptn[quant_end+1..];
+                        if match_pattern(input_line, start_pt) && match_pattern(input_line, after_pt){
+                            eprintln!("start={start_pt} matched and end={after_pt}  continue...");
+                            return match_pattern(input_line, &min_match) && !match_pattern(input_line, &max_match)
+
+
+                        } else {
+                            return false
+                        }
+
+                        let ptn_new_min = format!(
+                            "{}{}{}",
+                            &ptn[0..quant_start - 1],
+                            min_match,
+                            &ptn[quant_end + 1..]
+                        );
+
+                        let ptn_new_max = format!(
+                            "{}{}{}",
+                            &ptn[0..quant_start - 1],
+                            max_match,
+                            &ptn[quant_end + 1..]
+                        );
+
+                        return false;
                     } else {
                         return false;
                     }
@@ -1282,7 +1328,17 @@ pub fn remove_underline_and_punc(input_line: &String, is_input: bool) -> String 
         for (u, _) in comma_all.iter() {
             if *u < input_len - 1 {
                 let behind_comma = input_line.chars().nth(u + 1).unwrap();
-                if !vec!['}'].contains(&behind_comma) {
+                let behind_comma_str = &input_line[u + 1..];
+                let is_between_pattern: bool = if behind_comma.is_ascii_digit() {
+                    if u + 2 <= input_len - 1 {
+                        input_line[u + 2..].starts_with("}")
+                    } else {
+                        false
+                    }
+                } else {
+                    false
+                };
+                if !vec!['}'].contains(&behind_comma) && !is_between_pattern {
                     // new_input.replacen(",", ", ", count);
                     // count += 1;
                     // eprintln!("count={count} new_input is {new_input} -> is_nput={is_input}");
