@@ -1,4 +1,6 @@
-use crate::lib::{find_index_of_ptn, find_match_inbetween, remove_start_end};
+use crate::lib::{
+    find_index_of_ptn, find_match_inbetween, find_matching_letters, remove_start_end,
+};
 use std::collections::HashMap;
 
 pub fn count_single_repeat(mut pattern: &str) -> usize {
@@ -62,6 +64,67 @@ pub fn re_formatted_res_with_pattern(input: Vec<&str>, pattern: &str) -> Vec<Str
     }
 
     out
+}
+
+pub fn check_quant_with_range(mut ptn: String) -> Option<(String, String)> {
+    let mut quant_start = find_index_of_ptn(ptn.as_str(), "{");
+    let quant_end = find_index_of_ptn(ptn.as_str(), "}");
+
+    match (quant_start, quant_end) {
+        (Some(mut start), Some(mut end)) => {
+            if start >= end {
+                return None;
+            }
+
+            let mut quant_num = &ptn[start + 1..end];
+            let letter_before = ptn.chars().nth(start - 1).unwrap().to_string();
+
+            let quant_num_last = quant_num.chars().last().unwrap();
+            let quant_num_first = quant_num.chars().nth(0).unwrap();
+
+            if quant_num_last.is_ascii_digit() && quant_num_first.is_ascii_digit() {
+                let parsed_last = quant_num_last.to_string().parse::<usize>().unwrap();
+                let parsed_first = quant_num_first.to_string().parse::<usize>().unwrap();
+
+                let mut min_match = letter_before.repeat(parsed_first);
+                let mut max_match = letter_before.repeat(parsed_last + 1);
+
+                // handling diits
+                let mut before_quant = &ptn[start - 2..start];
+                let mut prev_idx = 1;
+
+                if vec!["\\d", "\\w"].contains(&before_quant) {
+                    min_match = before_quant.repeat(parsed_first);
+                    max_match = before_quant.repeat(parsed_last + 1);
+                    prev_idx = before_quant.len();
+                }
+
+                // min requirement
+
+                let ptn_new_min = format!(
+                    "{}{}{}",
+                    &ptn[0..start - prev_idx],
+                    min_match,
+                    &ptn[end + 1..]
+                );
+
+                let ptn_new_max = format!(
+                    "{}{}{}",
+                    &ptn[0..start - prev_idx],
+                    max_match,
+                    &ptn[end + 1..]
+                );
+
+                return Some((ptn_new_min, ptn_new_max));
+            } else {
+                return None;
+            }
+        }
+
+        _ => return None,
+    }
+
+    return None;
 }
 
 pub fn check_quant_pattern(mut ptn: String) -> Option<(usize, usize, String)> {
@@ -664,19 +727,20 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                         if vec!["\\d", "\\w"].contains(&before_quant) {
                             min_match = before_quant.repeat(parsed_first);
                             max_match = before_quant.repeat(parsed_last + 1);
-                            quant_start -= 1;
+                            quant_start -= 2;
                         }
 
                         // min requirement
                         let start_pt = &ptn[0..quant_start];
-                        let after_pt = &ptn[quant_end+1..];
-                        if match_pattern(input_line, start_pt) && match_pattern(input_line, after_pt){
+                        let after_pt = &ptn[quant_end + 1..];
+                        if match_pattern(input_line, start_pt)
+                            && match_pattern(input_line, after_pt)
+                        {
                             eprintln!("start={start_pt} matched and end={after_pt}  continue...");
-                            return match_pattern(input_line, &min_match) && !match_pattern(input_line, &max_match)
-
-
+                            return match_pattern(input_line, &min_match)
+                                && !match_pattern(input_line, &max_match);
                         } else {
-                            return false
+                            return false;
                         }
 
                         let ptn_new_min = format!(
@@ -1426,10 +1490,22 @@ pub fn print_single_matching_line(input_line: &String, ptn: &mut String) -> Stri
     let mut pattern = &mut ptn.clone();
     let mut new_input = input_line.clone();
     let ptn_clone = pattern.clone().to_string();
+
     let mut ptn_temp = pattern.to_string();
     if let Some((quant_start, quant_end, new_ptn)) = check_quant_pattern(ptn_clone) {
         ptn_temp = new_ptn;
     }
+
+    if let Some((mut ptn_min, mut ptn_max)) = check_quant_with_range(pattern.clone().to_string()) {
+        let min = print_single_matching_line(input_line, &mut ptn_min);
+        let max = print_single_matching_line(input_line, &mut ptn_max);
+
+        if !min.is_empty() && max.is_empty() {
+            return input_line.to_string();
+        } else {
+            return "".to_string();
+        }
+    };
 
     pattern = &mut ptn_temp;
 
@@ -1438,6 +1514,18 @@ pub fn print_single_matching_line(input_line: &String, ptn: &mut String) -> Stri
     // simplest case exact match
     if input_line == pattern {
         return input_line.to_string();
+    }
+
+    // a case handle caaat -> caaaat
+    if input_line.len() >= pattern.len() {
+        let my_match_between = find_matching_letters(input_line, pattern);
+        eprintln!("found match between: {my_match_between}");
+        let shared_match = pattern.find(&my_match_between).unwrap();
+        let ptn_end = &pattern[shared_match + my_match_between.len()..];
+        eprintln!("sjared {shared_match}, ptn end {ptn_end}");
+        if input_line.ends_with(ptn_end) {
+            return input_line.to_string();
+        }
     }
 
     if input_line.ends_with("_") {

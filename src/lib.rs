@@ -98,6 +98,53 @@ pub fn find_match_inbetween(source: &str, pattern: &str) -> String {
     return res;
 }
 
+
+pub fn find_matching_letters(source: &str, ptn: &str) -> String {
+    let mut pattern = ptn.clone();
+    let mut pattern_temp = pattern.to_string();
+    if source.len() == 0 || pattern.len() == 0 {
+        return "".to_string();
+    }
+
+    //println!("matching word by word source {source} and ptn: {pattern}");
+    let mut start_pos: usize = 0;
+    //let mut end_pos:usize = 0;
+    let source_len = source.len();
+    let mut matched_chars: Vec<char> = Vec::new();
+
+    // remove all brackets
+    let special_symbols = ["|", ")", "(", "$", "^", "?", "[", "]"];
+    let source_contain_symbols = special_symbols.iter().any(|a| pattern.contains(*a));
+    if source_contain_symbols {
+        for s in special_symbols.iter() {
+            pattern_temp = pattern_temp.replace(s, "");
+        }
+    }
+
+    pattern = &pattern_temp;
+
+    //println!("pattern is now {pattern}");
+
+    for (s_idx, s_val) in source.chars().enumerate() {
+        let mut ptn_range = &pattern[start_pos..];
+        for (p_idx, p_val) in ptn_range.chars().enumerate() {
+            println!("s_val {s_val}, start pos : {start_pos}  and p_val {p_val} and s_idx {s_idx}");
+            if s_val == p_val {
+                start_pos += 1;
+                matched_chars.push(s_val);
+                break;
+            }
+
+            if start_pos >= ptn_range.len() - 1 {
+                eprintln!("==FN---find_match_inbetween_=== inbetween={:?}", matched_chars);
+                return matched_chars.iter().collect();
+            }
+        }
+    }
+    let res = matched_chars.iter().collect();
+    return res;
+}
+
 pub fn remove_start_end(input: &str) -> &str {
     let mut input_chars = input.chars();
     input_chars.next();
