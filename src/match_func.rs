@@ -92,11 +92,29 @@ pub fn check_quant_with_range(mut ptn: String) -> Option<(String, String)> {
                 // handling diits
                 let mut before_quant = &ptn[start - 2..start];
                 let mut prev_idx = 1;
+                let before_quant_last = before_quant.chars().last().unwrap().to_string();
 
                 if vec!["\\d", "\\w"].contains(&before_quant) {
                     min_match = before_quant.repeat(parsed_first);
                     max_match = before_quant.repeat(parsed_last + 1);
                     prev_idx = before_quant.len();
+                } else if vec![")", "]"].contains(&before_quant_last.as_str()) {
+                    let bracket_start = if before_quant_last == "]" { "[" } else { "(" };
+                    let bracket_start_idx = ptn.find(bracket_start);
+                    let bracket_end_idx = ptn.find(&before_quant_last).unwrap();
+
+                    match bracket_start_idx {
+                        Some(i) => {
+                            if bracket_end_idx >= i {
+                                let bracket_ptn = &ptn[i..start];
+                                min_match = bracket_ptn.repeat(parsed_first);
+                                max_match = bracket_ptn.repeat(parsed_last + 1);
+                                prev_idx = bracket_ptn.len();
+                            }
+                        }
+
+                        None => {}
+                    }
                 }
 
                 // min requirement
@@ -124,7 +142,6 @@ pub fn check_quant_with_range(mut ptn: String) -> Option<(String, String)> {
         _ => return None,
     }
 
-    return None;
 }
 
 pub fn check_quant_pattern(mut ptn: String) -> Option<(usize, usize, String)> {
@@ -890,7 +907,39 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
         //check alt | operator
         ptn if pattern.starts_with("(") && pattern.ends_with(")") => {
             //println!("{ptn} eval alternat");
-            let ptn_formatted = remove_start_end(ptn);
+            let mut ptn_formatted = remove_start_end(ptn);
+            let mut input_temp = input_line.clone().to_string();
+            if ptn_formatted.contains(")(") {
+                let mut ptn_all = ptn_formatted.split_inclusive(")").collect::<Vec<&str>>();
+                let mut match_arr: Vec<bool> = Vec::new();
+                if !ptn_all.is_empty() {
+                    let new_ptn_all = ptn_all.iter().map(|a| if !a.starts_with("(") {
+                        format!("({a}")
+                    } else if !a.ends_with(")") {
+                         format!("{a})")
+                    } else {
+                        a.to_string()
+                    }).collect::<Vec<String>>();
+
+                eprintln!("--> multiple brackets--->ptn all is {:?}", new_ptn_all);
+                for item in new_ptn_all {
+                    let item_temp = item.replace(")", "").replace("(", "");
+                    let item_spilt = item_temp.split("|").collect::<Vec<&str>>();
+                    for word in item_spilt {
+                        if input_temp.contains(&word) {
+                            eprintln!("input temp is {input_temp} -> contains {word}");
+                            input_temp = input_temp.replace(&word, "");
+                            match_arr.push(true);
+                            continue;
+                        }
+                    }
+                }
+
+                return match_arr.len() >= ptn_all.len();
+
+
+                }
+            }
             let ptn_spilt = ptn_formatted.split("|").collect::<Vec<&str>>();
             if ptn_spilt.len() <= 1 {
                 //eprintln!("{:?}", ptn_spilt);
