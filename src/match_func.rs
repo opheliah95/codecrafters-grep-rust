@@ -834,6 +834,24 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                         let input_range = &input_line[s_idx + ptn_before_len..];
                         let mut input_end_range = "";
                         let mut match_found = false;
+
+                        if ptn_range.contains("][") {
+                            let all_pair: Vec<&str> = ptn_range.split_inclusive("]").collect();
+                            eprintln!("matchiing ][ ---> INPUT={input_range} all bracket pairs {:?}", all_pair);
+
+                            // u have lesser input than bracket pairs
+                            if input_range.len() < all_pair.len() {
+                                return false;
+                            } else {
+                                let mut input_temp = input_range.clone().chars().map(|a| a.to_string());
+                                let match_pair = input_temp.zip(all_pair);
+
+                                let res: Vec<_> = match_pair.filter(|(i, p)| p.contains(i)).collect();
+
+                                return !res.is_empty();
+                            }
+                        }
+
                         //match the range of input range to [abc]*
                         for (idx, ch) in input_range.chars().enumerate() {
                             let char_in_ptn = ptn_range.contains(ch);
