@@ -141,7 +141,6 @@ pub fn check_quant_with_range(mut ptn: String) -> Option<(String, String)> {
 
         _ => return None,
     }
-
 }
 
 pub fn check_quant_pattern(mut ptn: String) -> Option<(usize, usize, String)> {
@@ -837,16 +836,21 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
 
                         if ptn_range.contains("][") {
                             let all_pair: Vec<&str> = ptn_range.split_inclusive("]").collect();
-                            eprintln!("matchiing ][ ---> INPUT={input_range} all bracket pairs {:?}", all_pair);
+                            eprintln!(
+                                "matchiing ][ ---> INPUT={input_range} all bracket pairs {:?}",
+                                all_pair
+                            );
 
                             // u have lesser input than bracket pairs
                             if input_range.len() < all_pair.len() {
                                 return false;
                             } else {
-                                let mut input_temp = input_range.clone().chars().map(|a| a.to_string());
+                                let mut input_temp =
+                                    input_range.clone().chars().map(|a| a.to_string());
                                 let match_pair = input_temp.zip(all_pair);
 
-                                let res: Vec<_> = match_pair.filter(|(i, p)| p.contains(i)).collect();
+                                let res: Vec<_> =
+                                    match_pair.filter(|(i, p)| p.contains(i)).collect();
 
                                 return !res.is_empty();
                             }
@@ -931,31 +935,34 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                 let mut ptn_all = ptn_formatted.split_inclusive(")").collect::<Vec<&str>>();
                 let mut match_arr: Vec<bool> = Vec::new();
                 if !ptn_all.is_empty() {
-                    let new_ptn_all = ptn_all.iter().map(|a| if !a.starts_with("(") {
-                        format!("({a}")
-                    } else if !a.ends_with(")") {
-                         format!("{a})")
-                    } else {
-                        a.to_string()
-                    }).collect::<Vec<String>>();
+                    let new_ptn_all = ptn_all
+                        .iter()
+                        .map(|a| {
+                            if !a.starts_with("(") {
+                                format!("({a}")
+                            } else if !a.ends_with(")") {
+                                format!("{a})")
+                            } else {
+                                a.to_string()
+                            }
+                        })
+                        .collect::<Vec<String>>();
 
-                eprintln!("--> multiple brackets--->ptn all is {:?}", new_ptn_all);
-                for item in new_ptn_all {
-                    let item_temp = item.replace(")", "").replace("(", "");
-                    let item_spilt = item_temp.split("|").collect::<Vec<&str>>();
-                    for word in item_spilt {
-                        if input_temp.contains(&word) {
-                            eprintln!("input temp is {input_temp} -> contains {word}");
-                            input_temp = input_temp.replace(&word, "");
-                            match_arr.push(true);
-                            continue;
+                    eprintln!("--> multiple brackets--->ptn all is {:?}", new_ptn_all);
+                    for item in new_ptn_all {
+                        let item_temp = item.replace(")", "").replace("(", "");
+                        let item_spilt = item_temp.split("|").collect::<Vec<&str>>();
+                        for word in item_spilt {
+                            if input_temp.contains(&word) {
+                                eprintln!("input temp is {input_temp} -> contains {word}");
+                                input_temp = input_temp.replace(&word, "");
+                                match_arr.push(true);
+                                continue;
+                            }
                         }
                     }
-                }
 
-                return match_arr.len() >= ptn_all.len();
-
-
+                    return match_arr.len() >= ptn_all.len();
                 }
             }
             let ptn_spilt = ptn_formatted.split("|").collect::<Vec<&str>>();
@@ -1448,9 +1455,12 @@ pub fn update_punc(new_input: &mut String, symbol: &str, fmt: &str, is_input: bo
     }
 }
 pub fn remove_underline_and_punc(input_line: &String, is_input: bool) -> String {
+    if input_line.len() == 1 {
+        return input_line.to_string();
+    }
+
     let mut new_input = input_line.clone();
     let input_len = input_line.len();
-    let comma = input_line.find(",");
     let comma_all: Vec<_> = input_line.match_indices(",").collect();
     let mut has_comma_underscore = false;
 
@@ -1513,8 +1523,19 @@ pub fn remove_underline_and_punc(input_line: &String, is_input: bool) -> String 
     //     None => {}
     // }
 
+    let input_temp = new_input.clone();
     if !has_comma_underscore {
-        new_input = new_input.replace("_", "_ ");
+        let underscores = input_temp.match_indices("_");
+        for (idx, _) in underscores {
+            let prev = new_input.chars().nth(idx - 1).unwrap();
+            let after = new_input.chars().nth(idx + 1).unwrap();
+
+            if prev.is_ascii_alphanumeric() || after.is_alphanumeric() {
+                continue;
+            } else {
+                new_input = new_input.replace("_", "_ ");
+            }
+        }
     }
 
     // decide if to update
