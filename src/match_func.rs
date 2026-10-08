@@ -1575,14 +1575,14 @@ pub fn remove_underline_and_punc(input_line: &String, is_input: bool) -> String 
         for (idx, _) in underscores {
             let prev = new_input.chars().nth(idx - 1).unwrap();
             let after = new_input.chars().nth(idx + 1).unwrap();
+            eprint!("comma underscore... {new_input}");
+            //(prev.is_ascii_alphanumeric() || after.is_alphanumeric())
+            new_input = new_input.replace("_", "_ ");
 
-            if (prev.is_ascii_alphanumeric() || after.is_alphanumeric())
-                && !input_temp.contains(" ")
-            {
-                continue;
-            } else {
-                new_input = new_input.replace("_", "_ ");
-            }
+            // if !input_temp.contains(" ") {
+            //     continue;
+            // } else {
+            // }
         }
     }
 
