@@ -218,7 +218,7 @@ pub fn check_quant_pattern(mut ptn: String) -> Option<(usize, usize, String)> {
 
                             match num_before.parse::<usize>() {
                                 Ok(n_b) => {
-                                    eprintln!("Found n, Quant, {n_b}");
+                                    eprintln!("Contain {n_b} repeats");
                                     let mut repeated_letter = letter_before.repeat(n_b);
                                     // handling diits
                                     let before_quant = &ptn[quant_start - 2..quant_start];
@@ -228,6 +228,24 @@ pub fn check_quant_pattern(mut ptn: String) -> Option<(usize, usize, String)> {
                                         quant_start -= 1;
                                     }
 
+                                    // handle cases with brackets ()
+                                    eprintln!("before quant: {before_quant}");
+                                    if before_quant.contains(")") {
+                                        let bracket_start = ptn.find("(");
+
+                                        match bracket_start {
+                                            Some(s) => {
+                                                let end_idx = ptn.find(before_quant).unwrap();
+                                                if end_idx > s {
+                                                    let new_ptn = &ptn[s..end_idx + 2];
+                                                    eprintln!("found repeat () ptn : {new_ptn}"); //include )
+                                                    repeated_letter = new_ptn.repeat(n_b);
+                                                    quant_start =s+1;
+                                                }
+                                            }
+                                            None => {}
+                                        }
+                                    }
                                     // min requirement
                                     let ptn_new = format!(
                                         "{}{}{}",
@@ -705,7 +723,7 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
 
                         match num_before.parse::<usize>() {
                             Ok(n_b) => {
-                                eprintln!("Found n, Quant, {n_b}");
+                                //eprintln!("Found n, Quant, {n_b}");
                                 let mut repeated_letter = letter_before.repeat(n_b);
                                 // handling diits
                                 let before_quant = &pattern[quant_start - 2..quant_start];
@@ -713,6 +731,23 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                                 if vec!["\\d", "\\w"].contains(&before_quant) {
                                     repeated_letter = before_quant.repeat(n_b);
                                     quant_start -= 1;
+                                }
+
+                                // handle cases with brackets ()
+                                eprintln!("before quant: {before_quant}");
+                                if vec![")}"].contains(&before_quant) {
+                                    let bracket_start = input_line.find("(");
+
+                                    match bracket_start {
+                                        Some(s) => {
+                                            let end_idx = input_line.find(before_quant).unwrap();
+                                            if end_idx > s {
+                                                let ptn = &input_line[s + 1..end_idx];
+                                                repeated_letter = ptn.repeat(n_b);
+                                            }
+                                        }
+                                        None => {}
+                                    }
                                 }
 
                                 // min requirement
