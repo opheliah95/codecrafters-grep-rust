@@ -497,6 +497,8 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                 return false;
             }
 
+            //eprintln!("ptn start with .* or .+ ---> {ptn}");
+
             let ptn_start: usize = if ptn.contains(".*") {
                 ptn.find(".*").unwrap()
             } else {
@@ -1640,7 +1642,7 @@ pub fn print_single_matching_line(input_line: &String, ptn: &mut String) -> Stri
     }
 
     // a case handle caaat -> caaaat
-    if input_line.len() >= pattern.len() {
+    if input_line.len() >= pattern.len() && !pattern.starts_with(".") {
         let my_match_between = find_matching_letters(input_line, pattern);
         eprintln!("found match between: {my_match_between}");
         let shared_match = pattern.find(&my_match_between).unwrap();
