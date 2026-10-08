@@ -1642,7 +1642,7 @@ pub fn print_single_matching_line(input_line: &String, ptn: &mut String) -> Stri
     }
 
     // a case handle caaat -> caaaat
-    if input_line.len() >= pattern.len() && !pattern.starts_with(".") {
+    if input_line.len() >= pattern.len() && !pattern.starts_with(".") && !pattern.ends_with("*") {
         let my_match_between = find_matching_letters(input_line, pattern);
         eprintln!("found match between: {my_match_between}");
         let shared_match = pattern.find(&my_match_between).unwrap();
