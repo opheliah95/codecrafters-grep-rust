@@ -105,6 +105,9 @@ pub fn find_matching_letters(source: &str, ptn: &str) -> String {
     if source.len() == 0 || pattern.len() == 0 {
         return "".to_string();
     }
+    if vec!["\\d", "\\w"].contains(&pattern) {
+        return "".to_string();
+    }
 
     //println!("matching word by word source {source} and ptn: {pattern}");
     let mut start_pos: usize = 0;
