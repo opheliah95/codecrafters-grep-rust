@@ -109,6 +109,10 @@ pub fn find_matching_letters(source: &str, ptn: &str) -> String {
         return "".to_string();
     }
 
+    if source.chars().nth(0) != ptn.chars().nth(0) {
+         return "".to_string();
+    }
+
     //println!("matching word by word source {source} and ptn: {pattern}");
     let mut start_pos: usize = 0;
     //let mut end_pos:usize = 0;
