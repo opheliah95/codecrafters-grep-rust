@@ -1567,7 +1567,7 @@ pub fn remove_underline_and_punc(input_line: &String, is_input: bool) -> String 
             let prev = new_input.chars().nth(idx - 1).unwrap();
             let after = new_input.chars().nth(idx + 1).unwrap();
 
-            if prev.is_ascii_alphanumeric() || after.is_alphanumeric() {
+            if (prev.is_ascii_alphanumeric() || after.is_alphanumeric()) && !input_temp.contains(" ") {
                 continue;
             } else {
                 new_input = new_input.replace("_", "_ ");
