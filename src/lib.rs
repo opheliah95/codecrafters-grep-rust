@@ -128,7 +128,7 @@ pub fn find_matching_letters(source: &str, ptn: &str) -> String {
     for (s_idx, s_val) in source.chars().enumerate() {
         let mut ptn_range = &pattern[start_pos..];
         for (p_idx, p_val) in ptn_range.chars().enumerate() {
-            println!("s_val {s_val}, start pos : {start_pos}  and p_val {p_val} and s_idx {s_idx}");
+            //eprintln!("s_val {s_val}, start pos : {start_pos}  and p_val {p_val} and s_idx {s_idx}");
             if s_val == p_val {
                 start_pos += 1;
                 matched_chars.push(s_val);
