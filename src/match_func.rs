@@ -1646,7 +1646,7 @@ pub fn print_single_matching_line(input_line: &String, ptn: &mut String) -> Stri
     if input_line.len() >= pattern.len() && !pattern.starts_with(".") && !vec!["*", "$"].contains(&ptn_last.as_str()){
         let my_match_between = find_matching_letters(input_line, pattern);
         eprintln!("found match between: {my_match_between}");
-        let shared_match = pattern.find(&my_match_between).unwrap();
+        let shared_match = pattern.find(&my_match_between).unwrap_or_default();
         let ptn_end = &pattern[shared_match + my_match_between.len()..];
         eprintln!("sjared {shared_match}, ptn end {ptn_end}");
         if input_line.ends_with(ptn_end) {
