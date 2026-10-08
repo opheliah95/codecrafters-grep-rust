@@ -753,7 +753,7 @@ fn handle_single_ptn_to_spaced_txt(
     let mut temp_input_len = 0;
     eprintln!(
         "====FN handle_single_ptn_to_spaced_txt=== {:?} vs {:?}",
-        split_input_by_space, split_input_by_space
+        split_input_by_space, split_ptn_by_space
     );
     while start < split_input_by_space.len() {
         if input_len == ptn_len {
