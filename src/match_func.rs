@@ -1642,7 +1642,8 @@ pub fn print_single_matching_line(input_line: &String, ptn: &mut String) -> Stri
     }
 
     // a case handle caaat -> caaaat
-    if input_line.len() >= pattern.len() && !pattern.starts_with(".") && !pattern.ends_with("*") {
+    let ptn_last = pattern.chars().last().unwrap().to_string();
+    if input_line.len() >= pattern.len() && !pattern.starts_with(".") && vec!["*", "$"].contains(&ptn_last.as_str()){
         let my_match_between = find_matching_letters(input_line, pattern);
         eprintln!("found match between: {my_match_between}");
         let shared_match = pattern.find(&my_match_between).unwrap();
