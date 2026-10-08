@@ -66,10 +66,10 @@ pub fn re_formatted_res_with_pattern(input: Vec<&str>, pattern: &str) -> Vec<Str
     out
 }
 
-pub fn check_quant_with_range(mut ptn: String) -> Option<(String, String)> {
+pub fn check_quant_with_range(mut ptn: String) -> Option<(String, String, Vec<String>)> {
     let mut quant_start = find_index_of_ptn(ptn.as_str(), "{");
     let quant_end = find_index_of_ptn(ptn.as_str(), "}");
-
+    let mut ptn_range: Vec<String> = Vec::new();
     match (quant_start, quant_end) {
         (Some(mut start), Some(mut end)) => {
             if start >= end {
@@ -133,7 +133,16 @@ pub fn check_quant_with_range(mut ptn: String) -> Option<(String, String)> {
                     &ptn[end + 1..]
                 );
 
-                return Some((ptn_new_min, ptn_new_max));
+                if parsed_last - parsed_first > 1 {
+                    for i in (parsed_first..parsed_last + 1) {
+                        let ptn_temp =
+                            format!("{}{}{}", &ptn[0..start - prev_idx], i, &ptn[end + 1..]);
+
+                        ptn_range.push(ptn_temp);
+                    }
+                }
+
+                return Some((ptn_new_min, ptn_new_max, ptn_range));
             } else {
                 return None;
             }
@@ -240,7 +249,7 @@ pub fn check_quant_pattern(mut ptn: String) -> Option<(usize, usize, String)> {
                                                     let new_ptn = &ptn[s..end_idx + 2];
                                                     eprintln!("found repeat () ptn : {new_ptn}"); //include )
                                                     repeated_letter = new_ptn.repeat(n_b);
-                                                    quant_start =s+1;
+                                                    quant_start = s + 1;
                                                 }
                                             }
                                             None => {}
@@ -1567,7 +1576,9 @@ pub fn remove_underline_and_punc(input_line: &String, is_input: bool) -> String 
             let prev = new_input.chars().nth(idx - 1).unwrap();
             let after = new_input.chars().nth(idx + 1).unwrap();
 
-            if (prev.is_ascii_alphanumeric() || after.is_alphanumeric()) && !input_temp.contains(" ") {
+            if (prev.is_ascii_alphanumeric() || after.is_alphanumeric())
+                && !input_temp.contains(" ")
+            {
                 continue;
             } else {
                 new_input = new_input.replace("_", "_ ");
@@ -1621,12 +1632,22 @@ pub fn print_single_matching_line(input_line: &String, ptn: &mut String) -> Stri
         ptn_temp = new_ptn;
     }
 
-    if let Some((mut ptn_min, mut ptn_max)) = check_quant_with_range(pattern.clone().to_string()) {
+    if let Some((mut ptn_min, mut ptn_max, ptn_range)) =
+        check_quant_with_range(pattern.clone().to_string())
+    {
         let min = print_single_matching_line(input_line, &mut ptn_min);
         let max = print_single_matching_line(input_line, &mut ptn_max);
 
         if !min.is_empty() && max.is_empty() {
             return input_line.to_string();
+        } else if !ptn_range.is_empty() {
+            for mut p in ptn_range {
+                let r = print_single_matching_line(input_line, &mut p);
+                if !r.is_empty() {
+                    return r;
+                }
+            }
+            return "".to_string();
         } else {
             return "".to_string();
         }
@@ -1643,7 +1664,7 @@ pub fn print_single_matching_line(input_line: &String, ptn: &mut String) -> Stri
 
     // a case handle caaat -> caaaat
     let ptn_last = pattern.chars().last().unwrap().to_string();
-    if input_line.len() >= pattern.len() && !pattern.starts_with(".") && !vec!["*", "$"].contains(&ptn_last.as_str()){
+    if input_line.len() >= pattern.len() && pattern.chars().all(|a| a.is_alphanumeric()) {
         let my_match_between = find_matching_letters(input_line, pattern);
         eprintln!("found match between: {my_match_between}");
         let shared_match = pattern.find(&my_match_between).unwrap_or_default();
