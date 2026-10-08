@@ -135,8 +135,16 @@ pub fn check_quant_with_range(mut ptn: String) -> Option<(String, String, Vec<St
 
                 if parsed_last - parsed_first > 1 {
                     for i in (parsed_first..parsed_last + 1) {
-                        let ptn_temp =
-                            format!("{}{}{}", &ptn[0..start - prev_idx], i, &ptn[end + 1..]);
+                        before_quant = &ptn[start - 1..start];
+
+                        let temp_march = before_quant.repeat(i);
+
+                        let ptn_temp = format!(
+                            "{}{}{}",
+                            &ptn[0..start - prev_idx],
+                            temp_march,
+                            &ptn[end + 1..]
+                        );
 
                         ptn_range.push(ptn_temp);
                     }
@@ -1572,17 +1580,18 @@ pub fn remove_underline_and_punc(input_line: &String, is_input: bool) -> String 
     let input_temp = new_input.clone();
     if !has_comma_underscore {
         let underscores = input_temp.match_indices("_");
+        new_input = new_input.replace("_", "_ ");
+
         for (idx, _) in underscores {
             let prev = new_input.chars().nth(idx - 1).unwrap();
             let after = new_input.chars().nth(idx + 1).unwrap();
 
-            if (prev.is_ascii_alphanumeric() || after.is_alphanumeric())
-                && !input_temp.contains(" ")
-            {
-                continue;
-            } else {
-                new_input = new_input.replace("_", "_ ");
-            }
+            // if (prev.is_ascii_alphanumeric() || after.is_alphanumeric())
+            //     && !input_temp.contains(" ")
+            // {
+            //     continue;
+            // } else {
+            // }
         }
     }
 
@@ -1632,7 +1641,7 @@ pub fn print_single_matching_line(input_line: &String, ptn: &mut String) -> Stri
         ptn_temp = new_ptn;
     }
 
-    if let Some((mut ptn_min, mut ptn_max, ptn_range)) =
+    if let Some((mut ptn_min, mut ptn_max, mut ptn_range)) =
         check_quant_with_range(pattern.clone().to_string())
     {
         let min = print_single_matching_line(input_line, &mut ptn_min);
@@ -1641,6 +1650,7 @@ pub fn print_single_matching_line(input_line: &String, ptn: &mut String) -> Stri
         if !min.is_empty() && max.is_empty() {
             return input_line.to_string();
         } else if !ptn_range.is_empty() {
+            //  else if !ptn_range.is_empty() {
             for mut p in ptn_range {
                 let r = print_single_matching_line(input_line, &mut p);
                 if !r.is_empty() {
@@ -1651,6 +1661,8 @@ pub fn print_single_matching_line(input_line: &String, ptn: &mut String) -> Stri
         } else {
             return "".to_string();
         }
+
+        //     return "".to_string();
     };
 
     pattern = &mut ptn_temp;
