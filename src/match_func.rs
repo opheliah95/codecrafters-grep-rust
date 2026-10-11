@@ -1589,7 +1589,7 @@ pub fn remove_underline_and_punc(input_line: &String, is_input: bool) -> String 
     return new_input;
 }
 
-pub fn spilt_all_white_space_punc(input_line: &str, is_input: bool) -> Vec<String> {
+pub fn spilt_all_white_space_punc(input_line: &str, is_input: bool, captured: &mut bool) -> Vec<String> {
     // let mut new_input = input_line.replace('_', " _ ");
     // new_input = new_input.replace(',', " , ");
     // new_input = new_input.replace('.', " . ");
@@ -1618,6 +1618,8 @@ pub fn spilt_all_white_space_punc(input_line: &str, is_input: bool) -> Vec<Strin
                 let back_idx = split_input.iter().position(|a| a == backreference).unwrap();
                 split_input[back_idx] = start.to_string();
             }
+
+            *captured = true;
         }
         
     }

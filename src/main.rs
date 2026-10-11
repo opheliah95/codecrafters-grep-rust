@@ -190,12 +190,13 @@ fn match_by_files_or_input(
     let input_clone = input_line.clone();
     input_line = remove_underline_and_punc(&input_line, true);
 
-    let mut split_ptn_by_space = spilt_all_white_space_punc(&pattern, false);
+    let mut captured = false;
+    let split_ptn_by_space = spilt_all_white_space_punc(&pattern, false, &mut captured);
 
-    let mut split_input_by_space = spilt_all_white_space_punc(&input_line, true);
+    let split_input_by_space = spilt_all_white_space_punc(&input_line, true, &mut captured);
 
     eprintln!(
-        "sptilt_input={:?}, spilt_pattern={:?}",
+        "sptilt_input={:?}, spilt_pattern={:?} contain capature group ={captured}",
         split_input_by_space, split_ptn_by_space
     );
 
@@ -212,6 +213,7 @@ fn match_by_files_or_input(
         *total_files,
         input_clone,
         ptn_clone,
+        captured,
     );
 }
 
@@ -228,6 +230,7 @@ fn handle_pattern_matching(
     total_files: usize,
     input_clone: String,
     ptn_clone: String,
+    captured: bool,
 ) {
     let suffix = if filename.is_empty() || (total_files < 2 && env::args().nth(1).unwrap() == "-r")
     {
@@ -237,6 +240,16 @@ fn handle_pattern_matching(
     };
     eprintln!("at filename:={filename} Total files {total_files} and file_count = {file_count}");
     eprintln!("the suffix is {suffix}");
+
+    if captured {
+        let input_start = split_input_by_space.iter().nth(0).unwrap();
+        let input_end = split_input_by_space.last().unwrap();
+
+        if input_start != input_end {
+            process::exit(1)
+        }
+    }
+
     if split_ptn_by_space.len() == 1 {
         if pattern.starts_with("^") && pattern.ends_with("$") {
             let ptn_last = pattern.len();
