@@ -1604,8 +1604,8 @@ pub fn spilt_all_white_space_punc(input_line: &str, is_input: bool, captured: &m
 
     if !is_input {
         let mut captures:Vec<String> = split_input.iter().filter(|a| {
-            //eprintln!("A is {a}");
-            a.starts_with("\\") && a.chars().last().unwrap().is_ascii_digit()
+            eprintln!("A is {a} --> a iter {:?} --> first is {}", a.chars(), a.chars().nth(1).unwrap());
+            a.starts_with("\\") && a.chars().nth(1).unwrap().is_ascii_digit()
             || a.starts_with("(") && a.ends_with(")")
         }).map(|a| a.to_string()).collect();
         eprintln!("the capatures are {:?}", captures);
