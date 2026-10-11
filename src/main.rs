@@ -190,9 +190,9 @@ fn match_by_files_or_input(
     let input_clone = input_line.clone();
     input_line = remove_underline_and_punc(&input_line, true);
 
-    let mut split_ptn_by_space = spilt_all_white_space_punc(&pattern);
+    let mut split_ptn_by_space = spilt_all_white_space_punc(&pattern, false);
 
-    let mut split_input_by_space = spilt_all_white_space_punc(&input_line);
+    let mut split_input_by_space = spilt_all_white_space_punc(&input_line, true);
 
     eprintln!(
         "sptilt_input={:?}, spilt_pattern={:?}",

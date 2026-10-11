@@ -982,7 +982,7 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
 
         //check alt | operator
         ptn if pattern.starts_with("(") && pattern.ends_with(")") => {
-            //println!("{ptn} eval alternat");
+            //eprintln!("{ptn} eval alternat");
             let mut ptn_formatted = remove_start_end(ptn);
             let mut input_temp = input_line.clone().to_string();
             if ptn_formatted.contains(")(") {
@@ -1021,8 +1021,8 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
             }
             let ptn_spilt = ptn_formatted.split("|").collect::<Vec<&str>>();
             if ptn_spilt.len() <= 1 {
-                //eprintln!("{:?}", ptn_spilt);
-                return false;
+                eprintln!(" MATCH () =? NO | found ");
+                return match_pattern(input_line, ptn_formatted);
             } else {
                 let mut contain_alt: Vec<bool> = Vec::new();
                 let mut input_compare = input_line.to_string();
@@ -1558,24 +1558,7 @@ pub fn remove_underline_and_punc(input_line: &String, is_input: bool) -> String 
             }
         }
     }
-    // match comma {
-    //     Some(u) => {
-    //         if u < new_input.len() - 1 {
-    //             let behind_comma = new_input.chars().nth(u + 1).unwrap();
-    //             if !vec!['}'].contains(&behind_comma) {
-    //                 eprintln!(" does not has: {behind_comma}");
-    //                 new_input = new_input.replace(",", ", ");
-    //             }
-
-    //             let after_underscore = input_line.chars().nth(u + 1).unwrap();
-    //             if vec!['_'].contains(&after_underscore) {
-    //                 new_input = new_input.replace("_", " _");
-    //                 has_comma_underscore = true;
-    //             }
-    //         }
-    //     }
-    //     None => {}
-    // }
+    
 
     let input_temp = new_input.clone();
     if !has_comma_underscore {
@@ -1602,21 +1585,42 @@ pub fn remove_underline_and_punc(input_line: &String, is_input: bool) -> String 
     new_input = new_input.replace("-", " - ");
     new_input = new_input.replace(":", " : ");
 
+
     return new_input;
 }
 
-pub fn spilt_all_white_space_punc(input_line: &str) -> Vec<String> {
+pub fn spilt_all_white_space_punc(input_line: &str, is_input: bool) -> Vec<String> {
     // let mut new_input = input_line.replace('_', " _ ");
     // new_input = new_input.replace(',', " , ");
     // new_input = new_input.replace('.', " . ");
 
     //println!("new input is {new_input}");
 
-    let split_input: Vec<String> = input_line
+    let mut split_input: Vec<String> = input_line
         .split(|t: char| t.is_whitespace())
         .filter(|t| !t.is_empty())
         .map(String::from)
         .collect();
+
+    if !is_input {
+        let mut captures:Vec<String> = split_input.iter().filter(|a| {
+            //eprintln!("A is {a}");
+            a.starts_with("\\") && a.chars().last().unwrap().is_ascii_digit()
+            || a.starts_with("(") && a.ends_with(")")
+        }).map(|a| a.to_string()).collect();
+        eprintln!("the capatures are {:?}", captures);
+
+        if captures.len() == 2 {
+            let backreference = captures.last().unwrap();
+            let start = captures.iter().nth(0).unwrap();
+
+            if start.starts_with("(") && backreference.starts_with("\\") {
+                let back_idx = split_input.iter().position(|a| a == backreference).unwrap();
+                split_input[back_idx] = start.to_string();
+            }
+        }
+        
+    }
 
     eprintln!("removed all punc and white space: {:?}", split_input);
     split_input
