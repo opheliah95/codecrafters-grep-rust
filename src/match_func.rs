@@ -936,7 +936,11 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
 
                         //match the range of input range to [abc]*
                         for (idx, ch) in input_range.chars().enumerate() {
-                            let mut char_in_ptn = if ptn_range.starts_with("^") { !ptn_range.contains(ch)} else {ptn_range.contains(ch)};
+                            let mut char_in_ptn = if ptn_range.starts_with("^") {
+                                !ptn_range.contains(ch)
+                            } else {
+                                ptn_range.contains(ch)
+                            };
                             eprintln!(
                                 "input = {input_range} at {idx} CHAR={ch} in range: [{ptn_range}]* = {char_in_ptn} "
                             );
@@ -959,7 +963,9 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                                     } else {
                                         // echo -n "kabacb" | ./your_program.sh -E "k[abc]*b"
                                         //eprintln!("ptn after {ptn_after} and input range is {input_range}");
-                                        if vec!["+", "$"].contains(&&ptn_after) && ptn_after.len() == 1 {
+                                        if vec!["+", "$"].contains(&&ptn_after)
+                                            && ptn_after.len() == 1
+                                        {
                                             //eprintln!("ptn matched {input_range}");
                                             return true;
                                         }
@@ -1657,6 +1663,26 @@ pub fn spilt_all_white_space_punc(
                     out = format!("{out}{rest}");
                 }
                 split_input[back_idx] = out;
+            }
+
+            *captured = true;
+        }
+
+        if captures.len() % 2 == 0 {
+            let start_vec: Vec<String> = captures
+                .iter()
+                .filter(|a| a.ends_with(")"))
+                .map(|a| a.to_string())
+                .collect();
+            let back_vec: Vec<String> = captures
+                .iter()
+                .filter(|a| a.chars().nth(1).unwrap().is_ascii_digit())
+                .map(|a| a.to_string())
+                .collect();
+
+            for (x, y) in start_vec.iter().zip(back_vec.iter()) {
+                let s_idx = split_input.iter().position(|a| a == y).unwrap_or_default();
+                split_input[s_idx] = x.to_string();
             }
 
             *captured = true;
