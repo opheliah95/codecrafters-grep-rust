@@ -242,8 +242,8 @@ fn handle_pattern_matching(
     eprintln!("the suffix is {suffix}");
 
     if captured {
-       // eprintln!("analyse capature");
-        let unmodified_ptn: Vec<String> = ptn_clone.split(" "). map(|a| a.to_string()).collect();
+        // eprintln!("analyse capature");
+        let unmodified_ptn: Vec<String> = ptn_clone.split(" ").map(|a| a.to_string()).collect();
         let start: Vec<_> = unmodified_ptn
             .iter()
             .enumerate()
@@ -258,7 +258,7 @@ fn handle_pattern_matching(
         if start.len() != back.len() {
             process::exit(1)
         }
-        //eprintln!("=====analyse here {:?}, {:?}", start, back);
+        eprintln!("=====analyse here {:?}, {:?}", start, back);
 
         if start.len() == 1 && start.len() == back.len() {
             let backref_end = back[0].0;
@@ -268,6 +268,20 @@ fn handle_pattern_matching(
             eprintln!("input start {input_start} andi nput end is {input_end}");
             if !input_end.starts_with(input_start) {
                 process::exit(1)
+            }
+        } else if start.len() == back.len() && start.len() % 2 == 0 {
+            let idx_group: Vec<_> = start
+                .iter()
+                .map(|(idx, _)| idx)
+                .zip(back.iter().map(|(idx, _)| idx))
+                .collect();
+            for (start_idx, back_idx) in idx_group {
+                let input_back = &split_input_by_space[*back_idx];
+                let input_start = &split_input_by_space[*start_idx];
+                eprintln!("CAP=true, BACK={input_back} START={input_start}");
+                if input_back != input_start {
+                    process::exit(1)
+                }
             }
         }
     }
