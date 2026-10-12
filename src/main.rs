@@ -242,11 +242,31 @@ fn handle_pattern_matching(
     eprintln!("the suffix is {suffix}");
 
     if captured {
-        let input_start = split_input_by_space.iter().nth(0).unwrap();
-        let input_end = split_input_by_space.last().unwrap();
+        //eprintln!("analyse capature");
+        // let input_start = split_input_by_space.iter().nth(0).unwrap();
+        // let input_end = split_input_by_space.last().unwrap();
+        let start: Vec<_> = split_input_by_space
+            .iter()
+            .enumerate()
+            .filter(|(idx, a)| a.contains("(") && a.ends_with(")"))
+            .collect();
+        let back: Vec<_> = split_ptn_by_space
+            .iter()
+            .enumerate()
+            .filter(|(idx, a)| a.starts_with("\\") && a.chars().nth(1).unwrap().is_ascii_digit())
+            .collect();
 
-        if input_start != input_end {
+        if start.len() != back.len() {
             process::exit(1)
+        }
+
+        if start.len() == 1 && start.len() == back.len() {
+            let backref_end = back[0].0;
+            let input_start = start[0].1;
+            let input_end = &split_input_by_space[backref_end];
+            if input_end != input_start {
+                process::exit(1)
+            }
         }
     }
 

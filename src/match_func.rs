@@ -564,18 +564,42 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
         // check start anchor
         ptn if pattern.starts_with("^") => {
             let to_match = &pattern[1..pattern.len()];
-            //println!("matching ^ {}", input_line.starts_with(to_match));
-            return input_line.starts_with(to_match);
+            eprintln!("matching ^ {}", input_line.starts_with(to_match));
+            if input_line.starts_with(to_match) {
+                return true;
+            } else {
+                if pattern.contains("(") && pattern.contains(")") {
+                    let b_start = pattern.find("(").unwrap();
+                    let b_end = pattern.rfind(")").unwrap();
+
+                    if b_end > b_start {
+                        let mut content = &pattern[b_start + 1..b_end];
+                        let after_end = &pattern[b_end + 1..];
+                        let mut input_temp = input_line;
+                        if !after_end.is_empty() {
+                            if !match_pattern(input_line, after_end) {
+                                return false;
+                            }
+                            let idx = input_line.find(after_end).unwrap_or_default();
+                            input_temp = &input_line[..idx];
+                        }
+                        eprintln!("input temp is {input_temp}");
+                        return match_pattern(input_temp, content);
+                    };
+                    eprintln!("mismatched brackets");
+                }
+                return false;
+            }
         }
         // ch,eck ending
         ptn if pattern.ends_with("$") => {
-            //println!("{ptn} contains $");
+            eprintln!("HANDLE $ at end -> {ptn} contains $");
             let to_match = &pattern[0..pattern.len() - 1];
-            let regex: Vec<&str> = vec!["\\d", "\\w", "(", ")"];
+            let regex: Vec<&str> = vec!["\\d", "\\w", "(", ")", "]", "[", "+"];
             if regex.iter().any(|a| to_match.contains(a)) {
                 //let mut new_input = &input_line[0..input_line.len() - 1];
                 let res = match_pattern(&input_line, to_match);
-                //println!("matching {input_line} to {pattern} and res is {res}");
+                //eprintln!("matching {input_line} to {pattern} and res is {res}");
                 return res;
             } else {
                 return input_line.ends_with(to_match);
@@ -912,9 +936,9 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
 
                         //match the range of input range to [abc]*
                         for (idx, ch) in input_range.chars().enumerate() {
-                            let char_in_ptn = ptn_range.contains(ch);
+                            let mut char_in_ptn = if ptn_range.starts_with("^") { !ptn_range.contains(ch)} else {ptn_range.contains(ch)};
                             eprintln!(
-                                "input = {input_range} at {idx} {ch} in range: [{ptn_range}]* = {char_in_ptn} "
+                                "input = {input_range} at {idx} CHAR={ch} in range: [{ptn_range}]* = {char_in_ptn} "
                             );
                             if !char_in_ptn {
                                 input_end_range = &input_line[s_idx + idx + 1..];
@@ -934,6 +958,12 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                                         return true; // ptn end at *
                                     } else {
                                         // echo -n "kabacb" | ./your_program.sh -E "k[abc]*b"
+                                        //eprintln!("ptn after {ptn_after} and input range is {input_range}");
+                                        if vec!["+", "$"].contains(&&ptn_after) && ptn_after.len() == 1 {
+                                            //eprintln!("ptn matched {input_range}");
+                                            return true;
+                                        }
+
                                         return input_range.ends_with(ptn_after);
                                     }
                                 } else {
@@ -1558,7 +1588,6 @@ pub fn remove_underline_and_punc(input_line: &String, is_input: bool) -> String 
             }
         }
     }
-    
 
     let input_temp = new_input.clone();
     if !has_comma_underscore {
@@ -1585,11 +1614,14 @@ pub fn remove_underline_and_punc(input_line: &String, is_input: bool) -> String 
     new_input = new_input.replace("-", " - ");
     new_input = new_input.replace(":", " : ");
 
-
     return new_input;
 }
 
-pub fn spilt_all_white_space_punc(input_line: &str, is_input: bool, captured: &mut bool) -> Vec<String> {
+pub fn spilt_all_white_space_punc(
+    input_line: &str,
+    is_input: bool,
+    captured: &mut bool,
+) -> Vec<String> {
     // let mut new_input = input_line.replace('_', " _ ");
     // new_input = new_input.replace(',', " , ");
     // new_input = new_input.replace('.', " . ");
@@ -1603,25 +1635,32 @@ pub fn spilt_all_white_space_punc(input_line: &str, is_input: bool, captured: &m
         .collect();
 
     if !is_input {
-        let mut captures:Vec<String> = split_input.iter().filter(|a| {
-            eprintln!("A is {a} --> a iter {:?} --> first is {}", a.chars(), a.chars().nth(1).unwrap());
-            a.starts_with("\\") && a.chars().nth(1).unwrap().is_ascii_digit()
-            || a.starts_with("(") && a.ends_with(")")
-        }).map(|a| a.to_string()).collect();
+        let mut captures: Vec<String> = split_input
+            .iter()
+            .filter(|a| {
+                //eprintln!("A is {a} --> a iter {:?} --> first is {}", a.chars(), a.chars().nth(1).unwrap());
+                a.starts_with("\\") && a.chars().nth(1).unwrap().is_ascii_digit()
+                    || a.contains("(") && a.ends_with(")")
+            })
+            .map(|a| a.to_string())
+            .collect();
         eprintln!("the capatures are {:?}", captures);
 
         if captures.len() == 2 {
             let backreference = captures.last().unwrap();
             let start = captures.iter().nth(0).unwrap();
-
-            if start.starts_with("(") && backreference.starts_with("\\") {
+            if backreference.starts_with("\\") {
                 let back_idx = split_input.iter().position(|a| a == backreference).unwrap();
-                split_input[back_idx] = start.to_string();
+                let mut out = start.to_string();
+                if backreference.len() > 2 {
+                    let rest = &backreference[2..];
+                    out = format!("{out}{rest}");
+                }
+                split_input[back_idx] = out;
             }
 
             *captured = true;
         }
-        
     }
 
     eprintln!("removed all punc and white space: {:?}", split_input);
