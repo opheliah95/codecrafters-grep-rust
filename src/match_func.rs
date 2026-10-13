@@ -858,12 +858,34 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                 }
             };
         }
-        ptn if ptn.contains("[") && ptn.contains("]") => {
+        ref mut ptn if ptn.contains("[") && ptn.contains("]") => {
+            if *ptn == "[]" && input_line.is_empty() {
+                return true;
+            }
             let mut bracket_ptn = "[]".to_string();
-            let brac_starter_idx = ptn.find("[").unwrap();
+            let mut brac_starter_idx = ptn.find("[").unwrap();
             let mut brac_end_idx = ptn.rfind("]").unwrap(); // get the very last one
             let mut brac_end_inclusive = brac_end_idx + 1;
             let behind_bracket = find_index_of_ptn(ptn, "*");
+            let parenthesis_start = ptn.find("(").unwrap_or_default();
+            let parenthesis_end = ptn.find(")").unwrap_or_default();
+            let mut temp_ptn = ptn.clone().to_string();
+            //let mut input_temp: String = input_line.clone().to_string();
+            if parenthesis_end > parenthesis_start
+                && parenthesis_start < brac_starter_idx
+                && parenthesis_end > brac_end_idx
+            {
+                temp_ptn = temp_ptn.replace("(", "");
+                temp_ptn = temp_ptn.replace(")", "");
+                brac_starter_idx -= 1;
+                brac_end_idx -= 1;
+                brac_end_inclusive -= 1;
+            }
+
+            eprintln!(
+                "ptn={ptn} temp ptn is {temp_ptn} pare_start = {parenthesis_start} pare_end={parenthesis_end} brac_start={brac_starter_idx} brac_end={brac_end_idx}"
+            );
+
             match behind_bracket {
                 Some(n) => {
                     if n == brac_end_idx + 1 {
@@ -880,16 +902,21 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                 eprintln!("]* appear in front of [");
                 return input_line == pattern;
             } else {
-                let ptn_before = &ptn[0..brac_starter_idx];
+                let ptn_before = &temp_ptn[0..brac_starter_idx];
                 let ptn_before_len = ptn_before.len();
-                let ptn_after = &ptn[brac_end_inclusive..]; //]* len is 2 hardcoded
-                let ptn_range = &ptn[brac_starter_idx + 1..brac_end_idx];
+                let ptn_after = &temp_ptn[brac_end_inclusive..]; //]* len is 2 hardcoded
+                let ptn_range = &temp_ptn[brac_starter_idx + 1..brac_end_idx];
 
                 // if input < ptn
                 let mut ptn_merged = vec![ptn_before, ptn_after].join("");
-                eprintln!("===> {bracket_ptn}  --ptn BEFORE={ptn_before}");
-                eprintln!("===> {bracket_ptn}  --ptn AFTER={ptn_after}");
+                eprintln!(
+                    "===> {bracket_ptn}  --ptn BEFORE={ptn_before} temp={temp_ptn} brac_start={brac_starter_idx}"
+                );
+                eprintln!(
+                    "===> {bracket_ptn}  --ptn AFTER={ptn_after} brac+end={brac_end_inclusive}"
+                );
                 eprintln!("===> {bracket_ptn} match --ptn merged={ptn_merged}");
+                eprintln!("===> {bracket_ptn} match --ptn range={ptn_range}");
 
                 // just []* pattern
                 if ptn_merged.is_empty() {
@@ -904,11 +931,12 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                         return true;
                     }
                 }
-
+                //eprintln!("input modified is {input_line}");
                 let input_start_match = input_line.find(ptn_before);
                 match input_start_match {
                     Some(s_idx) => {
                         let input_range = &input_line[s_idx + ptn_before_len..];
+                        eprintln!("input range {input_range}");
                         let mut input_end_range = "";
                         let mut match_found = false;
 
@@ -945,7 +973,8 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                                 "input = {input_range} at {idx} CHAR={ch} in range: [{ptn_range}]* = {char_in_ptn} "
                             );
                             if !char_in_ptn {
-                                input_end_range = &input_line[s_idx + idx + 1..];
+                                input_end_range = &input_line[idx..];
+                                eprintln!("input end range {input_end_range}, s_idx={s_idx}");
                                 break;
                             }
 
@@ -974,14 +1003,25 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                                     }
                                 } else {
                                     input_end_range = &input_line[s_idx + input_range.len() + 1..];
+                                    //eprintln!("input end range {input_end_range}");
                                 }
                             }
                         }
+
+                        // only handles completely non-pattern match
+                        if ptn_after.starts_with("+") {
+                            eprintln!(
+                                "[]*--> CONTAIN STH input end range=<{input_end_range}> start with=<{}> result={}",
+                                &ptn_after[1..], input_end_range.starts_with(&ptn_after[1..])
+
+                            );
+                            return input_end_range.starts_with(&ptn_after[1..]);
+                        }
                         eprintln!(
-                            "[]* input end range is {input_end_range}, start with {ptn_after} ? {}",
+                            "[]* input end range is {input_end_range} || start with {ptn_after} result={}",
                             input_end_range.starts_with(ptn_after)
                         );
-                        // only handles completely non-pattern match
+
                         return input_end_range.starts_with(ptn_after);
                     }
 
@@ -1628,13 +1668,17 @@ pub fn spilt_all_white_space_punc(
     is_input: bool,
     captured: &mut bool,
 ) -> Vec<String> {
-    // let mut new_input = input_line.replace('_', " _ ");
+    let mut new_input = input_line.to_string();
     // new_input = new_input.replace(',', " , ");
     // new_input = new_input.replace('.', " . ");
 
     //println!("new input is {new_input}");
 
-    let mut split_input: Vec<String> = input_line
+    if new_input.contains(")-(") {
+        new_input = new_input.replace(")-(", ")- (");
+    }
+
+    let mut split_input: Vec<String> = new_input
         .split(|t: char| t.is_whitespace())
         .filter(|t| !t.is_empty())
         .map(String::from)
@@ -1682,7 +1726,7 @@ pub fn spilt_all_white_space_punc(
 
             for (x, y) in start_vec.iter().zip(back_vec.iter()) {
                 let s_idx = split_input.iter().position(|a| a == y).unwrap_or_default();
-                split_input[s_idx] = x.to_string();
+                split_input[s_idx] = format!("{}{}", x.to_string(), &y[2..]);
             }
 
             *captured = true;

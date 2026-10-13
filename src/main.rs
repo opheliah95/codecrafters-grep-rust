@@ -243,11 +243,19 @@ fn handle_pattern_matching(
 
     if captured {
         // eprintln!("analyse capature");
-        let unmodified_ptn: Vec<String> = ptn_clone.split(" ").map(|a| a.to_string()).collect();
+        let mut ptn_mut = ptn_clone.clone();
+        let mut input_mut = input_clone.clone();
+        if ptn_mut.contains(")-(") {
+            ptn_mut = ptn_mut.replace("-", "- ");
+            input_mut = input_mut.replace("-", "- ");
+        }
+        let unmodified_ptn: Vec<String> = ptn_mut.split(" ").map(|a| a.to_string()).collect();
+        let unmodified_input: Vec<String> = input_mut.split(" ").map(|a| a.to_string()).collect();
+        eprintln!("the ptn unmodified is {:?}", unmodified_ptn);
         let start: Vec<_> = unmodified_ptn
             .iter()
             .enumerate()
-            .filter(|(idx, a)| a.contains("(") && a.ends_with(")"))
+            .filter(|(idx, a)| a.contains("(") && a.contains(")"))
             .collect();
         let back: Vec<_> = unmodified_ptn
             .iter()
@@ -255,16 +263,17 @@ fn handle_pattern_matching(
             .filter(|(idx, a)| a.starts_with("\\") && a.chars().nth(1).unwrap().is_ascii_digit())
             .collect();
 
+        eprintln!("=====analyse here {:?}, {:?}", start, back);
+
         if start.len() != back.len() {
             process::exit(1)
         }
-        eprintln!("=====analyse here {:?}, {:?}", start, back);
 
         if start.len() == 1 && start.len() == back.len() {
             let backref_end = back[0].0;
             let input_start_idx = start[0].0;
-            let input_end = &split_input_by_space[backref_end];
-            let input_start = &split_input_by_space[input_start_idx];
+            let input_end = &unmodified_input[backref_end];
+            let input_start = &unmodified_input[input_start_idx];
             eprintln!("input start {input_start} andi nput end is {input_end}");
             if !input_end.starts_with(input_start) {
                 process::exit(1)
@@ -276,10 +285,10 @@ fn handle_pattern_matching(
                 .zip(back.iter().map(|(idx, _)| idx))
                 .collect();
             for (start_idx, back_idx) in idx_group {
-                let input_back = &split_input_by_space[*back_idx];
-                let input_start = &split_input_by_space[*start_idx];
+                let input_back = &unmodified_input[*back_idx];
+                let input_start = &unmodified_input[*start_idx];
                 eprintln!("CAP=true, BACK={input_back} START={input_start}");
-                if input_back != input_start {
+                if !input_back.contains(input_start) {
                     process::exit(1)
                 }
             }
