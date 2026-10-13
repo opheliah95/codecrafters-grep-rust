@@ -859,9 +859,9 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
             };
         }
         ref mut ptn if ptn.contains("[") && ptn.contains("]") => {
-            if *ptn == "[]" && input_line.is_empty() {
-                return true;
-            }
+            // if *ptn == "[]" && input_line.is_empty() {
+            //     return true;
+            // }
             let mut bracket_ptn = "[]".to_string();
             let mut brac_starter_idx = ptn.find("[").unwrap();
             let mut brac_end_idx = ptn.rfind("]").unwrap(); // get the very last one
@@ -1015,7 +1015,7 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                                 &ptn_after[1..], input_end_range.starts_with(&ptn_after[1..])
 
                             );
-                            return input_end_range.starts_with(&ptn_after[1..]);
+                            return input_end_range.starts_with(&ptn_after[1..]) && !ptn_range.starts_with("^");
                         }
                         eprintln!(
                             "[]* input end range is {input_end_range} || start with {ptn_after} result={}",
