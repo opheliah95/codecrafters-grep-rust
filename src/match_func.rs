@@ -1669,7 +1669,8 @@ pub fn spilt_all_white_space_punc(
     captured: &mut bool,
 ) -> Vec<String> {
     let mut new_input = input_line.to_string();
-    // new_input = new_input.replace(',', " , ");
+    new_input = new_input.replace(',', " , ");
+
     // new_input = new_input.replace('.', " . ");
 
     //println!("new input is {new_input}");
@@ -1684,13 +1685,14 @@ pub fn spilt_all_white_space_punc(
         .map(String::from)
         .collect();
 
+    eprintln!("spilt input is {:?}", split_input);
     if !is_input {
         let mut captures: Vec<String> = split_input
             .iter()
             .filter(|a| {
                 //eprintln!("A is {a} --> a iter {:?} --> first is {}", a.chars(), a.chars().nth(1).unwrap());
                 a.starts_with("\\") && a.chars().nth(1).unwrap().is_ascii_digit()
-                    || a.contains("(") && a.ends_with(")")
+                    || a.contains("(") && a.contains(")")
             })
             .map(|a| a.to_string())
             .collect();
@@ -1715,7 +1717,7 @@ pub fn spilt_all_white_space_punc(
         if captures.len() % 2 == 0 {
             let start_vec: Vec<String> = captures
                 .iter()
-                .filter(|a| a.ends_with(")"))
+                .filter(|a| a.contains(")"))
                 .map(|a| a.to_string())
                 .collect();
             let back_vec: Vec<String> = captures
@@ -1724,9 +1726,17 @@ pub fn spilt_all_white_space_punc(
                 .map(|a| a.to_string())
                 .collect();
 
+            eprintln!("start_vec={:?} back_vec={:?}", start_vec, back_vec);
             for (x, y) in start_vec.iter().zip(back_vec.iter()) {
                 let s_idx = split_input.iter().position(|a| a == y).unwrap_or_default();
-                split_input[s_idx] = format!("{}{}", x.to_string(), &y[2..]);
+                let mut start_str = x.to_string();
+                let start_len = start_str.len();
+                if vec!['.', ','].contains (&start_str.chars().last().unwrap()) {
+                    start_str = start_str[0..start_len-1].to_string();
+                                    eprintln!("start str: {start_str}");
+
+                }
+                split_input[s_idx] = format!("{}{}", start_str.to_string(), &y[2..]);
             }
 
             *captured = true;

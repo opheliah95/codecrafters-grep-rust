@@ -245,13 +245,16 @@ fn handle_pattern_matching(
         // eprintln!("analyse capature");
         let mut ptn_mut = ptn_clone.clone();
         let mut input_mut = input_clone.clone();
+        input_mut = input_mut.replace(",", ", ");
+        ptn_mut = ptn_mut.replace(",", ", ");
         if ptn_mut.contains(")-(") {
             ptn_mut = ptn_mut.replace("-", "- ");
             input_mut = input_mut.replace("-", "- ");
         }
+        
         let unmodified_ptn: Vec<String> = ptn_mut.split(" ").map(|a| a.to_string()).collect();
         let unmodified_input: Vec<String> = input_mut.split(" ").map(|a| a.to_string()).collect();
-        eprintln!("the ptn unmodified is {:?}", unmodified_ptn);
+        eprintln!("the ptn to compare is {:?}", unmodified_ptn);
         let start: Vec<_> = unmodified_ptn
             .iter()
             .enumerate()
@@ -285,8 +288,8 @@ fn handle_pattern_matching(
                 .zip(back.iter().map(|(idx, _)| idx))
                 .collect();
             for (start_idx, back_idx) in idx_group {
-                let input_back = &unmodified_input[*back_idx];
-                let input_start = &unmodified_input[*start_idx];
+                let input_back = &unmodified_input[*back_idx].replace(",", "");
+                let input_start = &unmodified_input[*start_idx].replace(",", "");
                 eprintln!("CAP=true, BACK={input_back} START={input_start}");
                 if !input_back.contains(input_start) {
                     process::exit(1)
