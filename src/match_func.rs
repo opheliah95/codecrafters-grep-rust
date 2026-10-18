@@ -584,6 +584,9 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                             input_temp = &input_line[..idx];
                         }
                         eprintln!("input temp is {input_temp}");
+                        if content.chars().all(|a| a.is_alphanumeric()) {
+                            return input_temp.starts_with(content);
+                        }
                         return match_pattern(input_temp, content);
                     };
                     eprintln!("mismatched brackets");
