@@ -291,7 +291,7 @@ fn handle_pattern_matching(
                 let input_back = &unmodified_input[*back_idx].replace(",", "");
                 let input_start = &unmodified_input[*start_idx].replace(",", "");
                 eprintln!("CAP=true, BACK={input_back} START={input_start}");
-                if !input_back.contains(input_start) {
+                if *input_start !=*input_back {
                     process::exit(1)
                 }
             }
