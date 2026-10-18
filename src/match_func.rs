@@ -1015,7 +1015,7 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                                 &ptn_after[1..], input_end_range.starts_with(&ptn_after[1..])
 
                             );
-                            return input_end_range.starts_with(&ptn_after[1..]) && !ptn_range.starts_with("^");
+                            return input_end_range.starts_with(&ptn_after[1..]) && !ptn_range.starts_with("^") && !&ptn_after[1..].is_empty();
                         }
                         eprintln!(
                             "[]* input end range is {input_end_range} || start with {ptn_after} result={}",
