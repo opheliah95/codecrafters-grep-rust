@@ -1015,10 +1015,12 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                         if ptn_after.starts_with("+") {
                             eprintln!(
                                 "[]*--> CONTAIN STH input end range=<{input_end_range}> start with=<{}> result={}",
-                                &ptn_after[1..], input_end_range.starts_with(&ptn_after[1..])
-
+                                &ptn_after[1..],
+                                input_end_range.starts_with(&ptn_after[1..])
                             );
-                            return input_end_range.starts_with(&ptn_after[1..]) && !ptn_range.starts_with("^") && !&ptn_after[1..].is_empty();
+                            return input_end_range.starts_with(&ptn_after[1..])
+                                && !ptn_range.starts_with("^")
+                                && !&ptn_after[1..].is_empty();
                         }
                         eprintln!(
                             "[]* input end range is {input_end_range} || start with {ptn_after} result={}",
@@ -1115,12 +1117,10 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
 
                         contain_alt.push(true);
                     } else if val.contains('.') {
-                         if match_pattern(&input_compare, val) {
+                        if match_pattern(&input_compare, val) {
                             return true;
-                         }
-                    }
-                    
-                    else {
+                        }
+                    } else {
                         contain_alt.push(false);
                     }
 
@@ -1672,13 +1672,14 @@ pub fn remove_underline_and_punc(input_line: &String, is_input: bool) -> String 
     return new_input;
 }
 
-pub fn within_brackets (input: &str, start: &str, end:&str, symbol: &str) -> bool {
+pub fn within_brackets(input: &str, start: &str, end: &str, symbol: &str) -> bool {
     let start_idx = input.find(start).unwrap_or_default();
     let end_idx = input.find(end).unwrap_or_default();
     let symbol_idx = input.find(symbol).unwrap_or_default();
-    eprintln!("input={input}, end_idx={end}->{end_idx}, start={start}->{start_idx} symbol={symbol} -> {symbol_idx}");
+    eprintln!(
+        "input={input}, end_idx={end}->{end_idx}, start={start}->{start_idx} symbol={symbol} -> {symbol_idx}"
+    );
     return symbol_idx > start_idx && symbol_idx < end_idx;
-
 }
 pub fn spilt_all_white_space_punc(
     input_line: &str,
@@ -1686,9 +1687,11 @@ pub fn spilt_all_white_space_punc(
     captured: &mut bool,
 ) -> Vec<String> {
     let mut new_input = input_line.to_string();
-    if !within_brackets(input_line, "{", "}", ",") {
-        new_input = new_input.replace(',', " , ");
-
+    let all_comma: Vec<_> = new_input.match_indices(",").collect();
+    if all_comma.len() == 1 {
+        if !within_brackets(input_line, "{", "}", ",") {
+            new_input = new_input.replace(',', " , ");
+        }
     }
 
     // new_input = new_input.replace('.', " . ");
@@ -1751,10 +1754,9 @@ pub fn spilt_all_white_space_punc(
                 let s_idx = split_input.iter().position(|a| a == y).unwrap_or_default();
                 let mut start_str = x.to_string();
                 let start_len = start_str.len();
-                if vec!['.', ','].contains (&start_str.chars().last().unwrap()) {
-                    start_str = start_str[0..start_len-1].to_string();
-                                    eprintln!("start str: {start_str}");
-
+                if vec!['.', ','].contains(&start_str.chars().last().unwrap()) {
+                    start_str = start_str[0..start_len - 1].to_string();
+                    eprintln!("start str: {start_str}");
                 }
                 split_input[s_idx] = format!("{}{}", start_str.to_string(), &y[2..]);
             }
