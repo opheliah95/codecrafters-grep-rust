@@ -1676,9 +1676,9 @@ pub fn within_brackets(input: &str, start: &str, end: &str, symbol: &str) -> boo
     let start_idx = input.find(start).unwrap_or_default();
     let end_idx = input.find(end).unwrap_or_default();
     let symbol_idx = input.find(symbol).unwrap_or_default();
-    eprintln!(
-        "input={input}, end_idx={end}->{end_idx}, start={start}->{start_idx} symbol={symbol} -> {symbol_idx}"
-    );
+    // eprintln!(
+    //     "input={input}, end_idx={end}->{end_idx}, start={start}->{start_idx} symbol={symbol} -> {symbol_idx}"
+    // );
     return symbol_idx > start_idx && symbol_idx < end_idx;
 }
 pub fn spilt_all_white_space_punc(
@@ -1687,10 +1687,33 @@ pub fn spilt_all_white_space_punc(
     captured: &mut bool,
 ) -> Vec<String> {
     let mut new_input = input_line.to_string();
-    let all_comma: Vec<_> = new_input.match_indices(",").collect();
+    let all_comma: Vec<_> = input_line.match_indices(",").collect();
+    eprintln!("num of commas: {}", all_comma.len());
     if all_comma.len() == 1 {
         if !within_brackets(input_line, "{", "}", ",") {
             new_input = new_input.replace(',', " , ");
+        }
+    } else if all_comma.len() > 1 {
+        let mut all_comma_clone = all_comma.clone();
+        let mut temp_input = new_input.clone();
+        for (idx, item) in all_comma.iter().enumerate() {
+            let start = item.0;
+            //eprintln!("temp input {temp_input} ==> start={start}");
+
+            if within_brackets(&temp_input, "{", "}", ",") {
+                all_comma_clone.remove(idx);
+               // eprintln!("within");
+            } else {
+                temp_input = temp_input[start + 1..].to_string();
+            }
+        }
+
+        //eprintln!("all comma cloned = {:?}", all_comma_clone);
+
+        // iterate backwards so earlier indices stay valid
+        for (idx, _) in all_comma_clone.iter().rev() {
+            new_input.insert(*idx, ' ');
+           // eprintln!("new input is {new_input}");
         }
     }
 
