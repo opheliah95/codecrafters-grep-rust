@@ -1672,13 +1672,24 @@ pub fn remove_underline_and_punc(input_line: &String, is_input: bool) -> String 
     return new_input;
 }
 
+pub fn within_brackets (input: &str, start: &str, end:&str, symbol: &str) -> bool {
+    let start_idx = input.find(start).unwrap_or_default();
+    let end_idx = input.find(end).unwrap_or_default();
+    let symbol_idx = input.find(symbol).unwrap_or_default();
+    eprintln!("input={input}, end_idx={end}->{end_idx}, start={start}->{start_idx} symbol={symbol} -> {symbol_idx}");
+    return symbol_idx > start_idx && symbol_idx < end_idx;
+
+}
 pub fn spilt_all_white_space_punc(
     input_line: &str,
     is_input: bool,
     captured: &mut bool,
 ) -> Vec<String> {
     let mut new_input = input_line.to_string();
-    new_input = new_input.replace(',', " , ");
+    if !within_brackets(input_line, "{", "}", ",") {
+        new_input = new_input.replace(',', " , ");
+
+    }
 
     // new_input = new_input.replace('.', " . ");
 
