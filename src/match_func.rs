@@ -1689,31 +1689,33 @@ pub fn spilt_all_white_space_punc(
     let mut new_input = input_line.to_string();
     let all_comma: Vec<_> = input_line.match_indices(",").collect();
     eprintln!("num of commas: {}", all_comma.len());
-    if all_comma.len() == 1 {
-        if !within_brackets(input_line, "{", "}", ",") {
-            new_input = new_input.replace(',', " , ");
-        }
-    } else if all_comma.len() > 1 {
-        let mut all_comma_clone = all_comma.clone();
-        let mut temp_input = new_input.clone();
-        for (idx, item) in all_comma.iter().enumerate() {
-            let start = item.0;
-            //eprintln!("temp input {temp_input} ==> start={start}");
-
-            if within_brackets(&temp_input, "{", "}", ",") {
-                all_comma_clone.remove(idx);
-               // eprintln!("within");
-            } else {
-                temp_input = temp_input[start + 1..].to_string();
+    if !new_input.contains((char::is_whitespace)) {
+        if all_comma.len() == 1 {
+            if !within_brackets(input_line, "{", "}", ",") {
+                new_input = new_input.replace(',', " , ");
             }
-        }
+        } else if all_comma.len() > 1 {
+            let mut all_comma_clone = all_comma.clone();
+            let mut temp_input = new_input.clone();
+            for (idx, item) in all_comma.iter().enumerate() {
+                let start = item.0;
+                eprintln!("temp input {temp_input} ==> start={start}");
 
-        //eprintln!("all comma cloned = {:?}", all_comma_clone);
+                if within_brackets(&temp_input, "{", "}", ",") {
+                    all_comma_clone.remove(idx);
+                    // eprintln!("within");
+                } else {
+                    temp_input = temp_input[start + 1..].to_string();
+                }
+            }
 
-        // iterate backwards so earlier indices stay valid
-        for (idx, _) in all_comma_clone.iter().rev() {
-            new_input.insert(*idx, ' ');
-           // eprintln!("new input is {new_input}");
+            //eprintln!("all comma cloned = {:?}", all_comma_clone);
+
+            // iterate backwards so earlier indices stay valid
+            for (idx, _) in all_comma_clone.iter().rev() {
+                new_input.insert(*idx, ' ');
+                eprintln!("new input is {new_input}");
+            }
         }
     }
 
