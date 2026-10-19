@@ -1114,7 +1114,13 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                         input_compare = input_compare.replace(val, "");
 
                         contain_alt.push(true);
-                    } else {
+                    } else if val.contains('.') {
+                         if match_pattern(&input_compare, val) {
+                            return true;
+                         }
+                    }
+                    
+                    else {
                         contain_alt.push(false);
                     }
 
