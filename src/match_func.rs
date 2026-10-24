@@ -1478,10 +1478,10 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                                                 eprintln!(
                                                     "QUANT = +  idx > p matching {idx} idx::: {ptn} pattern: PTN: {} VAL: {}",
                                                     pattern_slice,
-                                                    &input_line[idx-1..]
+                                                    &input_line[idx..]
                                                 );
 
-                                                return input_line[idx-1..]
+                                                return input_line[idx..]
                                                     .starts_with(pattern_slice);
                                             }
                                         }
