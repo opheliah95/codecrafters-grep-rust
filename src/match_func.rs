@@ -1676,18 +1676,13 @@ pub fn within_brackets(input: &str, start: &str, end: &str, symbol: &str) -> boo
     let mut symbol_idx = input.find(symbol).unwrap_or_default();
     let all_symbols: Vec<_> = input.match_indices(symbol).collect();
 
-    let mut before_symbol = input.clone();
-    let mut after_symbol = input.clone();
-    let mut mult_symbol_idx: usize = 0;
-    if all_symbols.len() > 1 {
-        before_symbol = &input[0..symbol_idx];
-        after_symbol = &input[symbol_idx..];
-        mult_symbol_idx += symbol_idx;
-    }
+    let mut before_symbol = &input[0..symbol_idx];
+    let mut after_symbol =&input[symbol_idx..];
+   
 
     eprintln!("before {before_symbol} and after {after_symbol}");
     let start_idx = before_symbol.find(start).unwrap_or_default();
-    let end_idx = after_symbol.find(end).unwrap_or_default() + mult_symbol_idx;
+    let end_idx = after_symbol.find(end).unwrap_or_default() + symbol_idx;
 
     eprintln!(
         "input={input}, end_idx={end}->{end_idx}, start={start}->{start_idx} symbol={symbol} -> {symbol_idx}"
@@ -1706,7 +1701,7 @@ pub fn within_brackets(input: &str, start: &str, end: &str, symbol: &str) -> boo
 
     return end_idx > start_idx
         && input.chars().nth(symbol_idx - 1).unwrap().is_ascii_digit()
-        && input.chars().nth(symbol_idx + 1).unwrap().is_ascii_digit();
+        &&(input.chars().nth(symbol_idx + 1).unwrap().is_ascii_digit() || input.chars().nth(symbol_idx + 1).unwrap() == '}');
 }
 pub fn spilt_all_white_space_punc(
     input_line: &str,
