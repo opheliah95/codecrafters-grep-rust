@@ -1473,14 +1473,15 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                                                 if idx == input_line_len - 1 {
                                                     return val == pattern.chars().last().unwrap();
                                                 }
-
+                                                
+                                                // need to exclude +               
                                                 eprintln!(
                                                     "QUANT = +  idx > p matching {idx} idx::: {ptn} pattern: PTN: {} VAL: {}",
                                                     pattern_slice,
-                                                    &input_line[idx..]
+                                                    &input_line[idx-1..]
                                                 );
 
-                                                return input_line[idx..]
+                                                return input_line[idx-1..]
                                                     .starts_with(pattern_slice);
                                             }
                                         }
