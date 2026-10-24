@@ -1,7 +1,7 @@
 use crate::lib::{
     find_index_of_ptn, find_match_inbetween, find_matching_letters, remove_start_end,
 };
-use std::collections::HashMap;
+use std::{collections::HashMap, fmt::format};
 
 pub fn count_single_repeat(mut pattern: &str) -> usize {
     // handle plural cases
@@ -1748,13 +1748,12 @@ pub fn spilt_all_white_space_punc(
         // iterate backwards so earlier indices stay valid
         for (idx, _) in all_comma_clone.iter().rev() {
             new_input.insert(*idx, ' ');
-            eprintln!("new input is {new_input}");
         }
     }
 
     // new_input = new_input.replace('.', " . ");
 
-    //println!("new input is {new_input}");
+    eprintln!("Line = {input_line} ===========> new input is {new_input}");
 
     if new_input.contains(")-(") {
         new_input = new_input.replace(")-(", ")- (");
@@ -1766,7 +1765,7 @@ pub fn spilt_all_white_space_punc(
         .map(String::from)
         .collect();
 
-    eprintln!("spilt input is {:?}", split_input);
+    //eprintln!("spilt input is {:?}", split_input);
     if !is_input {
         let mut captures: Vec<String> = split_input
             .iter()
@@ -1816,7 +1815,13 @@ pub fn spilt_all_white_space_punc(
                     start_str = start_str[0..start_len - 1].to_string();
                     eprintln!("start str: {start_str}");
                 }
-                split_input[s_idx] = format!("{}{}", start_str.to_string(), &y[2..]);
+                split_input[s_idx] = format!("{}", start_str.to_string());
+                //split_input[s_idx] = format!("{}{}", start_str.to_string(), &y[2..]);
+
+                eprintln!(
+                    "input formated = {} start_str={start_str} y={y}",
+                    split_input[s_idx]
+                );
             }
 
             *captured = true;
@@ -1832,16 +1837,47 @@ pub fn spilt_all_white_space_punc(
                     if first_count > 1 && second.ends_with(")") {
                         let to_split_start = input_line.find(first).unwrap();
                         let to_split_end = input_line.find(second).unwrap() + second.len();
-                        let cap_range = &input_line[to_split_start..to_split_end];
+
+                        let start_idx = split_input.iter().position(|x| x == first).unwrap();
+                        let end_pos = split_input.iter().position(|x| x == second).unwrap();
+
+                        let final_pos = split_input.iter().position(|x| x == &c[2]).unwrap();
+                        //remove brackets
+                        let cap_range = &input_line[to_split_start + 1..to_split_end - 1];
                         eprintln!("<==== Teh cap range is {cap_range} ====>");
                         let spilt = spilt_all_white_space_punc(cap_range, is_input, captured);
                         eprintln!("the spilt is ============{:?}==========", spilt);
-                        
+
                         cap_temp = spilt;
-                        cap_temp.push(c[2].to_string());
+                        let cap_len = cap_temp.len();
+
+                        //handle ''
+                        if !second.starts_with("'") && cap_temp.last().unwrap().starts_with("'") {
+                            let temp_no_comma = &cap_temp.last().unwrap()[1..];
+                            cap_temp[cap_len - 1] = temp_no_comma.to_string();
+                        }
+
+                        split_input[start_idx] =
+                            format!("{}", &cap_temp[0].replace("(", "").replace(")", ""));
+                        split_input[end_pos] = format!(
+                            "{}",
+                            &cap_temp.last().unwrap().replace("(", "").replace(")", "")
+                        );
+
+                        split_input[final_pos] =
+                            format!("{}", &cap_temp[0].replace("(", "").replace(")", ""));
+                        let mut count = 0;
+                        for i in (final_pos..final_pos + cap_temp.len()) {
+                            split_input.insert(
+                                i,
+                                format!("{}", cap_temp[count].replace("(", "").replace(")", "")),
+                            );
+                            count += 1;
+                        }
+                        split_input.remove(final_pos + cap_temp.len());
+                        *captured = false // mutate state
                     }
                 }
-                eprintln!("cap temp is {:?}", cap_temp);
             }
         }
     }

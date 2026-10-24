@@ -188,7 +188,12 @@ fn match_by_files_or_input(
 
     pattern = remove_underline_and_punc(&pattern, false);
     let input_clone = input_line.clone();
+
+    eprintln!("1 input passed is {input_line}");
+
     input_line = remove_underline_and_punc(&input_line, true);
+
+    eprintln!("2 input passed is {input_line}");
 
     let mut captured = false;
     let split_ptn_by_space = spilt_all_white_space_punc(&pattern, false, &mut captured);
@@ -251,7 +256,7 @@ fn handle_pattern_matching(
             ptn_mut = ptn_mut.replace("-", "- ");
             input_mut = input_mut.replace("-", "- ");
         }
-        
+
         let unmodified_ptn: Vec<String> = ptn_mut.split(" ").map(|a| a.to_string()).collect();
         let unmodified_input: Vec<String> = input_mut.split(" ").map(|a| a.to_string()).collect();
         eprintln!("the ptn to compare is {:?}", unmodified_ptn);
@@ -291,7 +296,7 @@ fn handle_pattern_matching(
                 let input_back = &unmodified_input[*back_idx].replace(",", "");
                 let input_start = &unmodified_input[*start_idx].replace(",", "");
                 eprintln!("CAP=true, BACK={input_back} START={input_start}");
-                if *input_start !=*input_back {
+                if *input_start != *input_back {
                     process::exit(1)
                 }
             }
