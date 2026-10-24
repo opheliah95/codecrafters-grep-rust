@@ -1436,11 +1436,13 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                                 }
 
                                 if idx > p {
+            
+                                    letter_to_match = pattern.clone().chars().nth(before_p);
                                     eprintln!(
-                                        "step {idx}: WHEN {idx} > {p}: checking match after {ptn}: PATTERN {letter_after_p} => VAL {val} INPUT: {input_line}"
+                                        "step {idx}: WHEN {idx} > {p}: checking match after {ptn}: PATTERN {letter_after_p} => VAL {val} INPUT: {input_line} -> before_p={}", letter_to_match.unwrap()
                                     );
 
-                                    letter_to_match = pattern.clone().chars().nth(before_p);
+                                    
                                     if val != letter_to_match.unwrap() {
                                         // if nothing after +
                                         // eprintln!(
