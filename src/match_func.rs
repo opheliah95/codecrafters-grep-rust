@@ -1453,7 +1453,7 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                                             return true;
                                         }
 
-                                        let mut pattern_slice = &pattern[p + 1..];
+                                        let mut pattern_slice = &pattern[after_p + 1..];
 
                                         if last_occurance_of_p != p {
                                             pattern_slice = &pattern[last_occurance_of_p + 1..];
