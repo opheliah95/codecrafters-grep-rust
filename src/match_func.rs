@@ -1852,7 +1852,9 @@ pub fn spilt_all_white_space_punc(
                         let cap_len = cap_temp.len();
 
                         //handle ''
-                        if !second.starts_with("'") && cap_temp.last().unwrap().starts_with("'") {
+                        if !second.starts_with("'") && cap_temp.last().unwrap().starts_with("'")
+                        
+                        || !second.starts_with("'") && cap_temp.last().unwrap().starts_with('"')  {
                             let temp_no_comma = &cap_temp.last().unwrap()[1..];
                             cap_temp[cap_len - 1] = temp_no_comma.to_string();
                         }
