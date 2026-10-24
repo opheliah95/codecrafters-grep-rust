@@ -1832,7 +1832,11 @@ pub fn spilt_all_white_space_punc(
                     if first_count > 1 && second.ends_with(")") {
                         let to_split_start = input_line.find(first).unwrap();
                         let to_split_end = input_line.find(second).unwrap() + second.len();
-                        let cap_range = &input_line[to_split_start..to_split_end + 1];
+                        let cap_range = &input_line[to_split_start..to_split_end];
+                        eprintln!("<==== Teh cap range is {cap_range} ====>");
+                        let spilt = spilt_all_white_space_punc(cap_range, is_input, captured);
+                        eprintln!("the spilt is ============{:?}==========", spilt);
+                        
                         cap_temp.push(cap_range.to_string());
                         cap_temp.push(c[2].to_string());
                     }
