@@ -1837,7 +1837,7 @@ pub fn spilt_all_white_space_punc(
                         let spilt = spilt_all_white_space_punc(cap_range, is_input, captured);
                         eprintln!("the spilt is ============{:?}==========", spilt);
                         
-                        cap_temp.push(cap_range.to_string());
+                        cap_temp = spilt;
                         cap_temp.push(c[2].to_string());
                     }
                 }
