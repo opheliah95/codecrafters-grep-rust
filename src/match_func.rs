@@ -1844,7 +1844,7 @@ pub fn spilt_all_white_space_punc(
                         let final_pos = split_input.iter().position(|x| x == &c[2]).unwrap();
                         //remove brackets
                         let cap_range = &input_line[to_split_start + 1..to_split_end - 1];
-                        eprintln!("<==== Teh cap range is {cap_range} ====>");
+                        eprintln!("<==== THE cap range is {cap_range} ====>");
                         let spilt = spilt_all_white_space_punc(cap_range, is_input, captured);
                         eprintln!("the spilt is ============{:?}==========", spilt);
 
@@ -1880,6 +1880,49 @@ pub fn spilt_all_white_space_punc(
                         *captured = false // mutate state
                     }
                 }
+            }   else {
+
+                let mut digit_cap: Vec<String> = captures.iter().filter_map(|a| {
+                    let r = a.starts_with("\\") && a.chars().nth(1).unwrap().is_ascii_digit();
+                    match r {
+                        true => Some(a.to_string()),
+                        false => None
+
+                    }
+                }).collect();
+
+                captures.retain(|s| s.starts_with("(") && s.ends_with(")"));
+
+                if digit_cap.len() == 3 {
+
+                    // handle outer bracket
+                    let full_bracket_start = input_line.find("(").unwrap();
+                    let full_bracket_end = input_line.rfind(")").unwrap();
+                    let in_bwetween = input_line[full_bracket_start..full_bracket_end]
+                                                .replace("(", "")
+                                                .replace(")", "");
+                    
+                    let in_between_trimed = spilt_all_white_space_punc(&in_bwetween, is_input, captured);
+                    let trimed_len = in_between_trimed.len();
+                    let first_pos = split_input.iter().position(|a| a=="\\1").unwrap();
+                    eprintln!("the first pos is {in_bwetween}");
+                    for i in (0..trimed_len) {
+                        split_input.insert(i+first_pos, in_between_trimed[i].clone()) ;
+                    }
+                    split_input.remove(trimed_len+first_pos);
+                    
+                    // handle subsequent brackets
+                    digit_cap.retain(|a| a != "\\1");
+                    
+                    for (dig, ptn) in digit_cap.iter().zip(captures.iter()) {
+                        let dig_pos = split_input.iter().position(|a| a==dig).unwrap();
+                        split_input[dig_pos] = ptn.replace("(", "")
+                                                .replace(")", "");
+                    }
+
+                    *captured = false;
+                } 
+
             }
         }
     }

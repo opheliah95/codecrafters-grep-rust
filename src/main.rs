@@ -189,11 +189,11 @@ fn match_by_files_or_input(
     pattern = remove_underline_and_punc(&pattern, false);
     let input_clone = input_line.clone();
 
-    eprintln!("1 input passed is {input_line}");
+    // eprintln!("1 input passed is {input_line}");
 
     input_line = remove_underline_and_punc(&input_line, true);
 
-    eprintln!("2 input passed is {input_line}");
+    // eprintln!("2 input passed is {input_line}");
 
     let mut captured = false;
     let split_ptn_by_space = spilt_all_white_space_punc(&pattern, false, &mut captured);
