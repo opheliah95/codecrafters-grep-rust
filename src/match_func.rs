@@ -1436,13 +1436,12 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                                 }
 
                                 if idx > p {
-            
                                     letter_to_match = pattern.clone().chars().nth(before_p);
                                     eprintln!(
-                                        "step {idx}: WHEN {idx} > {p}: checking match after {ptn}: PATTERN {letter_after_p} => VAL {val} INPUT: {input_line} -> before_p={}", letter_to_match.unwrap()
+                                        "step {idx}: WHEN {idx} > {p}: checking match after {ptn}: PATTERN {letter_after_p} => VAL {val} INPUT: {input_line} -> before_p={}",
+                                        letter_to_match.unwrap()
                                     );
 
-                                    
                                     if val != letter_to_match.unwrap() {
                                         // if nothing after +
                                         // eprintln!(
@@ -1475,16 +1474,15 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                                                 if idx == input_line_len - 1 {
                                                     return val == pattern.chars().last().unwrap();
                                                 }
-                                                
-                                                // need to exclude +               
+
+                                                // need to exclude +
                                                 eprintln!(
                                                     "QUANT = +  idx > p matching {idx} idx::: {ptn} pattern: PTN: {} VAL: {}",
                                                     pattern_slice,
                                                     &input_line[idx..]
                                                 );
 
-                                                return input_line[idx..]
-                                                    .contains(pattern_slice);
+                                                return input_line[idx..].contains(pattern_slice);
                                             }
                                         }
                                     }
@@ -1680,8 +1678,7 @@ pub fn within_brackets(input: &str, start: &str, end: &str, symbol: &str) -> boo
     let all_symbols: Vec<_> = input.match_indices(symbol).collect();
 
     let mut before_symbol = &input[0..symbol_idx];
-    let mut after_symbol =&input[symbol_idx..];
-   
+    let mut after_symbol = &input[symbol_idx..];
 
     eprintln!("before {before_symbol} and after {after_symbol}");
     let start_idx = before_symbol.find(start).unwrap_or_default();
@@ -1704,7 +1701,8 @@ pub fn within_brackets(input: &str, start: &str, end: &str, symbol: &str) -> boo
 
     return end_idx > start_idx
         && input.chars().nth(symbol_idx - 1).unwrap().is_ascii_digit()
-        &&(input.chars().nth(symbol_idx + 1).unwrap().is_ascii_digit() || input.chars().nth(symbol_idx + 1).unwrap() == '}');
+        && (input.chars().nth(symbol_idx + 1).unwrap().is_ascii_digit()
+            || input.chars().nth(symbol_idx + 1).unwrap() == '}');
 }
 pub fn spilt_all_white_space_punc(
     input_line: &str,
@@ -1822,6 +1820,25 @@ pub fn spilt_all_white_space_punc(
             }
 
             *captured = true;
+        } else {
+            // consider whether it is a nested case
+            if captures.len() % 3 == 0 {
+                let chunks: Vec<&[String]> = captures.chunks(3).collect();
+                let mut cap_temp: Vec<String> = Vec::new();
+                for c in chunks {
+                    let first = &c[0];
+                    let second = &c[1];
+                    let first_count = first.chars().filter(|c| *c == '(').count();
+                    if first_count > 1 && second.ends_with(")") {
+                        let to_split_start = input_line.find(first).unwrap();
+                        let to_split_end = input_line.find(second).unwrap() + second.len();
+                        let cap_range = &input_line[to_split_start..to_split_end + 1];
+                        cap_temp.push(cap_range.to_string());
+                        cap_temp.push(c[2].to_string());
+                    }
+                }
+                eprintln!("cap temp is {:?}", cap_temp);
+            }
         }
     }
 
