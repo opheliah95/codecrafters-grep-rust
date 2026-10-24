@@ -1673,13 +1673,40 @@ pub fn remove_underline_and_punc(input_line: &String, is_input: bool) -> String 
 }
 
 pub fn within_brackets(input: &str, start: &str, end: &str, symbol: &str) -> bool {
-    let start_idx = input.find(start).unwrap_or_default();
-    let end_idx = input.find(end).unwrap_or_default();
-    let symbol_idx = input.find(symbol).unwrap_or_default();
+    let mut symbol_idx = input.find(symbol).unwrap_or_default();
+    let all_symbols: Vec<_> = input.match_indices(symbol).collect();
+
+    let mut before_symbol = input.clone();
+    let mut after_symbol = input.clone();
+    let mut mult_symbol_idx: usize = 0;
+    if all_symbols.len() > 1 {
+        before_symbol = &input[0..symbol_idx];
+        after_symbol = &input[symbol_idx..];
+        mult_symbol_idx += symbol_idx;
+    }
+
+    eprintln!("before {before_symbol} and after {after_symbol}");
+    let start_idx = before_symbol.find(start).unwrap_or_default();
+    let end_idx = after_symbol.find(end).unwrap_or_default() + mult_symbol_idx;
+
+    eprintln!(
+        "input={input}, end_idx={end}->{end_idx}, start={start}->{start_idx} symbol={symbol} -> {symbol_idx}"
+    );
+
     // eprintln!(
-    //     "input={input}, end_idx={end}->{end_idx}, start={start}->{start_idx} symbol={symbol} -> {symbol_idx}"
+    //     "start: {}={}",
+    //     input.chars().nth(symbol_idx - 1).unwrap(),
+    //     input.chars().nth(symbol_idx - 1).unwrap().is_ascii_digit()
     // );
-    return symbol_idx > start_idx && symbol_idx < end_idx;
+    // eprintln!(
+    //     "after: {}={}",
+    //     input.chars().nth(symbol_idx + 1).unwrap(),
+    //     input.chars().nth(symbol_idx + 1).unwrap().is_ascii_digit()
+    // );
+
+    return end_idx > start_idx
+        && input.chars().nth(symbol_idx - 1).unwrap().is_ascii_digit()
+        && input.chars().nth(symbol_idx + 1).unwrap().is_ascii_digit();
 }
 pub fn spilt_all_white_space_punc(
     input_line: &str,
@@ -1688,7 +1715,7 @@ pub fn spilt_all_white_space_punc(
 ) -> Vec<String> {
     let mut new_input = input_line.to_string();
     let all_comma: Vec<_> = input_line.match_indices(",").collect();
-    eprintln!("num of commas: {}", all_comma.len());
+    eprintln!("num of commas: {}  -> {:?}", all_comma.len(), all_comma);
     if all_comma.len() == 1 {
         if !within_brackets(input_line, "{", "}", ",") {
             new_input = new_input.replace(',', " , ");
@@ -1698,17 +1725,29 @@ pub fn spilt_all_white_space_punc(
         let mut temp_input = new_input.clone();
         for (idx, item) in all_comma.iter().enumerate() {
             let start = item.0;
-            eprintln!("temp input {temp_input} ==> start={start}");
+
+            eprintln!("temp input {idx}  ==> {temp_input} ==> start={start}");
 
             if within_brackets(&temp_input, "{", "}", ",") {
-                all_comma_clone.remove(idx);
-                // eprintln!("within");
+                let r_pos = all_comma_clone
+                    .iter()
+                    .position(|i| i == item)
+                    .unwrap_or_default();
+                all_comma_clone.remove(r_pos);
+                eprintln!(
+                    "idx={idx} is remove at r={r_pos}, item={}, {}",
+                    item.0, item.1
+                );
             } else {
-                temp_input = temp_input[start + 1..].to_string();
+                if start < temp_input.len() {
+                    temp_input = temp_input[start + 1..].to_string();
+                } else {
+                    break;
+                }
             }
         }
 
-        //eprintln!("all comma cloned = {:?}", all_comma_clone);
+        eprintln!("all comma cloned = {:?}", all_comma_clone);
 
         // iterate backwards so earlier indices stay valid
         for (idx, _) in all_comma_clone.iter().rev() {
