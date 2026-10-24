@@ -1484,7 +1484,7 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                                                 );
 
                                                 return input_line[idx..]
-                                                    .starts_with(pattern_slice);
+                                                    .contains(pattern_slice);
                                             }
                                         }
                                     }
