@@ -1751,7 +1751,7 @@ pub fn spilt_all_white_space_punc(
         }
     }
 
-    // new_input = new_input.replace('.', " . ");
+    new_input = new_input.replace("\"", " \" ");
 
     //eprintln!("Line = {input_line} ===========> new input is {new_input}");
 
@@ -1892,9 +1892,10 @@ pub fn spilt_all_white_space_punc(
                         }
                     })
                     .collect();
-
+                
                 captures.retain(|s| s.contains("(") && s.ends_with(")"));
-
+                
+                eprintln!("the digit caps are {:?} and captures are {:?}", digit_cap, captures);
                 if digit_cap.len() == 3 {
                     // handle outer bracket
                     let full_bracket_start = input_line.find("(").unwrap();
@@ -1950,6 +1951,17 @@ pub fn spilt_all_white_space_punc(
                 }
                 None => {}
             }
+        }
+
+        let contain_bracket = split_input.iter().any(|a| a.contains(")") || a.contains("("));
+        if contain_bracket {
+            let spilt_clone = split_input.clone();
+            for (idx, content) in spilt_clone.iter().enumerate() {
+                if content.contains(")") || content.contains("(") {
+                    split_input[idx] = content.replace(")", "").replace("(", "");
+                }
+            }
+
         }
     }
 
