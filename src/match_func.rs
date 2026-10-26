@@ -1753,7 +1753,7 @@ pub fn spilt_all_white_space_punc(
 
     // new_input = new_input.replace('.', " . ");
 
-    eprintln!("Line = {input_line} ===========> new input is {new_input}");
+    //eprintln!("Line = {input_line} ===========> new input is {new_input}");
 
     if new_input.contains(")-(") {
         new_input = new_input.replace(")-(", ")- (");
@@ -1776,7 +1776,7 @@ pub fn spilt_all_white_space_punc(
             })
             .map(|a| a.to_string())
             .collect();
-        eprintln!("the capatures are {:?}", captures);
+        eprintln!("the capatures are {:?} len={}", captures, captures.len());
 
         if captures.len() == 2 {
             let backreference = captures.last().unwrap();
@@ -1893,17 +1893,20 @@ pub fn spilt_all_white_space_punc(
                     })
                     .collect();
 
-                captures.retain(|s| s.starts_with("(") && s.ends_with(")"));
+                captures.retain(|s| s.contains("(") && s.ends_with(")"));
 
                 if digit_cap.len() == 3 {
                     // handle outer bracket
                     let full_bracket_start = input_line.find("(").unwrap();
                     let mut full_bracket_end = input_line.rfind(")").unwrap();
-                    let first_pos = split_input.iter().position(|a| a == "\\1").unwrap();
+                    let first_pos = split_input.iter().position(|a| a.contains("\\1")).unwrap();
                     let first_pos_input = input_line.find("\\1").unwrap();
                     //let mut first_end = full_bracket_end;
                     if full_bracket_end > first_pos_input {
-                        eprintln!("DEBUG: {full_bracket_end} vs first_pos={first_pos} vs content ={}", &input_line[..first_pos]);
+                        eprintln!(
+                            "DEBUG: {full_bracket_end} vs first_pos={first_pos} vs content ={}",
+                            &input_line[..first_pos]
+                        );
                         full_bracket_end = input_line[..first_pos_input].rfind(")").unwrap();
                     }
 
@@ -1928,20 +1931,20 @@ pub fn spilt_all_white_space_punc(
                         split_input[dig_pos] = ptn.replace("(", "").replace(")", "");
                     }
 
-                    // refactor anything still remaining
-                    for ptn in captures.iter() {
-                        let ptn_loc = split_input.iter().position(|a| a == ptn);
-                        match ptn_loc {
-                            Some(p) => {
-                                split_input[p] = ptn.replace("(", "").replace(")", "");
-                            }, 
-                            None => {}
-                        }
-                        
-                    }
-
                     *captured = false;
                 }
+            }
+        }
+
+        // refactor anything still remaining
+        for ptn in captures.iter() {
+            let ptn_loc = split_input.iter().position(|a| a == ptn);
+            match ptn_loc {
+                Some(p) => {
+                    eprintln!("ptn is {ptn}...pos={p}");
+                    split_input[p] = ptn.replace("(", "").replace(")", "");
+                }
+                None => {}
             }
         }
     }
