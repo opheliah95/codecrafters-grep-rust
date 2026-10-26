@@ -1910,9 +1910,12 @@ pub fn spilt_all_white_space_punc(
                         full_bracket_end = input_line[..first_pos_input].rfind(")").unwrap();
                     }
 
-                    let in_bwetween = input_line[full_bracket_start..full_bracket_end]
+                    let first_ptn_last = &split_input[first_pos][2..];
+                    let first_ptn_formatted = format!("{}{}", &input_line[full_bracket_start..full_bracket_end], &first_ptn_last);
+                    let in_bwetween = first_ptn_formatted
                         .replace("(", "")
                         .replace(")", "");
+
 
                     let in_between_trimed =
                         spilt_all_white_space_punc(&in_bwetween, is_input, captured);
@@ -1924,11 +1927,12 @@ pub fn spilt_all_white_space_punc(
                     split_input.remove(trimed_len + first_pos);
 
                     // handle subsequent brackets
-                    digit_cap.retain(|a| a != "\\1");
+                    digit_cap.retain(|a| !a.contains("\\1"));
 
                     for (dig, ptn) in digit_cap.iter().zip(captures.iter()) {
                         let dig_pos = split_input.iter().position(|a| a == dig).unwrap();
-                        split_input[dig_pos] = ptn.replace("(", "").replace(")", "");
+                        let non_digit = if dig.chars().last().unwrap().is_ascii_digit() {"".to_string()} else {dig.chars().last().unwrap().to_string()};
+                        split_input[dig_pos] = format!("{ptn}{non_digit}").replace("(", "").replace(")", "");
                     }
 
                     *captured = false;
