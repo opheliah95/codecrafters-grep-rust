@@ -1751,8 +1751,6 @@ pub fn spilt_all_white_space_punc(
         }
     }
 
-    new_input = new_input.replace("\"", " \" ");
-
     //eprintln!("Line = {input_line} ===========> new input is {new_input}");
 
     if new_input.contains(")-(") {
@@ -1770,9 +1768,14 @@ pub fn spilt_all_white_space_punc(
         let mut captures: Vec<String> = split_input
             .iter()
             .filter(|a| {
-                //eprintln!("A is {a} --> a iter {:?} --> first is {}", a.chars(), a.chars().nth(1).unwrap());
-                a.starts_with("\\") && a.chars().nth(1).unwrap().is_ascii_digit()
-                    || a.contains("(") && a.contains(")")
+                if a.len() > 1 {
+                    let slash_pos = a.find("\\").unwrap_or_default();
+                    let digit_condition = a.chars().nth(slash_pos + 1).unwrap().is_ascii_digit();
+                    //eprintln!("A is {a} --> a iter {:?} --> first is {}", a.chars(), a.chars().nth(1).unwrap());
+                    digit_condition || a.contains("(") && a.contains(")")
+                } else {
+                    false
+                }
             })
             .map(|a| a.to_string())
             .collect();
@@ -1885,17 +1888,21 @@ pub fn spilt_all_white_space_punc(
                 let mut digit_cap: Vec<String> = captures
                     .iter()
                     .filter_map(|a| {
-                        let r = a.starts_with("\\") && a.chars().nth(1).unwrap().is_ascii_digit();
+                        let slash_pos = a.find("\\").unwrap_or(0);
+                        let r = a.chars().nth(slash_pos + 1).unwrap().is_ascii_digit();
                         match r {
                             true => Some(a.to_string()),
                             false => None,
                         }
                     })
                     .collect();
-                
+
                 captures.retain(|s| s.contains("(") && s.ends_with(")"));
-                
-                eprintln!("the digit caps are {:?} and captures are {:?}", digit_cap, captures);
+
+                eprintln!(
+                    "the digit caps are {:?} and captures are {:?}",
+                    digit_cap, captures
+                );
                 if digit_cap.len() == 3 {
                     // handle outer bracket
                     let full_bracket_start = input_line.find("(").unwrap();
@@ -1912,11 +1919,12 @@ pub fn spilt_all_white_space_punc(
                     }
 
                     let first_ptn_last = &split_input[first_pos][2..];
-                    let first_ptn_formatted = format!("{}{}", &input_line[full_bracket_start..full_bracket_end], &first_ptn_last);
-                    let in_bwetween = first_ptn_formatted
-                        .replace("(", "")
-                        .replace(")", "");
-
+                    let first_ptn_formatted = format!(
+                        "{}{}",
+                        &input_line[full_bracket_start..full_bracket_end],
+                        &first_ptn_last
+                    );
+                    let in_bwetween = first_ptn_formatted.replace("(", "").replace(")", "");
 
                     let in_between_trimed =
                         spilt_all_white_space_punc(&in_bwetween, is_input, captured);
@@ -1932,8 +1940,14 @@ pub fn spilt_all_white_space_punc(
 
                     for (dig, ptn) in digit_cap.iter().zip(captures.iter()) {
                         let dig_pos = split_input.iter().position(|a| a == dig).unwrap();
-                        let non_digit = if dig.chars().last().unwrap().is_ascii_digit() {"".to_string()} else {dig.chars().last().unwrap().to_string()};
-                        split_input[dig_pos] = format!("{ptn}{non_digit}").replace("(", "").replace(")", "");
+                        let non_digit = if dig.chars().last().unwrap().is_ascii_digit() {
+                            "".to_string()
+                        } else {
+                            dig.chars().last().unwrap().to_string()
+                        };
+                        split_input[dig_pos] = format!("{ptn}{non_digit}")
+                            .replace("(", "")
+                            .replace(")", "");
                     }
 
                     *captured = false;
@@ -1953,7 +1967,9 @@ pub fn spilt_all_white_space_punc(
             }
         }
 
-        let contain_bracket = split_input.iter().any(|a| a.contains(")") || a.contains("("));
+        let contain_bracket = split_input
+            .iter()
+            .any(|a| a.contains(")") || a.contains("("));
         if contain_bracket {
             let spilt_clone = split_input.clone();
             for (idx, content) in spilt_clone.iter().enumerate() {
@@ -1961,7 +1977,6 @@ pub fn spilt_all_white_space_punc(
                     split_input[idx] = content.replace(")", "").replace("(", "");
                 }
             }
-
         }
     }
 
