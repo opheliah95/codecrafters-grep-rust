@@ -1631,9 +1631,9 @@ pub fn remove_underline_and_punc(input_line: &String, is_input: bool) -> String 
                     } else {
                         new_input = format! {"{str_before}, {behind_comma_str}"};
                     }
-                    eprintln!(
-                        "[{input_line}] does not has: {behind_comma} idx={u} input_len={input_len} _> {new_input}"
-                    );
+                    // eprintln!(
+                    //     "[{input_line}] does not has: {behind_comma} idx={u} input_len={input_len} _> {new_input}"
+                    // );
                 }
 
                 let after_underscore = input_line.chars().nth(u + 1).unwrap();
@@ -1794,7 +1794,7 @@ pub fn spilt_all_white_space_punc(
             *captured = true;
         }
 
-        if captures.len() % 2 == 0 {
+        if captures.len() % 2 == 0 && captures.len() % 3 != 0 {
             let start_vec: Vec<String> = captures
                 .iter()
                 .filter(|a| a.contains(")"))
@@ -1827,14 +1827,14 @@ pub fn spilt_all_white_space_punc(
             *captured = true;
         } else {
             // consider whether it is a nested case
-            if captures.len() % 3 == 0 {
+            if captures.len() % 3 == 0 && captures.len() % 2 != 0 {
                 let chunks: Vec<&[String]> = captures.chunks(3).collect();
                 let mut cap_temp: Vec<String> = Vec::new();
                 for c in chunks {
                     let first = &c[0];
                     let second = &c[1];
                     let first_count = first.chars().filter(|c| *c == '(').count();
-                    if first_count > 1 && second.ends_with(")") {
+                    if first_count >= 1 && second.ends_with(")") {
                         let to_split_start = input_line.find(first).unwrap();
                         let to_split_end = input_line.find(second).unwrap() + second.len();
 
@@ -1853,8 +1853,8 @@ pub fn spilt_all_white_space_punc(
 
                         //handle ''
                         if !second.starts_with("'") && cap_temp.last().unwrap().starts_with("'")
-                        
-                        || !second.starts_with("'") && cap_temp.last().unwrap().starts_with('"')  {
+                            || !second.starts_with("'") && cap_temp.last().unwrap().starts_with('"')
+                        {
                             let temp_no_comma = &cap_temp.last().unwrap()[1..];
                             cap_temp[cap_len - 1] = temp_no_comma.to_string();
                         }
@@ -1870,6 +1870,7 @@ pub fn spilt_all_white_space_punc(
                             format!("{}", &cap_temp[0].replace("(", "").replace(")", ""));
                         let mut count = 0;
                         for i in (final_pos..final_pos + cap_temp.len()) {
+                            //eprintln!("==== insert {} into split ====",  cap_temp[count]);
                             split_input.insert(
                                 i,
                                 format!("{}", cap_temp[count].replace("(", "").replace(")", "")),
@@ -1880,49 +1881,67 @@ pub fn spilt_all_white_space_punc(
                         *captured = false // mutate state
                     }
                 }
-            }   else {
-
-                let mut digit_cap: Vec<String> = captures.iter().filter_map(|a| {
-                    let r = a.starts_with("\\") && a.chars().nth(1).unwrap().is_ascii_digit();
-                    match r {
-                        true => Some(a.to_string()),
-                        false => None
-
-                    }
-                }).collect();
+            } else {
+                let mut digit_cap: Vec<String> = captures
+                    .iter()
+                    .filter_map(|a| {
+                        let r = a.starts_with("\\") && a.chars().nth(1).unwrap().is_ascii_digit();
+                        match r {
+                            true => Some(a.to_string()),
+                            false => None,
+                        }
+                    })
+                    .collect();
 
                 captures.retain(|s| s.starts_with("(") && s.ends_with(")"));
 
                 if digit_cap.len() == 3 {
-
                     // handle outer bracket
                     let full_bracket_start = input_line.find("(").unwrap();
-                    let full_bracket_end = input_line.rfind(")").unwrap();
+                    let mut full_bracket_end = input_line.rfind(")").unwrap();
+                    let first_pos = split_input.iter().position(|a| a == "\\1").unwrap();
+                    let first_pos_input = input_line.find("\\1").unwrap();
+                    //let mut first_end = full_bracket_end;
+                    if full_bracket_end > first_pos_input {
+                        eprintln!("DEBUG: {full_bracket_end} vs first_pos={first_pos} vs content ={}", &input_line[..first_pos]);
+                        full_bracket_end = input_line[..first_pos_input].rfind(")").unwrap();
+                    }
+
                     let in_bwetween = input_line[full_bracket_start..full_bracket_end]
-                                                .replace("(", "")
-                                                .replace(")", "");
-                    
-                    let in_between_trimed = spilt_all_white_space_punc(&in_bwetween, is_input, captured);
+                        .replace("(", "")
+                        .replace(")", "");
+
+                    let in_between_trimed =
+                        spilt_all_white_space_punc(&in_bwetween, is_input, captured);
                     let trimed_len = in_between_trimed.len();
-                    let first_pos = split_input.iter().position(|a| a=="\\1").unwrap();
                     eprintln!("the first pos is {in_bwetween}");
                     for i in (0..trimed_len) {
-                        split_input.insert(i+first_pos, in_between_trimed[i].clone()) ;
+                        split_input.insert(i + first_pos, in_between_trimed[i].clone());
                     }
-                    split_input.remove(trimed_len+first_pos);
-                    
+                    split_input.remove(trimed_len + first_pos);
+
                     // handle subsequent brackets
                     digit_cap.retain(|a| a != "\\1");
-                    
+
                     for (dig, ptn) in digit_cap.iter().zip(captures.iter()) {
-                        let dig_pos = split_input.iter().position(|a| a==dig).unwrap();
-                        split_input[dig_pos] = ptn.replace("(", "")
-                                                .replace(")", "");
+                        let dig_pos = split_input.iter().position(|a| a == dig).unwrap();
+                        split_input[dig_pos] = ptn.replace("(", "").replace(")", "");
+                    }
+
+                    // refactor anything still remaining
+                    for ptn in captures.iter() {
+                        let ptn_loc = split_input.iter().position(|a| a == ptn);
+                        match ptn_loc {
+                            Some(p) => {
+                                split_input[p] = ptn.replace("(", "").replace(")", "");
+                            }, 
+                            None => {}
+                        }
+                        
                     }
 
                     *captured = false;
-                } 
-
+                }
             }
         }
     }
