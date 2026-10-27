@@ -1210,6 +1210,12 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
 
         // check wildcard
         ptn if ptn.contains(".") => {
+
+            let ptn_split: Vec<&str> = ptn.split("|").collect();
+            if ptn_split.len() > 1 {
+                return ptn_split.iter().any(|p| match_pattern(input_line, p));
+            }
+
             for (idx, c) in input_line.chars().enumerate() {
                 let wildcard_pos = pattern.find(".").unwrap_or(0);
                 let ptn_at_idx = pattern.clone().chars().nth(idx).unwrap_or('\0');
