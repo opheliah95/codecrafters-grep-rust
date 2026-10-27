@@ -564,7 +564,10 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
         // check start anchor
         ptn if pattern.starts_with("^") => {
             let to_match = &pattern[1..pattern.len()];
-            //eprintln!("start wit ^ matching ^ -> input={}", input_line.starts_with(to_match));
+            eprintln!(
+                "start wit ^ matching ^ -> input={}",
+                input_line.starts_with(to_match)
+            );
             if input_line.starts_with(to_match) {
                 return true;
             } else {
@@ -590,9 +593,13 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
                         return match_pattern(input_temp, content);
                     };
                     eprintln!("mismatched brackets");
-                } 
-                
-                return match_pattern(input_line, to_match);
+                } else {
+                    if pattern.contains("]") && pattern.contains("[") {
+                        return match_pattern(input_line, to_match);
+                    }
+                }
+
+                return false;
             }
         }
         // ch,eck ending
@@ -1211,7 +1218,6 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
 
         // check wildcard
         ptn if ptn.contains(".") => {
-
             let ptn_split: Vec<&str> = ptn.split("|").collect();
             if ptn_split.len() > 1 {
                 return ptn_split.iter().any(|p| match_pattern(input_line, p));
