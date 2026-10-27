@@ -1776,7 +1776,7 @@ pub fn spilt_all_white_space_punc(
         .map(String::from)
         .collect();
 
-    //eprintln!("spilt input is {:?}", split_input);
+    eprintln!("spilt input is {:?}", split_input);
     if !is_input {
         let mut captures: Vec<String> = split_input
             .iter()
