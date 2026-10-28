@@ -1286,7 +1286,7 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
             return true;
         }
 
-        ptn if pattern.contains("+") || pattern.contains("?") => {
+        ptn if pattern.contains("+") || pattern.contains("?") && !pattern.contains("|") => {
             let mut ptn_quant = "";
             let mut input_quantifier_pos = None;
             if ptn.contains("+") {
