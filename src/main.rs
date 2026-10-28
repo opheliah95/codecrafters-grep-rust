@@ -523,6 +523,7 @@ fn handle_pattern_matching(
     eprintln!("res trim {:?}", res_trim);
 
     let mut res_temp = re_formatted_res_with_pattern(res_trim.clone(), &pattern);
+    eprintln!("res temp {:?}", res_temp);
 
     let ptn_len_counted = count_ptn_len(split_ptn_by_space.clone());
     if ptn_len_counted > 1 {
@@ -544,7 +545,7 @@ fn handle_pattern_matching(
         .filter(|s| !s.is_empty())
         .map(String::as_str)
         .collect();
-    //eprintln!("res trimed is {:?}  and res is {:?} ", res_trim, res);
+    eprintln!("res trimed is {:?}  and res is {:?} res_temp={:?} reminder={ptn_len_counted}", res_trim, res, res_temp);
     if color_always {
         let input_spilt_by_space_only: Vec<String> = input_clone
             .split_inclusive('\n')
