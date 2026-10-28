@@ -295,7 +295,7 @@ pub fn check_quant_pattern(mut ptn: String) -> Option<(usize, usize, String)> {
 
 pub fn examine_repeat(mut input_line: &str, mut pattern: &str) -> Option<String> {
     // handle plural cases
-    if pattern.ends_with("s") && !input_line.ends_with("s") {
+    if pattern.ends_with("s") && !input_line.ends_with("s") && !pattern.contains("|") {
         eprintln!("plural not matching");
         return None;
     }
@@ -465,7 +465,7 @@ fn format_input_of_repeated_char_pattern(
 
 pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
     eprintln!("===FN match_pattern -> Matching: {input_line} to {pattern}");
-    if pattern.ends_with("s") && !input_line.ends_with("s") {
+    if pattern.ends_with("s") && !input_line.ends_with("s") && !pattern.contains("|") {
         eprintln!("plural not matching");
         return false;
     }
@@ -606,7 +606,7 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
         ptn if pattern.ends_with("$") => {
             eprintln!("HANDLE $ at end -> {ptn} contains $");
             let to_match = &pattern[0..pattern.len() - 1];
-            let regex: Vec<&str> = vec!["\\d", "\\w", "(", ")", "]", "[", "+"];
+            let regex: Vec<&str> = vec!["\\d", "\\w", "(", ")", "]", "[", "+", "|"];
             if regex.iter().any(|a| to_match.contains(a)) {
                 //let mut new_input = &input_line[0..input_line.len() - 1];
                 let res = match_pattern(&input_line, to_match);
