@@ -1043,6 +1043,7 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
             }
         }
 
+        
         ptn if ptn.contains("\\d*") => {
             let ptn_to_detect = "\\d*";
             let ptn_to_detect_len = ptn_to_detect.len();
@@ -1514,6 +1515,14 @@ pub fn match_pattern(mut input_line: &str, mut pattern: &str) -> bool {
             //println!("the string passed is: {}", input_line);
             return false;
         }
+
+        ptn if ptn.contains("|") => {
+            let all_ptn: Vec<&str> = ptn.split("|").collect();
+            eprintln!("single | case -> ptn={ptn} -> all pattern spilt are: {:?}", all_ptn);
+            
+            return all_ptn.iter().any(|p| match_pattern(input_line, p));
+        }
+
         _ => {
             // handle cases e.g. apple==apple
             if input_line.contains(pattern) {
@@ -1661,7 +1670,12 @@ pub fn remove_underline_and_punc(input_line: &String, is_input: bool) -> String 
     let input_temp = new_input.clone();
     if !has_comma_underscore {
         let underscores = input_temp.match_indices("_");
-        new_input = new_input.replace("_", "_ ");
+        let temp_split: Vec<&str> = input_temp.split(" ").collect();
+        let is_last_underscore = temp_split.last().unwrap().contains("_");
+        if  !is_last_underscore {
+            new_input = new_input.replace("_", "_ ");
+
+        }
 
         for (idx, _) in underscores {
             let prev = new_input.chars().nth(idx - 1).unwrap();
@@ -1764,7 +1778,7 @@ pub fn spilt_all_white_space_punc(
         }
     }
 
-    //eprintln!("Line = {input_line} ===========> new input is {new_input}");
+    eprintln!("Line = {input_line} ===========> new input is {new_input}");
 
     if new_input.contains(")-(") {
         new_input = new_input.replace(")-(", ")- (");
