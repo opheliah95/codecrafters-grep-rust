@@ -1672,7 +1672,7 @@ pub fn remove_underline_and_punc(input_line: &String, is_input: bool) -> String 
         let underscores = input_temp.match_indices("_");
         let temp_split: Vec<&str> = input_temp.split(" ").collect();
         let is_last_underscore = temp_split.last().unwrap().contains("_");
-        if  !is_last_underscore {
+        if  !is_last_underscore || temp_split.len() <= 1 {
             new_input = new_input.replace("_", "_ ");
 
         }
