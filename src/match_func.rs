@@ -21,7 +21,7 @@ pub fn count_single_repeat(mut pattern: &str) -> usize {
 
 pub fn count_ptn_len(mut pattern_split: Vec<String>) -> usize {
     let mut ptn_len = pattern_split.len();
-    eprintln!("---count_ptn_len--- ptn len {ptn_len} and {:?}", pattern_split);
+    //eprintln!("---count_ptn_len--- ptn len {ptn_len} and {:?}", pattern_split);
     // for ptn in pattern_split {
     //     if ptn.ends_with("?") && !ptn.starts_with("(") {
     //         //println!("found it {ptn}");

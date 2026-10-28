@@ -545,16 +545,16 @@ fn handle_pattern_matching(
         .filter(|s| !s.is_empty())
         .map(String::as_str)
         .collect();
-    eprintln!("res trimed is {:?}  and res is {:?} res_temp={:?} reminder={ptn_len_counted}", res_trim, res, res_temp);
+    //eprintln!("res trimed is {:?}  and res is {:?} res_temp={:?} reminder={ptn_len_counted}", res_trim, res, res_temp);
     if color_always {
         let input_spilt_by_space_only: Vec<String> = input_clone
             .split_inclusive('\n')
             .map(|c| c.to_string())
             .collect();
-        eprintln!(
-            "the input spilt by space is {:?} vs res {:?}",
-            input_spilt_by_space_only, res_trim
-        );
+        // eprintln!(
+        //     "the input spilt by space is {:?} vs res {:?}",
+        //     input_spilt_by_space_only, res_trim
+        // );
         res = input_spilt_by_space_only
             .iter()
             .map(|mut a| {
